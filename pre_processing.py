@@ -73,13 +73,14 @@ def dilate_red_QL(binary):
 def DAPI_count(DAPI, background_sz):
     #Subtract background:
     DAPI_blur = cv2.GaussianBlur(DAPI,(5,5), 1)
-    sz = background_sz;
-    se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2*sz-1, 2*sz-1));   # get disk structuring element
-    background = cv2.morphologyEx(DAPI_blur, cv2.MORPH_OPEN, se)
-    
-    I2 = DAPI_blur - background;
-    DAPI_blur = I2;
-    
+    if background_sz < 100: # if image is very high magnification, don't bother
+        sz = background_sz;
+        se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2*sz-1, 2*sz-1));   # get disk structuring element
+        background = cv2.morphologyEx(DAPI_blur, cv2.MORPH_OPEN, se)
+        
+        I2 = DAPI_blur - background;
+        DAPI_blur = I2;
+
     thresh = threshold_otsu(DAPI_blur)
     DAPI_binary = DAPI_blur > thresh
     #plt.figure(); plt.imshow(Image.fromarray(DAPI_binary * 255))
@@ -125,23 +126,7 @@ def DAPI_count(DAPI, background_sz):
 
 
 
-#
-#input_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Testing/Input/'
-#DAPI_path='C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Testing/Candidates/'
-#
-## Read in file names
-#onlyfiles_mask = [ f for f in listdir(input_path) if isfile(join(input_path,f))]   
-#natsort_key1 = natsort_keygen(key = lambda y: y.lower())      # natural sorting order
-#onlyfiles_mask.sort(key = natsort_key1)
-#counter = list(range(len(onlyfiles_mask)))  # create a counter, so can randomize it
-#filename = onlyfiles_mask[counter[0]]
-#    
-#""" Load image
-#"""
-#size = 8208
-#input_arr = readIm_counter(input_path,onlyfiles_mask, counter[0], size_h=size, size_w=size) 
-#    
-def pre_process(input_arr, im_num, DAPI_size, name='default'):
+def pre_process(input_arr, im_num, DAPI_size, name='default', sav_dir=''):
 
     input_arr = np.asarray(input_arr)
     red = input_arr[:, :, 0]
@@ -189,7 +174,7 @@ def pre_process(input_arr, im_num, DAPI_size, name='default'):
              
     """ Saving """
     candidates = final_match_O4 > 0
-    plt.imsave('candidates' + str(im_num) + '_' + name + '.tif', (candidates))
+    plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tif', (candidates))
         
     return candidates, counter, counter_DAPI
 
