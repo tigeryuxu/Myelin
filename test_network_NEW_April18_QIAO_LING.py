@@ -23,15 +23,17 @@ from post_process_functions import *
 from UNet import *
 from pre_processing import *
 
+Image.MAX_IMAGE_PIXELS = 10000000000
+
 import tkinter
 from tkinter import filedialog
 
 """ Network Begins:
 """
-scale = 0.227
+scale = 0.454  # 0.454 or 0.227
 min_microns = 12
 minLength = min_microns / scale
-minSingle = min_microns / scale
+minSingle = (min_microns * 2) / scale
 minLengthDuring = 4/scale
 radius = 3/scale  # um
 
@@ -120,21 +122,16 @@ for i in range(len(onlyfiles_mask)):
     """ Load image
     """
     input_arr = readIm_counter(input_path,onlyfiles_mask, counter[k])    
-    if np.shape(input_arr)[1] > 1500:
-        input_arr = resize_adaptive(input_arr, 1500, method=Image.BICUBIC)
+    #if np.shape(input_arr)[1] > 1500:
+    #    input_arr = resize_adaptive(input_arr, 1500, method=Image.BICUBIC)
     
-    input_save = np.copy(np.asarray(input_arr))
-    if green == 2:
-        green_arr = np.copy(input_save[:,:,1])
-        input_save[:,:,0] = green_arr
-        input_arr = Image.fromarray(input_save)
     DAPI_arr = readIm_counter(input_path,onlyfiles_mask, counter[k + 3])
-    if np.shape(DAPI_arr)[1] > 1500:
-        DAPI_arr = resize_adaptive(DAPI_arr, 1500, method=Image.BICUBIC)
+    #if np.shape(DAPI_arr)[1] > 1500:
+    #    DAPI_arr = resize_adaptive(DAPI_arr, 1500, method=Image.BICUBIC)
 
     red_arr = readIm_counter(input_path,onlyfiles_mask, counter[k + 2 + green])
-    if np.shape(red_arr)[1] > 1500:
-        red_arr = resize_adaptive(red_arr, 1500, method=Image.BICUBIC)
+    #if np.shape(red_arr)[1] > 1500:
+    #    red_arr = resize_adaptive(red_arr, 1500, method=Image.BICUBIC)
 
     k = k + 5
     DAPI_arr = np.asarray(DAPI_arr)
@@ -151,6 +148,9 @@ for i in range(len(onlyfiles_mask)):
     input_arr_tmp[:,:,0] = red
     input_arr_tmp[:,:,2] = DAPI
     #DAPI_tmp = np.asarray(DAPI_arr, dtype=float)         
+
+    input_arr = Image.fromarray(np.asarray(input_arr_tmp, dtype=np.uint8));
+    input_save = np.copy(np.asarray(input_arr))
 
     """ Generate candidate masks ==> optional """
     scale = 0.227

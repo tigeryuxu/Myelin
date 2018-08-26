@@ -15,7 +15,7 @@ debug = 0
 
 # Julia ==> 0.178 (20x) and 0.089 (40x) 
 min_microns = 12
-im_scale = 0.178  #0.519, 0.6904, 0.35
+im_scale = 0.227  #0.519, 0.6904, 0.35
 minLength = min_microns / im_scale
 minSingle = 0 / im_scale
 minLengthDuring = 4/im_scale
