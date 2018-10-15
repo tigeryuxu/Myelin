@@ -3,6 +3,9 @@
 Created on Sun Dec 31 17:24:11 2017
 
 @author: Tiger
+
+Creates training data from input images, DAPI mask, and fiber mask
+
 """
 
 from matplotlib import *

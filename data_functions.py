@@ -157,7 +157,7 @@ def check_shape_QL(input_im, truth_im, len_im, width_im):
 
 """ returns a batch of validation images from the zip file """
 
-def get_batch_val(myzip, onlyfiles_val, counter,  mean_arr, std_arr, batch_size=2):
+def get_batch_val(myzip, onlyfiles_val, counter,  mean_arr, std_arr, batch_size=2, rotate=0):
     
     np.random.shuffle(counter)
     batch_x_val = [];
@@ -186,6 +186,22 @@ def get_batch_val(myzip, onlyfiles_val, counter,  mean_arr, std_arr, batch_size=
         weighted_labels = np.copy(truth_val)
         weighted_labels[:, :, 1] = sp_weighted_labels
         
+        """ FOR ROTATING THE IMAGE OR ADDING BLACK LINES TO THE SIDES """
+        if rotate:
+           # ROTATE the input_im
+           np_zeros = np.zeros([1024, 1024, 3])
+           np_zeros[:,192:832, :] = input_val[:, :, :]
+           input_val = np_zeros   # delete this to do rotations
+
+
+           np_zeros = np.zeros([1024, 1024, 2])
+           np_zeros[:,192:832, :] = truth_val[:, :, :]
+           truth_val = np_zeros   # delete this to do rotations
+
+           np_zeros = np.zeros([1024, 1024, 2])
+           np_zeros[:,192:832, :] = weighted_labels[:, :, :]
+           weighted_labels = np_zeros   # delete this to do rotations
+            
         
         
         batch_x_val.append(input_val)

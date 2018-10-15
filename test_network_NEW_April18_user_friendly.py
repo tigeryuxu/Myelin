@@ -21,6 +21,7 @@ from plot_functions import *
 from data_functions import *
 from post_process_functions import *
 from UNet import *
+from random import randint
 from pre_processing import *
 
 from skimage import data, exposure, img_as_float
@@ -29,7 +30,7 @@ from skimage import data, exposure, img_as_float
 
 def run_analysis(s_path, sav_dir, input_path, checkpoint,
                  im_scale, minLength, minSingle, minLengthDuring, radius,
-                 len_x, width_x, channels, CLAHE,
+                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
                  debug):
     
     # Variable Declaration
@@ -118,6 +119,9 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         while N < len(cc):
             DAPI_idx = cc[N]['centroid']
             
+            if rotate:
+                width_x = 640
+            
             # extract CROP outo of everything          
             input_crop, coords = adapt_crop_DAPI(input_arr, DAPI_idx, length=len_x, width=width_x)
          
@@ -166,7 +170,26 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             elif channels == 3:
                 input_crop[:,:,1] = DAPI_crop
     
-    
+            """ FOR ROTATING THE IMAGE OR ADDING BLACK LINES TO THE SIDES """
+            
+            deg_rotated = randint(0, 360)      
+
+            if rotate:
+                # ROTATE the input_im
+                width_x = 1024
+                np_zeros = np.zeros([len_x, width_x, 3])
+                np_zeros[:,192:832, :] = input_crop[:, :, :]
+                
+                
+                if rand_rot:
+                    im = Image.fromarray(np.asarray(np_zeros, dtype=np.uint8))
+                    rotated = im.rotate(deg_rotated)
+                    input_crop = np.asarray(rotated, dtype=np.float32)
+                else:
+                    input_crop = np_zeros   # delete this to do rotations
+            
+            
+            
             """ Normalize the image first """
             input_crop = normalize_im(input_crop, mean_arr, std_arr)  
            
@@ -180,6 +203,23 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             """ FEED_INPUT to NETWORK """
             output = softMaxed.eval(feed_dict=feed_dict)
             classification = np.argmax(output, axis = -1)[0]
+            
+            
+            if rotate:   # reverse the rotation/adding black edges
+                # ROTATE the input_im
+                
+                if rand_rot:
+                    im = Image.fromarray(np.asarray(classification, dtype=np.uint8))
+                    rotated = im.rotate(-deg_rotated)
+                    classification = np.asarray(rotated, dtype=np.float32)                    
+                    
+                
+                width_x = 640
+                np_zeros = np.zeros([len_x, width_x])
+                np_zeros[:, :] = classification[:, 192:832]
+                
+                classification = np_zeros   # delete this to do rotations
+                
             
             """ Plot for debug """ 
             if debug:
@@ -314,7 +354,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         copy_all_fibers = np.copy(all_fibers)
         new_fibers = skeletonize_all_fibers(copy_all_fibers, i, DAPI_tmp=np.zeros([size_whole[0],size_whole[1]]), minLength=minLength,
                                              total_DAPI=total_DAPI, total_matched_DAPI=total_matched_DAPI,
-                                             minLengthSingle=minSingle, s_path=sav_dir, name=filename_split)
+                                             minLengthSingle=minSingle, s_path=sav_dir, name=filename_split, jacc_test=jacc_test)
             
         input_save = np.copy(np.asarray(input_arr))
         

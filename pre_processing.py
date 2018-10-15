@@ -179,7 +179,7 @@ def pre_process(input_arr, im_num, DAPI_size, name='default', sav_dir=''):
     return candidates, counter, counter_DAPI
 
 
-def pre_process_QL(input_arr, im_num, DAPIsize, name='default'):
+def pre_process_QL(input_arr, im_num, DAPIsize, name='default', sav_dir=''):
 
     input_arr = np.asarray(input_arr)
     red = input_arr[:, :, 0]
@@ -228,6 +228,6 @@ def pre_process_QL(input_arr, im_num, DAPIsize, name='default'):
              
     """ Saving """
     candidates = final_match_O4 > 0
-    #plt.imsave('candidates' + str(im_num) + '_' + name + '.tif', (candidates))
+    plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tif', (candidates))
         
     return candidates, counter, counter_DAPI

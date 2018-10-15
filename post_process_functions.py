@@ -16,6 +16,7 @@ import numpy as np
 from skimage import measure
 import csv
 from PIL import Image
+import pickle as pickle
 
 from data_functions import *
 from plot_functions import *
@@ -147,6 +148,87 @@ def rerun_all():
 
         skeletonize_all_fibers(all_fibers, T + add, DAPI_tmp = np.zeros([8208,8208]), minLength=18, minLengthSingle=72)    
 
+""" Read and combine csv into single files containing lengths, numsheaths, ect...
+
+***NEED TO FIX ==> when row is empty, still must add empty slot!!!
+
+ """
+def read_and_comb_csv_as_SINGLES():
+    all_fibers = []
+    all_numCells = []
+    all_numShea = []
+    all_numMFLC = []
+    
+    import tkinter
+    from tkinter import filedialog
+    root = tkinter.Tk()
+    input_path = filedialog.askdirectory(parent=root, initialdir="D:/Tiger/AI stuff/RESULTS/",
+                                    title='Please select input directory')
+    input_path = input_path + '/'
+
+    all_csv = read_file_names(input_path)
+    first = 1;
+    output_name = all_csv[0] 
+    output_name = output_name.split('.')[0]
+    
+    
+    with open('Results_' + output_name + '_num_sheaths.csv', 'w') as sheaths:
+        with open('Results_' +  output_name + '_lengths.csv', 'w') as lengths:
+            with open('Results_' + output_name + '_cells.csv', 'w') as cells:
+               with open('Results_' + output_name + '_mFLC.csv', 'w') as mFLC:
+
+                    for T in range(len(all_csv)):
+                        
+                        filename = all_csv[T]
+                        empty = 0
+                        with open(input_path + filename, 'r') as csvfile:
+                            spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+                            counter = 0
+                        
+                            for row in spamreader:
+                                print(', '.join(row))
+                                
+                                row = list(filter(lambda a: a != '[]', row))
+                                
+                                
+                                if counter % 2 != 0:
+                                    counter = counter + 1
+                                    continue
+                                
+                                for t in range(len(row)):
+                                    if row[t] == '[]' or not row[t] :
+                                        continue
+                                    row[t] =  float(row[t])
+
+                                if counter == 0:   all_fibers.append(row); wr = csv.writer(lengths, quoting=csv.QUOTE_ALL); wr.writerow(all_fibers[0]);
+
+                                elif counter == 2: 
+                                    all_numCells.append(row[0]);   # append the Num Ensheathed 
+                                elif counter == 8:
+                                    all_numCells.append(row[0]);   # append the Num MBP+
+                                elif counter == 10:
+                                    all_numCells.append(row[0]);   # append the Num Cells   
+                                    wr = csv.writer(cells, quoting=csv.QUOTE_ALL); 
+                                    wr.writerow(all_numCells);
+                                    all_numCells = []
+
+                                elif counter == 4: all_numShea.append(row); wr = csv.writer(sheaths, quoting=csv.QUOTE_ALL); wr.writerow(all_numShea[0]);
+
+                                elif counter == 6: all_numMFLC.append(row); wr = csv.writer(mFLC, quoting=csv.QUOTE_ALL); wr.writerow(all_numMFLC[0]);
+
+
+                                all_fibers = []
+                                #all_numCells = []
+                                all_numShea = []
+                                all_numMFLC = []
+
+                                
+                                if counter == 10:
+                                    break
+                                counter = counter + 1
+                            
+                        if not empty:
+                            first = 0    
 
 """ Read and combine csv """
 def read_and_comb_csv():
@@ -714,7 +796,7 @@ def im_from_list(list_cells, minLengthSingle, shape):
             fibers =  list_cells[i].fibers 
             if len(fibers) == 1 and fibers[0] < minLengthSingle:
                 continue;
-            elif len(fibers) == 2 and (fibers[0] < minLengthSingle/2 and fibers[1] < minLengthSingle/2):
+            elif len(fibers) == 2 and (fibers[0] < minLengthSingle and fibers[1] < minLengthSingle):
                 continue;
             elif fibers:   # if it is NOT empty, then there are fibers
                 coords = list_cells[i].coords
@@ -727,7 +809,7 @@ def im_from_list(list_cells, minLengthSingle, shape):
 
 
 """ Skeletonize and output final cell count """
-def skeletonize_all_fibers(all_fibers, im_num, DAPI_tmp, minLength, minLengthSingle, total_DAPI=0, total_matched_DAPI=0, s_path='', name=''):
+def skeletonize_all_fibers(all_fibers, im_num, DAPI_tmp, minLength, minLengthSingle, total_DAPI=0, total_matched_DAPI=0, s_path='', name='', jacc_test=0):
 
     # Invert the image
     image = all_fibers
@@ -822,6 +904,11 @@ def skeletonize_all_fibers(all_fibers, im_num, DAPI_tmp, minLength, minLengthSin
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (sz, sz));   # get disk structuring element
     dil_final = cv2.dilate(new_fibers, kernel, 1)
 
+
+    """ Print out pickles for jaccard testing """
+    if jacc_test:   
+        for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, s_path=s_path, N=8000)
+
     
     return dil_final
     
@@ -831,8 +918,9 @@ def skeletonize_all_fibers(all_fibers, im_num, DAPI_tmp, minLength, minLengthSin
     
     
 """ FOR JACCARD TESTING """
-def for_jaccard_testing():
+def for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, s_path, N=8000):
        
+    import pickle as pickle
     """ Print text onto image """
     #output_name = 'masked_out_dil' + str(im_num) + '.png'
     #add_text_to_image(new_fibers, filename=output_name)
@@ -844,8 +932,8 @@ def for_jaccard_testing():
          list_cells.append(cell)
     list_cells_sorted, final_counted_new = fiber_to_list(new_fibers, all_fibers, list_cells, minLength)
     DAPI_ensheathed = extract_ensheathed_DAPI(DAPI_tmp, list_cells_sorted)
-    plt.imsave('DAPI_ensheathed_second' + str(im_num) + '.tif', (DAPI_ensheathed * 255).astype(np.uint16))
-    with open('DAPI_ensheathed' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+    plt.imsave(s_path + 'DAPI_ensheathed_second' + str(im_num) + '.tif', (DAPI_ensheathed * 255).astype(np.uint16))
+    with open(s_path + 'DAPI_ensheathed' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
        pickle.dump([DAPI_ensheathed], f)    
        
        
@@ -854,7 +942,6 @@ def for_jaccard_testing():
     # first find all unique values
     uniq = np.unique(new_fibers)
     
-    minLength = 25
     binary_all_fibers = all_fibers > 0
     labelled = measure.label(binary_all_fibers)
     cc_overlap = measure.regionprops(labelled, intensity_image=all_fibers)
@@ -877,7 +964,7 @@ def for_jaccard_testing():
                 final_counted[overlap_coords[T,0], overlap_coords[T,1]] = cell_num
 
     import pickle
-    with open('final_jacc_fibers' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+    with open(s_path + 'final_jacc_fibers' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
        pickle.dump([final_counted], f)       
        
        

@@ -3,11 +3,17 @@
 Created on Sunday Dec. 24th
 ============================================================
 
-
- ***NEED TO INSTALL SCIPY???
+Runs the training for the UNet. Requires:
+    
+    - s_path    ==> location to save checkpoint files
+    - input_path ==> location of input files (Pickles)
+    - val_input_path ==> location of validation files
 
 @author: Tiger
 """
+
+
+
 import tensorflow as tf
 from matplotlib import *
 import numpy as np
@@ -28,8 +34,7 @@ from data_functions import *
 from UNet import *
 
 
-"""  Network Begins:
-"""
+"""  Required parameters """
 # for saving
 s_path = '/project/6015947/yxu233/MyelinUNet_new/Checkpoints/Check_MyQz11_sW_4d/'
 # for input
@@ -37,12 +42,17 @@ input_path = '/project/6015947/yxu233/MyelinUNet_new/create_training/Output/'
 # for validation
 val_input_path='/project/6015947/yxu233/MyelinUNet_new/create_training/Output/Validation/'
 
+batch_size = 4;     # number of files per epoch
+save_epoch = 1000;  # save output checkpoint every 'x' outputs
+epochs = 250000;    # last checkpoint to start from. If none, then set == 0
 
-""" load mean and std """  
+
+""" load mean and std for normalization later """  
 mean_arr = load_pkl('', 'mean_arr.pkl')
 std_arr = load_pkl('', 'std_arr.pkl')
                
-""" Load filenames from zip """
+
+""" Load list of filenames within zip file containing all the pickle files """
 myzip_val, onlyfiles_val, counter_val = read_zip_names(val_input_path, 'validation_13.zip')
 myzip, onlyfiles_mask, counter = read_zip_names(input_path, 'new_DATA_11_13_NO_FIBERS.zip')
 
@@ -50,21 +60,22 @@ myzip, onlyfiles_mask, counter = read_zip_names(input_path, 'new_DATA_11_13_NO_F
 """ parse validation into counter WITH fibers, and those with NO fibers """
 counter_fibers, counter_blank = parse_validation(myzip_val, onlyfiles_val, counter_val)
 
-# Variable Declaration
+
+""" Declare placeholder input/truth variables for tensorflow network """
 x = tf.placeholder('float32', shape=[None, 1024, 640, 3], name='InputImage')
 y_ = tf.placeholder('float32', shape=[None, 1024, 640, 2], name='CorrectLabel')
 training = tf.placeholder(tf.bool, name='training')
 weight_matrix = tf.placeholder('float32', shape=[None, 1024, 640, 2], name = 'weighted_labels')
 
 
-""" Creates network and cost function"""
+""" Initializes network and cost function"""
 y, y_b, L1, L2, L3, L4, L5, L6, L7, L8, L9, L9_conv, L10, L11, logits, softMaxed = create_network(x, y_, training)
 accuracy, jaccard, train_step, cross_entropy, loss, cross_entropy, original = costOptm(y, y_b, logits, weight_matrix, weight_mat=True)
 
 sess = tf.InteractiveSession()
-""" TO LOAD OLD CHECKPOINT """
 
-# To restore saved checkpoint:
+
+""" TO LOAD OLD CHECKPOINT """
 saver = tf.train.Saver()
 saver.restore(sess, s_path + 'check_250000')
 
@@ -88,25 +99,33 @@ with open(s_path + 'jaccard_val.pkl', 'rb') as f:  # Python 3: open(..., 'rb')
     loaded = pickle.load(f)
     plot_jaccard_val = loaded[0]     
 
+
+""" If not loading old checkpoint, uncomment this """
 # Required to initialize all
 #tf.global_variables_initializer().run()
 #tf.local_variables_initializer().run()
-
-batch_size = 4; 
-save_epoch = 1000;
 #plot_cost = []; plot_cost_val = []; plot_jaccard = []; plot_jaccard_val = [];
-epochs = 250000;
+
 
 batch_x = []; batch_y = [];
 weights = [];
 
-for P in range(8000000000000000000000):
+
+
+""" Starts looping:
+        - outer loop reshuffles the "counter" list that randomizes the order
+            that training data is presented.
+        - inner loop loads the training data from the zipfile "myzip" then
+            then normalizes images and applies spatial weighting
+"""
+while True:
     counter = list(range(len(onlyfiles_mask)))  # create a counter, so can randomize it
     counter = np.array(counter)
     np.random.shuffle(counter)
     
     for i in range(len(onlyfiles_mask)):
         
+        """ Load training image from zipfile """
         filename = onlyfiles_mask[counter[i]]
         input_im, truth_im = load_training_ZIP(myzip, filename)
         if not input_im.size:   # ERROR CATCHING
@@ -115,8 +134,6 @@ for P in range(8000000000000000000000):
     
         """ Normalize the image first """
         input_crop = normalize_im(input_im, mean_arr, std_arr)  
-           
-
         fiber_label = np.copy(truth_im[:, :, 1])
         
         """ Get spatial AND class weighting mask for truth_im """
@@ -129,21 +146,19 @@ for P in range(8000000000000000000000):
         weighted_labels = np.copy(truth_im)
         weighted_labels[:, :, 1] = sp_weighted_labels
         
-
         """ set inputs and truth """
         batch_x.append(input_crop)
         batch_y.append(truth_im)
         weights.append(weighted_labels)
                 
     
-    
         """ Plot for debug """
-#        plt.figure('Input'); plt.clf(); show_norm(batch_x[0]); plt.pause(0.05); 
-#        plt.figure('Truth'); plt.clf(); 
-#        true_m = np.argmax((batch_y[0]).astype('uint8'), axis=-1); plt.imshow(true_m);
-#        plt.pause(0.05); 
+        #plt.figure('Input'); plt.clf(); show_norm(batch_x[0]); plt.pause(0.05); 
+        #plt.figure('Truth'); plt.clf(); 
+        #true_m = np.argmax((batch_y[0]).astype('uint8'), axis=-1); plt.imshow(true_m);
+        #plt.pause(0.05); 
     
-        """ Feed into training loop """
+        """ Feed the batch data into training loop """
         if len(batch_x) == batch_size:
            feed_dict_TRAIN = {x:batch_x, y_:batch_y, training:1, weight_matrix:weights}                 
 
@@ -153,10 +168,9 @@ for P in range(8000000000000000000000):
            epochs = epochs + 1           
            print('Trained: %d' %(epochs))
            
-           
            if epochs % 10 == 0:
     
-              """ GET VALIDATION """
+              """ Get validation batches """
               batch_x_val_fibers, batch_y_val_fibers, batch_weights_fibers = get_batch_val(myzip_val, onlyfiles_val, counter_fibers, mean_arr, std_arr, 
                                                            batch_size=batch_size/2)
               batch_x_val_empty, batch_y_val_empty, batch_weights_empty = get_batch_val(myzip_val, onlyfiles_val, counter_blank, mean_arr, std_arr,
@@ -167,25 +181,25 @@ for P in range(8000000000000000000000):
              
               feed_dict_CROSSVAL = {x:batch_x_val, y_:batch_y_val, training:0, weight_matrix:batch_weights_val}      
               
-              """ Training loss"""
+              """ Get training loss """
               loss_t = cross_entropy.eval(feed_dict=feed_dict_TRAIN);
               plot_cost.append(loss_t);                 
                 
-              """ Training Jaccard """
+              """ Get training Jaccard """
               jacc_t = jaccard.eval(feed_dict=feed_dict_TRAIN)
               plot_jaccard.append(jacc_t)           
               
-              """ CV loss """
+              """ Get validation loss """
               loss_val = cross_entropy.eval(feed_dict=feed_dict_CROSSVAL)
               plot_cost_val.append(loss_val)
              
-              """ CV Jaccard """
+              """ Get validation Jaccard """
               jacc_val = jaccard.eval(feed_dict=feed_dict_CROSSVAL)
               plot_jaccard_val.append(jacc_val)
               
-              """ function call to plot """
-              #plot_cost_fun(plot_cost, plot_cost_val)
-              #plot_jaccard_fun(plot_jaccard, plot_jaccard_val)
+              """ function call to plot jaccard and loss values """
+              plot_cost_fun(plot_cost, plot_cost_val)
+              plot_jaccard_fun(plot_jaccard, plot_jaccard_val)
         
            """ To save (every x epochs) """
            if epochs % save_epoch == 0:                          
@@ -196,13 +210,13 @@ for P in range(8000000000000000000000):
               #save_path = saver.save(sess_get, save_name)
                
               """ Saving the objects """
-              save_pkl(plot_cost, s_path, 'loss_global_COPY.pkl')
-              save_pkl(plot_cost_val, s_path, 'loss_global_val_COPY.pkl')
-              save_pkl(plot_jaccard, s_path, 'jaccard_COPY.pkl')
-              save_pkl(plot_jaccard_val, s_path, 'jaccard_val_COPY.pkl')
+              save_pkl(plot_cost, s_path, 'loss_global.pkl')
+              save_pkl(plot_cost_val, s_path, 'loss_global_val.pkl')
+              save_pkl(plot_jaccard, s_path, 'jaccard.pkl')
+              save_pkl(plot_jaccard_val, s_path, 'jaccard_val.pkl')
                                                              
-              """Getting back the objects"""
-  #           plot_cost = load_pkl(s_path, 'loss_global.pkl')
-  #           plot_cost_val = load_pkl(s_path, 'loss_global_val.pkl')
-  #           plot_jaccard = load_pkl(s_path, 'jaccard.pkl')
-  #           plot_jaccard = load_pkl(s_path, 'jaccard_va;.pkl')
+              """Getting back the objects if want to load them for plotting """
+              plot_cost = load_pkl(s_path, 'loss_global.pkl')
+              plot_cost_val = load_pkl(s_path, 'loss_global_val.pkl')
+              plot_jaccard = load_pkl(s_path, 'jaccard.pkl')
+              plot_jaccard_val = load_pkl(s_path, 'jaccard_val.pkl')

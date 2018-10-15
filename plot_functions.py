@@ -242,7 +242,7 @@ def calc_moving_avg(plot_data, num_pts = 20, dist_points=100):
     
 def change_scale_plot():
 
-    multiply = 10
+    multiply = 1000
     font_size = 11
     legend_size = 11
     plt.rcParams.update({'font.size': 9})    
@@ -306,7 +306,7 @@ def change_scale_plot():
     
     """ MOVING AVERAGE """
     num_pts = 10
-    dist_points = 200
+    dist_points = 20
     mov_cost = calc_moving_avg(plot_cost, num_pts=num_pts, dist_points=dist_points)
     mov_cost_val = calc_moving_avg(plot_cost_val, num_pts=num_pts, dist_points=dist_points)
     mov_jaccard = calc_moving_avg(plot_jaccard, num_pts=num_pts, dist_points=dist_points)
@@ -322,7 +322,7 @@ def change_scale_plot():
     plt.ylabel('Loss', fontsize = font_size); plt.xlabel('Epochs', fontsize = font_size); plt.pause(0.05) 
     
     x_idx = list(range(0, len(mov_jaccard) * multiply, multiply));   
-    plt.figure(22); plt.plot(x_idx,mov_jaccard, label='Validation_weighted'); plt.title("Detailed Loss");     
+    plt.figure(22); plt.plot(x_idx,mov_jaccard, label='Validation_weighted'); plt.title("Detailed Jaccard");     
     plt.ylabel('Jaccard', fontsize = font_size); plt.xlabel('Epochs', fontsize = font_size); plt.pause(0.05) 
     plt.legend(loc='upper left');             
     

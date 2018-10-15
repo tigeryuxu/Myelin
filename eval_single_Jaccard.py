@@ -18,6 +18,7 @@ import pickle as pickle
 import os
 import zipfile
 import scipy
+import cv2
 
 import pandas as pd
 import seaborn as sns
@@ -44,9 +45,11 @@ def calc_jaccard(y, y_b):
 
 def plot_compare():
     
-    categories = ['H1_v_UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_MATLAB'];
+    """ Select tight-layout afterwards """
     
-    jaccard_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Jaccard_testing/all_jaccard/'
+    categories = ['H1_v_UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_Ex1', 'Ex1_v_AI', 'H1_v_MATLAB'];
+
+    jaccard_path = 'D:/Tiger/AI stuff/MyelinUNet/Jaccard_testing_re-run/all_combine/'
     onlyfiles_jaccard = read_file_names(jaccard_path)
     
     #plt.figure()   
@@ -64,18 +67,18 @@ def plot_compare():
 
     plt.rcParams.update({'font.size': 18})   
     #save_pkl(all_jaccard, '', 'all_jaccard' + name + '.pkl')
-    sns.set_context("notebook", font_scale=1.5)
+    sns.set_context("notebook", font_scale=1.2)
     sns.set_style("whitegrid")
     plt.figure()
-    sns.stripplot( data=newDF, jitter=True, orient='h', order=['H1_v_UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_MATLAB']);
+    sns.stripplot( data=newDF, jitter=True, orient='h', order=categories);
     plt.xlabel('Jaccard')    
 
     plt.figure()
-    sns.violinplot( data=newDF, jitter=True, orient='h', order=['H1_v_UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_MATLAB']);
+    sns.violinplot( data=newDF, jitter=True, orient='h', order=categories);
     plt.xlabel('Jaccard')    
 
     plt.figure()
-    sns.boxplot( data=newDF, orient='h', order=['H1_v_UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_MATLAB']);
+    sns.boxplot( data=newDF, orient='h', order=categories);
     plt.xlabel('Jaccard')    
     
     
@@ -185,13 +188,18 @@ def get_global_jacc(back_TRUTH_fibers,back_TEST_fibers):
     return global_jacc
 
 
-name = 'D_v_AI_301000'
+# D vs. AI ==> 0.3533
+# D vs. QL ==> 0.36
+# QL vs. AI ==> 0.2523
+
+
+name = 'QL_v_AI-re-run_301000'
 machine = 1
 MATLAB = 0
 
 
-TRUTH_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Jaccard_testing/Expert_Truth/'
-TESTER_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Jaccard_testing/Tester/'
+TRUTH_path = 'D:/Tiger/AI stuff/MyelinUNet/Jaccard_testing_re-run/Expert_Truth_re-run/'
+TESTER_path = 'D:/Tiger/AI stuff/MyelinUNet/Jaccard_testing_re-run/Tester_re-run/'
                
 """ Read in images to analyze """
 onlyfiles_TRUTH = read_file_names(TRUTH_path)
@@ -236,9 +244,16 @@ if machine:
     
     TEST_DAPI_tmp[binary == 0] = 0
     
-#    plt.imsave('TEST_DAPI_OLD' + str(1) + '.tif', (TEST_DAPI_tmp * 255).astype(np.uint16))    
+    
+    """ Added a dilation to the DAPI cores"""
+
+    sz = 50;
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (sz, sz));   # get disk structuring element
+    TEST_DAPI_tmp = cv2.dilate(TEST_DAPI_tmp, kernel, 1)    
     
     TEST_DAPI = Image.fromarray(TEST_DAPI_tmp)    
+    
+
     
 else:
     TEST_DAPI = readIm_counter(TESTER_path,onlyfiles_TEST, 0)

@@ -3,8 +3,7 @@
 Created on Sunday Dec. 24th
 ============================================================
 
-
- ***NEED TO INSTALL SCIPY???
+Converts pickled data to tiffs
 
 @author: Tiger
 """

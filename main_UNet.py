@@ -6,6 +6,8 @@ Created on Tue Jul 31 10:11:38 2018
 """
 
 from test_network_NEW_April18_user_friendly import *
+from test_network_NEW_April18_QIAO_LING import *
+
 
 import tkinter
 from tkinter import filedialog
@@ -13,21 +15,51 @@ import os
     
 debug = 0
 
+""" For Daryan's analysis """
 # Julia ==> 0.178 (20x) and 0.089 (40x) 
+DC = 1
 min_microns = 12
-im_scale = 0.227  #0.519, 0.6904, 0.35
+im_scale = 0.6904  #0.519, 0.6904, 0.35
 minLength = min_microns / im_scale
-minSingle = 0 / im_scale
+minSingle = (minLength * 3) / im_scale
 minLengthDuring = 4/im_scale
-radius = 3/im_scale  # um
+radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
 
 len_x = 1024     # 1344, 1024
 width_x = 640   # 864, 640
 
 channels = 3
 CLAHE = 0
+green = 0
 
-checkpoint = '655000'
+
+rand_rot = 0
+rotate = 1         #*** 1024, 1024 for rotation
+if rotate:
+    width_x = 1024
+jacc_test = 1
+
+
+""" Qiao Ling parameters """
+#QL = 1
+#im_scale = 0.227  # 0.454 or 0.227
+#min_microns = 12
+#minLength = min_microns / im_scale
+#minSingle = (min_microns * 2) / im_scale
+#minLengthDuring = 4/im_scale
+#radius = 3/im_scale  # um
+#
+#len_x = 1024    # 1024, 1440
+#width_x = 640   # 800, 1920
+#
+#CLAHE = 0
+#channels = 3
+#green = 0  # or 2 if O4 is green channel
+#
+#rotate = 0
+
+
+checkpoint = '1013000'    # 655000
 
 root = tkinter.Tk()
 s_path = filedialog.askdirectory(parent=root, initialdir="/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Checkpoints/",
@@ -41,13 +73,15 @@ sav_dir = sav_dir + '/'
 # get input folders
 another_folder = 'y';
 list_folder = []
-input_path = "/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Source/",
+input_path = "/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Source/"
 while(another_folder == 'y'):
     input_path = filedialog.askdirectory(parent=root, initialdir= input_path,
                                         title='Please select input directory')
     input_path = input_path + '/'
     
-    another_folder = input();
+#    another_folder = input();   # currently hangs forever
+    another_folder = 'n';
+
     list_folder.append(input_path)
 
 
@@ -63,11 +97,21 @@ for i in range(len(list_folder)):
         os.makedirs(sav_dir_folder)
     
     input_path = list_folder[i]
-    run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
+    
+    if DC:
+        run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
                  im_scale, minLength, minSingle, minLengthDuring, radius,
-                 len_x, width_x, channels, CLAHE,
+                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
                  debug)
-    tf.reset_default_graph() 
+ 
+    elif QL:
+        run_analysis_QL(s_path, sav_dir_folder, input_path, checkpoint,
+                 im_scale, minLength, minSingle, minLengthDuring, radius,
+                 len_x, width_x, channels, CLAHE, rotate,
+                 debug, green=green)
+        
+    
+    tf.reset_default_graph()
     
     
     
