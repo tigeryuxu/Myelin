@@ -8,16 +8,50 @@ Created on Fri Jan  4 14:53:43 2019
 import random
 from tkinter import Tk, Label, Button, Entry, StringVar, DISABLED, NORMAL, END, W, E
 
-class GuessingGame:
+class GUI:
     def __init__(self, master):
         self.master = master
-        master.title("Guessing Game")
+        master.title("Myelin Quantification - Parameters")
 
         self.secret_number = random.randint(1, 100)
         self.guess = None
         self.num_guesses = 0
+        
+        
+        self.scale = None
+        self.minLength = None
+        self.sensitivity = None
 
-        self.message = "Guess a number from 1 to 100"
+        # TITLE
+        self.label, self.entry = self.new_param(master, "MYELIN QUANTIFICATION")        
+        self.label.grid(row=0, column=0, columnspan=2, sticky=W+E)
+
+
+        # ROW 1:        
+        self.label1, self.entry1 = self.new_param(master, "Scale (um/px): ")
+        self.label1.grid(row=1, column=0, columnspan=1, sticky=W)
+        self.entry1.grid(row=1, column=1, columnspan=1, sticky=W)
+        
+        # ROW 2:
+        self.label2, self.entry2 = self.new_param(master, "minLength: ")
+        self.label2.grid(row=2, column=0, columnspan=1, sticky=W)
+        self.entry2.grid(row=2, column=1, columnspan=1, sticky=W)        
+
+        # ROW 3:
+        self.label3, self.entry3 = self.new_param(master, "Sensitivity (2 - 4): ")
+        self.label3.grid(row=3, column=0, columnspan=1, sticky=W)
+        self.entry3.grid(row=3, column=1, columnspan=1, sticky=W)        
+        
+                
+        self.guess_button = Button(master, text="Ok", command=self.guess_number)
+        self.reset_button = Button(master, text="Reset", command=self.reset, state=DISABLED)       
+        
+        self.guess_button.grid(row=10, column=0)
+        self.reset_button.grid(row=10, column=1)
+
+    def new_param(self, master, new_text):
+        
+        self.message = new_text
         self.label_text = StringVar()
         self.label_text.set(self.message)
         self.label = Label(master, textvariable=self.label_text)
@@ -25,20 +59,16 @@ class GuessingGame:
         vcmd = master.register(self.validate) # we have to wrap the command
         self.entry = Entry(master, validate="key", validatecommand=(vcmd, '%P'))
 
-        self.guess_button = Button(master, text="Guess", command=self.guess_number)
-        self.reset_button = Button(master, text="Play again", command=self.reset, state=DISABLED)
-
-        self.label.grid(row=0, column=0, columnspan=2, sticky=W+E)
-        self.entry.grid(row=1, column=0, columnspan=2, sticky=W+E)
-        self.guess_button.grid(row=2, column=0)
-        self.reset_button.grid(row=2, column=1)
-
+        return self.label, self.entry
+        
+        
     def validate(self, new_text):
         if not new_text: # the field is being cleared
             self.guess = None
             return True
 
         try:
+            """ SEE IF TEXT ENTERED IS INT"""
             guess = int(new_text)
             if 1 <= guess <= 100:
                 self.guess = guess
@@ -52,20 +82,36 @@ class GuessingGame:
         self.num_guesses += 1
 
         if self.guess is None:
-            self.message = "Guess a number from 1 to 100"
+            self.message = "Please enter a value"
 
-        elif self.guess == self.secret_number:
-            suffix = '' if self.num_guesses == 1 else 'es'
-            self.message = "Congratulations! You guessed the number after %d guess%s." % (self.num_guesses, suffix)
-            self.guess_button.configure(state=DISABLED)
-            self.reset_button.configure(state=NORMAL)
-
-        elif self.guess < self.secret_number:
-            self.message = "Too low! Guess again!"
+#        elif self.guess == self.secret_number:
+#            suffix = '' if self.num_guesses == 1 else 'es'
+#            self.message = "Congratulations! You guessed the number after %d guess%s." % (self.num_guesses, suffix)
+#            self.guess_button.configure(state=DISABLED)
+#            self.reset_button.configure(state=NORMAL)
+#
+#        elif self.guess < self.secret_number:
+#            self.message = "Too low! Guess again!"
         else:
-            self.message = "Too high! Guess again!"
+            """ SAVE PARAMETERS??? Then do pop-out to give message"""       
+            try:
+                """ SEE IF TEXT ENTERED ARE INTEGERS"""
+                if 1 <= int(self.entry.get()) <= 100 and 1 <= int(self.entry2.get()) <= 100 and 1 <= int(self.entry3.get()) <= 100:
+                    self.scale = self.entry.get()
+                    self.minLength = self.entry2.get()
+                    self.sensitivity = self.entry3.get()
+                   
+                else:
+                    return False
+            except ValueError:
+                
+                return False
+        
+            self.message = "Parameters saved: " + "Scale: " + self.scale
 
         self.label_text.set(self.message)
+
+        print("Parameters saved: " + "Scale: " + self.scale)
 
     def reset(self):
         self.entry.delete(0, END)
@@ -78,7 +124,11 @@ class GuessingGame:
 
         self.guess_button.configure(state=NORMAL)
         self.reset_button.configure(state=DISABLED)
-
+        
+    
 root = Tk()
-my_gui = GuessingGame(root)
+my_gui = GUI(root)
 root.mainloop()
+
+
+#return my_gui.scale, my_gui.minLength, my_gui.sensitivity

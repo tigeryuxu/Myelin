@@ -7,7 +7,7 @@ Created on Tue Jul 31 10:11:38 2018
 
 from test_network_NEW_April18_user_friendly import *
 from test_network_NEW_April18_QIAO_LING import *
-
+from GUI import *
 
 import tkinter
 from tkinter import filedialog
@@ -50,7 +50,7 @@ minSingle = (min_microns * 2) / im_scale
 minLengthDuring = 4/im_scale
 radius = 1.5/im_scale  # um
 
-len_x = 1024    # 1024, 1440
+len_x = 1024    # 1024, 1440     ***DEFINES CROP SIZE FOR CANDIDATE CELL CROPPING
 width_x = 640   # 800, 1920
 
 CLAHE = 0
@@ -60,6 +60,17 @@ green = 0  # or 2 if O4 is green channel
 rotate = 0
 rand_rot = 0
 jacc_test = 0
+
+
+""" LOAD UP GUI """
+root = Tk()
+my_gui = GUI(root)
+root.mainloop()
+
+im_scale = my_gui.scale
+min_microns = my_gui.minLength
+sensitvity = my_gui.sensitivity
+
 
 
 """ Best so far is 980000!!! """
