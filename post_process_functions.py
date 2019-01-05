@@ -809,8 +809,12 @@ def im_from_list(list_cells, minLengthSingle, shape):
 
 
 """ Skeletonize and output final cell count """
-def skeletonize_all_fibers(all_fibers, im_num, DAPI_tmp, minLength, minLengthSingle, total_DAPI=0, total_matched_DAPI=0, s_path='', name='', jacc_test=0):
+def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, total_DAPI=0, total_matched_DAPI=0, s_path='', name='', jacc_test=0):
 
+    im_num = i
+    minLengthSingle = minLengthSingle
+    #name = filename_split
+    #s_path = sav_dir
     # Invert the image
     image = all_fibers
     image = image > 0

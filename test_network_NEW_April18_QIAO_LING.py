@@ -33,7 +33,7 @@ from tkinter import filedialog
 
 def run_analysis_QL(s_path, sav_dir, input_path, checkpoint,
                  im_scale, minLength, minSingle, minLengthDuring, radius,
-                 len_x, width_x, channels, CLAHE,
+                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
                  debug, green=0):
 
 

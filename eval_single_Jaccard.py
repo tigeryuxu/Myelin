@@ -47,7 +47,7 @@ def plot_compare():
     
     """ Select tight-layout afterwards """
     
-    categories = ['H1_v_UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_Ex1', 'Ex1_v_AI', 'H1_v_MATLAB'];
+    categories = ['H1_v_CNN-UNet', 'H1_v_H2', 'H1_v_H3', 'H1_v_Ex1', 'Ex1_v_CNN-UNet', 'H1_v_MATLAB'];
 
     jaccard_path = 'D:/Tiger/AI stuff/MyelinUNet/Jaccard_testing_re-run/all_combine/'
     onlyfiles_jaccard = read_file_names(jaccard_path)
@@ -193,7 +193,7 @@ def get_global_jacc(back_TRUTH_fibers,back_TEST_fibers):
 # QL vs. AI ==> 0.2523
 
 
-name = 'QL_v_AI-re-run_301000'
+name = 'H1_v_rand_rotated_re-980000'
 machine = 1
 MATLAB = 0
 

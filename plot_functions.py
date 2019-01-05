@@ -350,8 +350,11 @@ def change_scale_plot():
 
 def change_scale_plot2():
 
-    s_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Checkpoints/ALL_FOR_PLOT/'
+    #s_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Checkpoints/ALL_FOR_PLOT/'
     
+    s_path = 'D:/Tiger/AI stuff/MyelinUNet/Checkpoints/ALL_FOR_PLOT/' 
+
+    num_pts = 10
     multiply = 10
     font_size = 11
     legend_size = 11
@@ -359,19 +362,19 @@ def change_scale_plot2():
     
     """Getting back the objects"""
     #plot_cost = load_pkl(s_path, 'loss_global.pkl')
-    plot_cost_val = load_pkl(s_path, 'loss_global_MyQz10_classW.pkl')
-    plot_jaccard = load_pkl(s_path, 'jaccard_MyQz10_classW.pkl')
+    plot_cost_val_noW = load_pkl(s_path, 'loss_global_sW_1_rotated.pkl')
+    plot_jaccard_noW = load_pkl(s_path, 'jaccard_sW_1_rotated.pkl')
 
     """Getting back the objects"""
     #plot_cost_noW = load_pkl(s_path, 'loss_global_no_W.pkl')
-    plot_cost_val_noW = load_pkl(s_path, 'loss_global_MyQ9_noW.pkl')
-    plot_jaccard_noW = load_pkl(s_path, 'jaccard_MyQ9_noW.pkl')
+    plot_cost_val = load_pkl(s_path, 'loss_global_MyQ_2_not_rotated.pkl')
+    plot_jaccard = load_pkl(s_path, 'jaccard_MyQ_2_not_rotated.pkl')
 
 
     """Getting back the objects"""
-    #plot_cost_noW = load_pkl(s_path, 'loss_global_no_W.pkl')
-    plot_cost_val_sW = load_pkl(s_path, 'loss_global_MyQz11_sW_batch2.pkl')
-    plot_jaccard_sW = load_pkl(s_path, 'jaccard_MyQz11_sW_batch2.pkl')
+    ##plot_cost_noW = load_pkl(s_path, 'loss_global_no_W.pkl')
+    #plot_cost_val_sW = load_pkl(s_path, 'loss_global_MyQz11_sW_batch2.pkl')
+    #plot_jaccard_sW = load_pkl(s_path, 'jaccard_MyQz11_sW_batch2.pkl')
 
 
     font_size = 11
@@ -380,23 +383,23 @@ def change_scale_plot2():
     """ no-weight """
     dist_points_loss = 3
     dist_points_jacc = 25
-    multiply = 1500
+    multiply = 1000
     #mov_cost_noW = calc_moving_avg(plot_cost_noW, num_pts=num_pts, dist_points=dist_points)
     mov_cost_val_noW = calc_moving_avg(plot_cost_val_noW, num_pts=num_pts, dist_points=dist_points_loss)
     mov_jaccard_noW = calc_moving_avg(plot_jaccard_noW, num_pts=num_pts, dist_points=dist_points_jacc)
        
-    plot_single_cost(mov_cost_val_noW, multiply, 'Validation no weight', 'Loss')    
-    plot_single_jacc(mov_jaccard_noW, multiply, 'Validation no weight', 'Jaccard')
+    plot_single_cost(mov_cost_val_noW, multiply, 'Validation rotated', 'Loss')    
+    plot_single_jacc(mov_jaccard_noW, multiply, 'Validation rotated', 'Jaccard')
 
     
     """ class weight """
-    multiply = 1500
+    multiply = 1000
     #mov_cost = calc_moving_avg(plot_cost, num_pts=num_pts, dist_points=dist_points)
     mov_cost_val = calc_moving_avg(plot_cost_val, num_pts=num_pts, dist_points=dist_points_loss)
     mov_jaccard = calc_moving_avg(plot_jaccard, num_pts=num_pts, dist_points=dist_points_jacc) 
            
-    plot_single_cost(mov_cost_val, multiply, 'Validation class weight', 'Loss')    
-    plot_single_jacc(mov_jaccard, multiply, 'Validation class weight', 'Jaccard')
+    plot_single_cost(mov_cost_val[0:400], multiply, 'Validation no rotate', 'Loss')    
+    plot_single_jacc(mov_jaccard[0:400], multiply, 'Validation no rotate', 'Jaccard')
     
 
     """ spatial W """
@@ -419,5 +422,5 @@ def plot_single_cost(data, multiply, label, title):
 def plot_single_jacc(data, multiply, label, title):
     x_idx = list(range(0, len(data) * multiply, multiply));   
     plt.figure(22); plt.plot(x_idx,data, label=label); plt.title(title);     
-    plt.legend(loc='upper left');     
+    plt.legend(loc='upper right');     
     

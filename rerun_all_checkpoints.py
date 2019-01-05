@@ -56,7 +56,7 @@ from pre_processing import *
 #def batch_4():
     
     
-rotate = 1
+rotate = 0
 batch_size=2
 
 len_x = 1024
@@ -66,9 +66,9 @@ if rotate:
 
 
 #s_path = 'D:/Tiger/AI stuff/MyelinUNet/Checkpoints/Check_MyQz_new_train_sW_1_rotated/' 
-s_path = 'D:/Tiger/AI stuff/MyelinUNet/Checkpoints/Check_MyQz_new_train_sW_1_with_diff_counter/' 
+#s_path = 'D:/Tiger/AI stuff/MyelinUNet/Checkpoints/Check_MyQz_new_train_sW_1_with_diff_counter/' 
 
-#s_path = 'D:/Tiger/AI stuff/MyelinUNet/Checkpoints/Check_MyQz_new_train_sW_2_not_rotated/'  
+s_path = 'D:/Tiger/AI stuff/MyelinUNet/Checkpoints/Check_MyQz_new_train_sW_2_not_rotated/'  
 x = tf.placeholder('float32', shape=[None, len_x, width_x, 3], name='InputImage')
 y_ = tf.placeholder('float32', shape=[None, len_x, width_x, 2], name='CorrectLabel')
 training = tf.placeholder(tf.bool, name='training')
@@ -102,7 +102,7 @@ sess = tf.InteractiveSession()
 
 plot_cost_val = []
 plot_jaccard = []
-for i in range(500 * 1000, 990 * 1000, 1000):
+for i in range(1000, 1200 * 1000, 1000):
     
     """ TO LOAD OLD CHECKPOINT """
     saver = tf.train.Saver()
@@ -143,3 +143,7 @@ plot_jaccard_fun(plot_jaccard, [])
 """ Saving the objects """
 save_pkl(plot_cost_val, s_path, 'loss_global_MyQz9_noW.pkl')
 save_pkl(plot_jaccard, s_path, 'jaccard_MyQ9_noW.pkl')
+
+
+plot_cost_val = plot_jaccard = load_pkl(s_path, 'loss_global_MyQz9_noW.pkl')
+plot_jaccard = plot_jaccard = load_pkl(s_path, 'jaccard_MyQ9_noW.pkl')
