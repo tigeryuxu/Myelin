@@ -7,8 +7,8 @@ Created on Tue Jul 31 10:11:38 2018
 
 from sys import path
 from os import getcwd
-path.append(getcwd() + "\\Data functions") #Yes, i'm on windows
-print(path)
+cur_dir = getcwd()
+path.append(cur_dir + "\\Data_functions") #Yes, i'm on windows
 import test_network as UNet
 from GUI import *
 
@@ -43,13 +43,13 @@ jacc_test = 0
 
 
 """ LOAD UP GUI """
-root = Tk()
-my_gui = GUI(root)
-root.mainloop()
-
-im_scale = my_gui.scale
-min_microns = my_gui.minLength
-sensitvity = my_gui.sensitivity
+#root = Tk()
+#my_gui = GUI(root)
+#root.mainloop()
+#
+#im_scale = my_gui.scale
+#min_microns = my_gui.minLength
+#sensitvity = my_gui.sensitivity
 
 
 
@@ -57,18 +57,18 @@ sensitvity = my_gui.sensitivity
 checkpoint = '301000'
 
 root = tkinter.Tk()
-s_path = filedialog.askdirectory(parent=root, initialdir="/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Checkpoints/",
+s_path = filedialog.askdirectory(parent=root, initialdir=cur_dir,
                                         title='Please select checkpoint directory')
 s_path = s_path + '/'
 
-sav_dir = filedialog.askdirectory(parent=root, initialdir="/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Source/",
+sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
                                         title='Please select saving directory')
 sav_dir = sav_dir + '/'
 
 # get input folders
 another_folder = 'y';
 list_folder = []
-input_path = "/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Source/"
+input_path = cur_dir
 while(another_folder == 'y'):
     input_path = filedialog.askdirectory(parent=root, initialdir= input_path,
                                         title='Please select input directory')
@@ -99,8 +99,6 @@ for i in range(len(list_folder)):
                  len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
                  debug)
 
-        
-    
     tf.reset_default_graph()
     
     
