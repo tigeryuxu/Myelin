@@ -51,8 +51,6 @@ jacc_test = 0
 #min_microns = my_gui.minLength
 #sensitvity = my_gui.sensitivity
 
-
-
 """ Best so far is 980000 for rotated """
 checkpoint = '301000'
 
