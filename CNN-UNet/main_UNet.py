@@ -97,7 +97,7 @@ for i in range(len(list_folder)):
                  len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
                  debug)
 
-    tf.reset_default_graph()
+    #tf.reset_default_graph()
     
     
     
