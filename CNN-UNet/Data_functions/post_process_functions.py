@@ -900,7 +900,7 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
     output_name = 'masked_out_dil' + '_' + name + '_' + str(im_num) + '.csv'
     new_list = cycle_and_output_csv(list_cells_sorted, output_name, minLengthSingle, total_DAPI, total_matched_DAPI, s_path=s_path)
 
-    shape = np.shape(DAPI_tmp)
+    shape = np.shape(all_fibers)
     new_fibers = im_from_list(new_list, minLengthSingle, shape)
     #plt.imsave('final_image' + str(im_num) + '.tif', (new_fibers * 255).astype(np.uint16))
     
