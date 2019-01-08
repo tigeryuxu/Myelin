@@ -124,6 +124,11 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             
             # extract CROP outo of everything          
             input_crop, coords = adapt_crop_DAPI(input_arr, DAPI_idx, length=len_x, width=width_x)
+            
+            # some reason converting PIL to array results in a [x,y,4] array... if so, remove the last matrix
+            if input_crop.shape[-1] == 4 and channels == 3:
+                tmp = input_crop[:, :, 0:3]
+                input_crop = tmp
          
             """ Create empty image with ONLY the DAPI at the DAPI_idx """
             DAPI_coords = cc[N]['coords']
