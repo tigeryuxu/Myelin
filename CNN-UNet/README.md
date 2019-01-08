@@ -68,22 +68,19 @@
 
 
 ## Demo run:
-  ### 1. Run main file and follow directions in "Usage" above
+  ### Run the "main_UNet.py" file by following the directions in "Usage" above
   * when prompted with GUI, select the following folders:
       * "Checkpoint"
       * "Results"
       * "Demo-data"
-     
-  ### 2. Check the results
- 
-
-## Optional:
- * If want to use your own checkpoint from training, navigate to the folder “Checkpoints” and replace the files with your own checkpoint files.
-
-
+    
+    
 ## Troubleshooting:
 1.	If program does not run or computer freezes:
     * Check the size of your images. If they are larger than 5000 x 5000 pixels, you may need to:
         * move to a computer with RAM > 8 GB
         * crop your image and analyze half of it at a time
+        
+2.  If you would like to use your own checkpoint from training:
+    * navigate to the folder “Checkpoints” and replace the files with your own checkpoint files.
 
