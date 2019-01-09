@@ -26,11 +26,12 @@
   ### 1.	Data format
    * please ensure all images are “.tiff” format
    *	individual channels are **separated**
-   *	all files to be analyzed are located in a SINGLE folder (see example below)
+   *	all files to be analyzed are located in a SINGLE folder (see "demo-data" folder for example)
 
   ### 2.	Run main file (mainDAPIfindStack72_run_whole_im_ADULT.m)
    1. Will first prompt you to select folder containing data to be analyzed
-   2. Then navigate the GUI
+   2. Select order of channels to match order of files in folder
+   3. Then navigate the GUI
    * First thing that appears prompts you to enter some parameters for the analysis
    ![Image of GUI](https://github.com/yxu233/Myelin/blob/master/Heuristic_algorithm/Images/GUI.PNG)
    
