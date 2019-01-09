@@ -1,42 +1,18 @@
-%(3) z - stack
-% (4) ***need stats
-% (7) eventually add try/catch
 
-%% Priorities:
-% (1) ==> some of the newly counted O4 cores ARE disjoint fibers...
-% thus get read falsely as "wrapped"
-% ahhhhh, thus may need to do cell_body_filt on new cores...???
-% OR, associate fibers FIRST, and then run analysis on these cells???
-
-% (2) get rid of single fibers hugging edge of cell near DAPI center
-% maybe try subtracting out a rectangle
-% OR, try increasing "diameterFiber"
-
-
-%% FIX + CHANGE
-% 
-% Need to make ridges2line better
-% but, also try to come up with way to melt everything together:
-% 
-% (1) High magnification ==> oldest images
-% - need high density, need...
-%     
-% (2) Low magnification, high density
-% 
-% (3) Low magnification, low density
-% 
-% (4) Clem ==> no enhance DAPI
-
+%% Main function to run heuristic algorithm
 opengl hardware;
 close all;
 
 cur_dir = pwd;
-
-addpath('matlab/myfiles')  
-
+addpath(strcat(cur_dir, '\Cell_body_seg'))  % adds path to functions
+addpath(strcat(cur_dir, '\Cell_counting'))  % adds path to functions
+addpath(strcat(cur_dir, '\Demo-data'))  % adds path to functions
+addpath(strcat(cur_dir, '\Image_enhance'))  % adds path to functions
+addpath(strcat(cur_dir, '\IO_func'))  % adds path to functions
+addpath(strcat(cur_dir, '\Ridge_filter'))  % adds path to functions
 cd(cur_dir);
 
-%% For stats
+%% Initialize
 allWrappedR = []; allWrappedG = []; allTotalCells = [];
 allNames = cell(0); allTrialLengths = cell(0);  allTrialSheathsR = cell(0); allTrialSheathsG = cell(0); allInfoInfo = cell(0);
 allTrialS = cell(0); allTrialMeanFLC = cell(0);
@@ -53,10 +29,11 @@ saveDirName = create_dir(cur_dir, saveName);   % creates directory
 %saveDirName = 'HA756-393_Result_8-right-numbering'
 mkdir(saveDirName);
 
-%% Prompt
+%% TO ADD as GUI prompts:
+%square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
+%square_cut_w = 7200;
 
-%% TO ADD:
-square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
+square_cut_h = 1460; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
 square_cut_w = 7200;
 
 human_OLs = 'N';
@@ -170,43 +147,8 @@ batch_run = 'N';
 batch_num = 0;
 batch = cell(2);   % intialize empty
 
-%% BCOR:
-%batch = {'B','C', 'O', 'R', 'Bio'}; %***MATCH WHOLE WORD    % August 1st (no enhance)
-%batch = {'B', 'O', 'P', 'R', 'T'};                                                        % August 2nd (no enhance)
-%batch = {'C', 'O', 'R', 'PF', 'Bi1', 'Bi2'};                                          % August 21 (yes enhance)
-%batch = {'O', 'PF', 'R', 'T'};                                                            % August 22 (yes enhance)
-%batch = {'B', 'C', 'O', 'R'};                                                              % Pooled old microscope (no enhance)
-
 %% Clem:
 %batch = {'Clem1-', 'Clem2-', 'Ctr'};
-
-%% Biotin:
-% batch = {'B1k-','B2k-', 'B10-', 'B25-', 'B50-', 'B100-', 'Ig- ', 'pf- '};     % August 8 (yes enhance) there is an Ig and a B501???
-% batch = {'B1k-','B2k-', 'B10-', 'B25-', 'B50-', 'B100-', ,'Ig- '};            % August 11 (yes enhance)
-% batch = {'B1k-','B2k-', 'B10-', 'B25-', 'B50-', 'B100-', 'C-', 'Ig- '};      % August 15 (yes enhance)
-% batch = {'B1k-','B2k-', 'B10-', 'B25-', 'B50-', 'B100-', 'pf-', 'T-'};           % August 16 (yes enhance)
-
-%batch = {'Bio1k-','Bio2k-', 'Bio10-', 'Bio25-', 'Bio50-', 'Bio100-', 'C'};      % #2 (extra biotin stuff)
-
-
-%% Old 2', 3' (ENHANCE DAPI FOR ALL)
-%batch = {'B', 'C', 'Igf', 'PF', '3''-11-','3''-22-','3''-55-','3-11-', '3-22-', '3-55-', 'Bio1k-','Bio2k-', 'Bio10-', 'Bio25-', 'Bio50-', 'Bio100-'};    % (MATCH_CASE) #2    % ALSO FULL Biotin stuff here???
-%batch = {'2-11-', '2-22-', '2-55-', '3-11-', '3-22-', '3-55-', 'B'};                           % April 6
-%batch = {'PF', 'C', 'B', 'T', '2-11-', '2-22-', '2-55-', '3-11-', '3-22-', '3-55-'};       % April 11  % SHARES CONTROLS
-%batch = {'2-11-', '2-22-', '2-55-', '3-11-', '3-22-', '3-55-', 'B', 'PF'};                   % New Folder
-
-%% **RUN AS DENSE, but with O4_clean_CB to 200 so don't undercount O4+ cells
-%batch = {'2-11-', '2-22-', '2-55-', '3-11-', '3-22-', '3-55-', 'B-', 'C-'};                   % August 18
-%batch = {'2-11-', '2-22-', '2-55-', '3-11-', '3-22-', '3-55-', 'T-', 'C-'};                    % August 25
-
-
-%% 3 days, 6 days and 2 weeks
-%batch = {'7B', '7C', '7211', '7222', '7255', '7311', '7322', '7355'};                    % August 25
-%batch = {'6B', '6C', '6211', '6222', '6255', '6311', '6322', '6355'};                    % August 25
-%batch = {'2WB', '2WN', '2W211', '2W222', '2W255', '2W311', '2W322', '2W355'};                    % August 25
-%batch = {'B', 'ctr', '211', '222', '255', '311', '322', '355'};                    % August 25
-
-
 
 %% MODIFIY THESE:
 % coreMin = 20;
@@ -216,7 +158,6 @@ batch = cell(2);   % intialize empty
 % sensitivity = 1;
 
 save_params = {'', '', '0.454', '10', '4', '0.9', '35', '25', '0', '0', '0', '0', '0'};
-
 
 %% Run Analysis
 while (moreTrials == 'Y')
@@ -332,7 +273,7 @@ while (moreTrials == 'Y')
         % decide if want to run as WHOLE image, or cut into squares
         if run_full_im == 'Y'
             size_red = size(redImage);
-            redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
+            %redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
             %square_cut_h = size_red(1);
             %square_cut_w = size_red(2);
         else
@@ -407,12 +348,7 @@ while (moreTrials == 'Y')
                     O4_im_ridges_adapted = tmp_im;
                     %I = adapthisteq(I);
                 end
-                
-                % (5) Green
-                %         MBP_im = im2double(rgb2gray(greenImage));
-                %         MBP_im_ridges = MBP_im;
-                %         [MBP_im, originalGreen] = imageAdjust(MBP_im, fillHoles, enhance);
-                
+
                 % Combine
                 if combineRG == 0
                     combined_im = O4_im;
@@ -475,9 +411,6 @@ while (moreTrials == 'Y')
                 end
                 wholeImage = cat(3, O4_original, zeros(size(O4_im)), tmpDAPI);
                 
-                %wholeImage = all_channels;
-                
-                
                 figure(5); imshow(wholeImage); title('Output Image'); hold on;
                 for Y = 1:length({s.objDAPI})
                     if ~isempty(s(Y).centerDAPI) % Print DAPI
@@ -498,10 +431,6 @@ while (moreTrials == 'Y')
                 [s] = small_del_O4(new_combined_im, minLength, squareDist, siz, s);
                 
                 %% (5) Line seg:
-                
-                
-               
-                
                 [fibers, fibers_idx, Lambda2R] = line_seg(O4_im_ridges_adapted, zeros(size(O4_im)), sigma, siz, sensitivity);
                 %         if nanoYN == 'Y' % only if there are fibers
                 %             fibers = imopen(fibers, strel('disk', 3));    % first erodes away some holes
@@ -522,20 +451,6 @@ while (moreTrials == 'Y')
                 % Horizontal lines are more dim
                 [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength);
                                 
-                %% MAYBE KEEP for LOW DENSITY???
-                %             if dense == 'N'
-                %                 for T = 1:length(locFibers)
-                %                     if  ~isempty(find(DAPI_bw(locFibers{T}), 1)) && allLengths{T} < minLength * 3
-                %                         mask(locFibers{T}) = 0;   % set the ENTIRE FIBER to be nothing
-                %
-                %                         fibers(locFibers{T}) = 0;
-                %                         fibers(mask_idx{T}) = 0;
-                %                         locFibers{T} = [];
-                %                         allLengths{T} = [];
-                %                     end
-                %                 end
-                %             end
-                %
                 locFibers =  locFibers(~cellfun('isempty',locFibers));   % delete from the list if not a line
                 allLengths = allLengths(~cellfun('isempty', allLengths));   % delete from the list if not a line
                 
@@ -586,34 +501,7 @@ while (moreTrials == 'Y')
                     saveFigs(saveDirName, cur_dir, name, fileNum, objDAPI, wrappedDAPIR);
                 end
                 
-                %         cd(saveDirName);
-                %         %For accuracy eval
-                %         filename = strcat(name, '-', num2str((fileNum + 5 - 1)/5), 'obj_DAPI');
-                %         save(filename, 'objDAPI');
-                %
-                %         filename = strcat(name, '-', num2str((fileNum + 5 - 1)/5), 'machine_DAPI');
-                %         save(filename, 'wrappedDAPIR');
-                %         cd(cur_dir);
-                
-                % For Green: %% maybe make new function?
-                %         isGreen = 1;
-                %         %%(1) Blobbify
-                %         [blobs, blobLines, lineImage, noColocFibers] = blobbify(MBP_im, wholeImage, lengthX, lengthY, nanoF_im, phaseThres, objDAPI, diameterFiber, fillHoles, mag, isGreen, minLength, originalGreen);    % turns into blobs
-                %
-                %         %%(2) Houghline analysis
-                %         [tmpLength, locFibersG, countedLines] = houghLineFind(lineImage, lengthX, lengthY, minLength, wholeImage);
-                %         allLengthFibersG = [allLengthFibersG tmpLength];
-                %
-                %         %%(3) Check blobs with DAPI peaks!!!
-                %         [numWrappedG, numSheathsG, wrappedDAPIG, numMBP] = wrappingAnalysis(blobs, blobLines, lineImage, noColocFibers, locFibersG, mat, objDAPI, lengthX, lengthY, tmpLength, minLength, isGreen, mag);
-                %         allNumSheathsG = [allNumSheathsG numSheathsG];
-                %         sumMBP = sumMBP + numMBP;
-                
-                % Setting variables
                 numCells = length(objDAPI);   % Don't comment out
-                %         numFibersG = length(allLengthFibersG);
-                %         wrappedG = numWrappedG;
-                %         unwrappedG = numCells - numWrappedG;
                 
                 numFibersG = 0;
                 wrappedG = 0;
