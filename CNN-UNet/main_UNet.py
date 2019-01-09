@@ -99,6 +99,7 @@ for i in range(len(list_folder)):
 
     #tf.reset_default_graph()
     
-    
+
+print("Analysis successfully completed")
     
     

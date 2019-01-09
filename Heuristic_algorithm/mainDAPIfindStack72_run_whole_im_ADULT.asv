@@ -31,7 +31,8 @@ opengl hardware;
 close all;
 
 cur_dir = pwd;
-addpath(strcat(cur_dir, '\Ridge_filter'))  % adds path to functions
+
+addpath('matlab/myfiles')  
 
 cd(cur_dir);
 
