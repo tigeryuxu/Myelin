@@ -34,9 +34,8 @@
   
    Then navigate the GUI
    * First thing that appears prompts you to enter some parameters for the analysis
-   *	Then navigate to and select the --- directory
-   *	Then navigate to and select the --- directory
-   *	Then navigate to and select the --- directory
+
+   ![Image of GUI](https://github.com/yxu233/Myelin/blob/master/Heuristic_algorithm/Images/GUI.PNG)
 
 
 ## Demo run:
