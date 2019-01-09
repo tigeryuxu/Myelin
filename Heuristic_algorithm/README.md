@@ -34,19 +34,19 @@
    * First thing that appears prompts you to enter some parameters for the analysis
    ![Image of GUI](https://github.com/yxu233/Myelin/blob/master/Heuristic_algorithm/Images/GUI.PNG)
    
-   * Name ==> leave empty
-   * Batch names ==> leave empty
-   * Scale ==> in um/px
-   * Diameter_F ==> diameter of cell body (10 - 25)
-   * Sigma ==> thickness of sheaths (5 - 10)
-   * Sensitivy ==> determines sensitivity to identifying sheaths (high 0 - 2.0 low)
-   * Min Length ==> minimum length of sheaths considered
-   * DAPI size ==> Minimum area (px^2) still considered DAPI nucleus
-   * Nano YN ==> colocalizes sheaths with nanofiber image (only select if have fiber)
-   * Combine RG ==> combines O4 + MBP (if have both channels)
-   * Verbose ==> for debugging, plots everything
-   * Calibrate ==> helps determine Sigma and Sensitivity
-   * Match Full Name ==> leave empty
+     * Name ==> leave empty
+     * Batch names ==> leave empty
+     * Scale ==> in um/px
+     * Diameter_F ==> diameter of cell body (10 - 25)
+     * Sigma ==> thickness of sheaths (5 - 10)
+     * Sensitivy ==> determines sensitivity to identifying sheaths (high 0 - 2.0 low)
+     * Min Length ==> minimum length of sheaths considered
+     * DAPI size ==> Minimum area (px^2) still considered DAPI nucleus
+     * Nano YN ==> colocalizes sheaths with nanofiber image (only select if have fiber)
+     * Combine RG ==> combines O4 + MBP (if have both channels)
+     * Verbose ==> for debugging, plots everything
+     * Calibrate ==> helps determine Sigma and Sensitivity
+     * Match Full Name ==> leave empty
   
    3. Option to "save parameters" that you entered so can load next time.
 
