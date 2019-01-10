@@ -91,10 +91,6 @@
   
   For examples of these files, check under "Results/Demo-data"
     
-
-## Training:
-
-
 ## Demo run:
   ### Run the "main_UNet.py" file by following the directions in "Usage" above
   * when prompted with GUI, select the following folders:
@@ -102,13 +98,18 @@
       * "Results"
       * "Demo-data"
     
-    
+## Training: 
+
 ## Troubleshooting:
-1.	If program does not run or computer freezes:
+1.  Recommended computational specifications:
+    * > 8GB RAM
+
+2.	If program does not run or computer freezes:
     * Check the size of your images. If they are larger than 5000 x 5000 pixels, you may need to:
         * move to a computer with RAM > 8 GB
         * crop your image and analyze half of it at a time
         
-2.  If you would like to use your own checkpoint from training:
+3.  If you would like to use your own checkpoint from training:
     * navigate to the folder “Checkpoints” and replace the files with your own checkpoint files.
+
 
