@@ -27,6 +27,14 @@ im_scale = my_gui.scale
 min_microns = my_gui.minLength
 sensitivity = my_gui.sensitivity
 
+# if nothing entered, switch to default
+if im_scale == None or min_microns == None or sensitivity == None:
+    im_scale = '0.69'
+    min_microns = '12'
+    sensitivity = '3'
+    print("Nothing entered, switching to default")    
+
+
 print("Parameters saved: " + "Scale: " + im_scale + " minLength: " + min_microns + " Sensitivity: " + sensitivity)
 
 im_scale = float(im_scale)
