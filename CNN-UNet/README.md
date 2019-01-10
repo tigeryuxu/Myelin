@@ -2,7 +2,7 @@
 
 
 ## Installation:
-### **Windows installation (~15 - 30 mins) **
+### Windows installation (~15 - 30 mins)
   #### 1.	Install Anaconda
   * Download here: [https://www.anaconda.com/download/](https://www.anaconda.com/download/)
   * Select "Python 3.7 version" and the corresponding "64-bit" or "32-bit" processor version
