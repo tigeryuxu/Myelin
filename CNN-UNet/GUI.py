@@ -13,11 +13,10 @@ class GUI:
         self.master = master
         master.title("Myelin Quantification - Parameters")
 
-        self.secret_number = random.randint(1, 100)
-        self.guess = 0
-        self.num_guesses = 0
-        
-        
+#        self.secret_number = random.randint(1, 100)
+#        self.guess = 0
+#        self.num_guesses = 0
+    
         self.scale = None
         self.minLength = None
         self.sensitivity = None
@@ -81,17 +80,17 @@ class GUI:
         return True
 
 
-    def reset(self):
-        self.entry.delete(0, END)
-        self.secret_number = random.randint(1, 100)
-        self.guess = 0
-        self.num_guesses = 0
-
-        self.message = "Guess a number from 1 to 100"
-        self.label_text.set(self.message)
-
-        self.guess_button.configure(state=NORMAL)
-        self.reset_button.configure(state=DISABLED)
+#    def reset(self):
+#        self.entry.delete(0, END)
+#        self.secret_number = random.randint(1, 100)
+#        self.guess = 0
+#        self.num_guesses = 0
+#
+#        self.message = "Guess a number from 1 to 100"
+#        self.label_text.set(self.message)
+#
+#        self.guess_button.configure(state=NORMAL)
+#        self.reset_button.configure(state=DISABLED)
         
         
     def close(self):

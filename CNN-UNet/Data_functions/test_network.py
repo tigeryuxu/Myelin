@@ -364,7 +364,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         input_save = np.copy(np.asarray(input_arr))
         
         new_fibers[new_fibers > 0] = 255
-        input_save[0:np.minimum(input_arr.size[0], new_fibers.shape[1]), 0:np.minimum(input_arr.size[1], new_fibers.shape[0]),1] = new_fibers[0:np.minimum(input_arr.size[0], new_fibers.shape[1]), 0:np.minimum(input_arr.size[1], new_fibers.shape[0])]
+        input_save[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1]),1] = new_fibers[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1])]
         plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tif', (input_save))
         # garbage collection
         
