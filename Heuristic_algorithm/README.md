@@ -28,7 +28,7 @@
    *	individual channels are either separated, or kept together in single .tiff (see option "load five" in GUI below)
    *	all files to be analyzed are located in a SINGLE folder (see "demo-data" folder for example)
 
-  ### 2.	Run main file (mainDAPIfindStack72_run_whole_im_ADULT.m)
+  ### 2.	Run main file (main_Heuristic-Myelin.m)
    1. Open the file in MATLAB and press the green "Run" button under the "Editor" tab
    2. Will first prompt you to select folder containing data to be analyzed
    3. Then navigate the GUI
