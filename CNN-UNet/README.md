@@ -2,7 +2,7 @@
 
 
 ## Installation:
-### **Windows installation (total time ~15 - 30 mins) **
+### **Windows installation (~15 - 30 mins) **
   #### 1.	Install Anaconda
   * Download here: [https://www.anaconda.com/download/](https://www.anaconda.com/download/)
   * Select "Python 3.7 version" and the corresponding "64-bit" or "32-bit" processor version
@@ -20,7 +20,7 @@
   Open command-terminal by typing “cmd” in windows search bar, then press "Enter"
   In command-terminal, type:
   
-        pip install numpy pillow scipy matplotlib natsort scikit-image
+        pip install natsort opencv-python
         
   Then
   
@@ -28,8 +28,9 @@
    
    For tensorflow installation, type one of two options in command-line:
 
-        pip install tensorflow-cpu  // if no GPU
-        pip install tensorflow-gpu  // if computer has GPU
+        pip install tensorflow
+        
+    * (Optional, for GPU compatibility...)uba
 
   #### 4.	Download files
   * Navigate to home-page of this repository again
