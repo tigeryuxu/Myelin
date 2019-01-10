@@ -297,13 +297,15 @@ set((handles.sensitivity), 'String', save_params{6});
 set((handles.minLength), 'String', save_params{7});
 set((handles.DAPIsize), 'String', save_params{8});
 
-set((handles.Nano_YN), 'value', double(save_params{9}));
+set((handles.checkbox12), 'value', double(save_params{9}));
 set((handles.Combine_RG), 'value', double(save_params{10}));
 set((handles.verbose), 'value', double(save_params{11}));
 set((handles.calib), 'value', double(save_params{12}));
 set((handles.match_full_name), 'value', double(save_params{13}));
 
-               
+set((handles.checkbox11), 'value', double(save_params{14}));
+set((handles.Nano_YN), 'value', double(save_params{15}));
+set((handles.checkbox13), 'value', double(save_params{16}));            
 
 
 % --- Executes on button press in save_p.
@@ -322,11 +324,15 @@ save_params{6}= str2num(get((handles.sensitivity), 'String'));
 save_params{7}= str2num(get((handles.minLength), 'String'));
 save_params{8} = str2num(get((handles.DAPIsize), 'String'));
 
-save_params{9} = get((handles.Nano_YN), 'value');
+save_params{9} = get((handles.checkbox12), 'value');
 save_params{10}= get((handles.Combine_RG), 'value');
 save_params{11} = get((handles.verbose), 'value');
 save_params{12} = get((handles.calib), 'value');
 save_params{13} = get((handles.match_full_name), 'value');
+
+save_params{14} = get((handles.checkbox11), 'value');
+save_params{15} = get((handles.Nano_YN), 'value');
+save_params{16} = get((handles.checkbox13), 'value');
 
 cur_dir = pwd;
 foldername = uigetdir();

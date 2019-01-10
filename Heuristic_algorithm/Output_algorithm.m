@@ -68,7 +68,7 @@ trialNames = natsort(trialNames);
 cd(foldername);
 numfids = length(trialNames);   %%% divided by 5 b/c 5 files per pack currently
 
-36, 44, 91, 93
+%36, 44, 91, 93
 % allNumSheathsR = [];
 % allLengthFibersR = [];
 % allMeanLPC = [];
@@ -80,7 +80,7 @@ height = 7200;  % 7729 x 5558
 %7345 x 6898
 
 %scale = 0.6904;
-scale = 0.454;
+%scale = 0.454;
 %minLengthSingle = 52;
 minLengthSingle = 0;
 minSingle = 12;   % in MICRONS
