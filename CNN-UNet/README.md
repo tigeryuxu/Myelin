@@ -76,18 +76,18 @@
 
   ### 3. Understanding the output/results:
   Under the directory you selected to save all files, you should find:
-    * all_fibers_image_name-of-file.pkl   --- contains sheaths identified in original matrix form
-    * all_fibers_image_name-of-file.png   --- sheaths identified with cell labels as PNG
-    * candidates0_name-of-file.tif        --- candidates selected for analysis
-    * final_image_name-of-file.tif        --- sheaths overlaid ontop of original input image
-    * masked_out_dil_name-of-file.csv     --- Output data
-        * Rows correspond to:
-            1. lengths of individual sheaths (in pixels, each excel array is a single sheath)
-            2. number of ensheathed cells identified
-            3. number of sheaths per cell (each excel array is a single cell)
-            4. mean sheath length per cell (each excel array is a single cell)
-            5. number of candidate cells analyzed
-            6. number of total cell nuclei identified
+  * all_fibers_image_name-of-file.pkl   --- contains sheaths identified in original matrix form
+  * all_fibers_image_name-of-file.png   --- sheaths identified with cell labels as PNG
+  * candidates0_name-of-file.tif        --- candidates selected for analysis
+  * final_image_name-of-file.tif        --- sheaths overlaid ontop of original input image
+  * masked_out_dil_name-of-file.csv     --- Output data
+    * Rows correspond to:
+       1. lengths of individual sheaths (in pixels, each excel array is a single sheath)
+       2. number of ensheathed cells identified
+       3. number of sheaths per cell (each excel array is a single cell)
+       4. mean sheath length per cell (each excel array is a single cell)
+       5. number of candidate cells analyzed
+       6. number of total cell nuclei identified
   
   For examples of these files, check under "Results/Demo-data"
     
