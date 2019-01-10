@@ -2,23 +2,26 @@
 
 
 ## Installation:
-### **Windows installation**
+### **Windows installation (total time ~15 - 30 mins) **
   #### 1.	Install Anaconda
   * Download here: [https://www.anaconda.com/download/](https://www.anaconda.com/download/)
-  
   * Select "Python 3.7 version" and the corresponding "64-bit" or "32-bit" processor version
+  * Follow the instructions
      
   #### 2. Install Python
   * In Windows Start Menu, search for "Anaconda Prompt" and select it
   * In the black command window that pops up, type:
   
         conda install python=3.6
+        
+  * enter "y" if prompted
        
   #### 3.	Install packages
   Open command-terminal by typing “cmd” in windows search bar, then press "Enter"
   In command-terminal, type:
   
         pip install numpy pillow scipy matplotlib natsort scikit-image
+        
   Then
   
         conda install -c https://conda.anaconda.org/conda-forge mahotas 
