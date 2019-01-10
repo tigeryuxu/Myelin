@@ -17,7 +17,6 @@ function [cb, no_dilate_cb, s] = cell_body_filt(im, diameter, siz, coreMin, s)
 %
 %         cb_idx == cell array of idx of cell bodies
 
-
 clean_CB = coreMin;
 
 

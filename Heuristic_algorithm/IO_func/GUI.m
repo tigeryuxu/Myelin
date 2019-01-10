@@ -1,6 +1,4 @@
-
 function  varargout = GUI(varargin)
-
 % GUI MATLAB code for GUI.fig
 %      GUI, by itself, creates a new GUI or raises the existing
 %      singleton*.
@@ -24,7 +22,7 @@ function  varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 07-Sep-2017 22:09:32
+% Last Modified by GUIDE v2.5 10-Jan-2019 11:10:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -337,9 +335,6 @@ save('save_params.mat', 'save_params');
 cd(cur_dir);
 
 
-
-
-
 % --- Executes on button press in match_full_name.
 function match_full_name_Callback(hObject, eventdata, handles)
 % hObject    handle to match_full_name (see GCBO)
@@ -535,3 +530,30 @@ if isequal(get (hObject, 'waitstatus'), 'waiting')
 else
     delete(hObject);
 end
+
+
+% --- Executes on button press in checkbox11.
+function checkbox11_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox11
+
+
+% --- Executes on button press in checkbox12.
+function checkbox12_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox12
+
+
+% --- Executes on button press in checkbox13.
+function checkbox13_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox13

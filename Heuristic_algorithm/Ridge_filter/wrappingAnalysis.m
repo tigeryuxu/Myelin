@@ -1,4 +1,4 @@
-function [locFibers, allLengths, s] = wrappingAnalysis(fibers_sub_cb, locFibers, allLengths, siz, minLength, isGreen, dense, s)
+function [locFibers, allLengths, s] = wrappingAnalysis(fibers_sub_cb, locFibers, allLengths, siz, minLength, isGreen, s)
 
 %% NEED ALTERNATIVE FOR BEFORE VERSION 2017
 
@@ -114,8 +114,8 @@ if ~isempty(ordered)  % if there are some cells at least
             end
         end
         
-        %% (4) if something only has 1 sheath, then the sheath has to be TWICE AS LONG as usual
-        if ~isempty(whichFibers{1}) && dense == 'N'
+        %% (4) if something only has 1 sheath, then the sheath has to be TWICE AS LONG as minLength
+        if ~isempty(whichFibers{1})
             singleFiberLength = allLengths{whichFibers{1}};
             if numSheaths == 1 && (singleFiberLength < minLength + minLength * multiplierSingleLine)
                 boolFiber = 0;  % or else it is also not counted as wrapped

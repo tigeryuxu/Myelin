@@ -19,103 +19,26 @@ allTrialS = cell(0); allTrialMeanFLC = cell(0);
 allSumO4 = []; allSumMBP = [];
 
 foldername = uigetdir();   % get directory
-allChoices = choosedialog2();   %% read in choices  %%% SWITCH TO FROM GUI.m
-
 moreTrials = 'Y';
 trialNum = 1;
 
 saveName = strcat(foldername, '_');
 saveDirName = create_dir(cur_dir, saveName);   % creates directory
-%saveDirName = 'HA756-393_Result_8-right-numbering'
 mkdir(saveDirName);
 
-%% TO ADD as GUI prompts:
-%square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
-%square_cut_w = 7200;
 
-square_cut_h = 1460; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
-square_cut_w = 1936;
-
-human_OLs = 'N';
-enhance_RED = 'N'; % ==> set as 'Y' for other human OL trials!!!
-run_full_im = 'Y'; % ==> decide if want to run the entire plate as is!
-
-remove_nets = 'Y';
-
-mag = 'N';
-dense = 'N';              % for different types of images
-
-elim_O4 = 'Y';    % CHANGES SMALL O4 size from 200 ==> 1000 pixels
-load_five = 5;     % DECIDE IF WANT TO LOAD 5 or 1 image
-
-if human_OLs == 'Y'
-    mag = 'X';
-end
-    
-DAPImetric = 0.3;   % Lower b/c some R not picked up due to shape...
-percentDilate = 2;   % for cores
-calibrate = 1;
-enhance = 'Y';   % CLEM ==> doesn't need this
-if mag == 'Y'  && dense == 'Y'            %%%%%%%%%%%%% DENSE
-    adapt_his = 0;  % don't enhance fibers
-    
-    squareDist = 200;
-    coreMin = 200;         % for cleaning CBs
-    %near_join = 200;
-
-    hor_factor = 1;
-    %%
-    near_join = 50;       %%%%%%%%%%SWITCHED TO 10
-
-    fillHoles = 150;
-    
-elseif mag == 'Y' && dense == 'N'        %%%%%%%%%%%%% NOT DENSE
-    % minLength exclusion
-    % adapthisteq
-    % DAPI_exclusion
-    adapt_his = 1;
-    
-    squareDist = 200;
-    coreMin = 200;         % for cleaning CBs
-    near_join = 50;
-    fillHoles = 150;
-    hor_factor = 2;
-    
-elseif  mag == 'N' && dense == 'N'           %%%%%%%%%%%% OLD IMAGES
-    squareDist = 50;
-    coreMin = 0;
-    near_join = 50;
-    fillHoles = 25;
-    adapt_his = 1;
-    
-    hor_factor = 2;
-    
-elseif  human_OLs == 'Y'           %%%%%%%%%%%% OLD IMAGES
-    squareDist = 150;
-    coreMin = 0;
-    near_join = 100;
-    fillHoles = 1000;
-    adapt_his = 0;
-    
-    hor_factor = 2;
-    
-end
-%%
+%% Loads up GUI
 % '10', '35', 'N', '25', '25', 'N', 'N', '0.25', '0.227', '0.8', '4', 'N', 'N', '75', 'N'
 % '20', '55', 'N', '150', '300', 'N', 'Y', '0.6', '0.227', '0.9', '8', 'N', 'N', '200', 'N'
 save_params = {'', '', '0.227', '20', '8', '0.9', '55', '300', '0', '0', '0', '0', '0'};
-
 save_params = {'', '', '0.454', '10', '4', '0.9', '35', '25', '0', '0', '0', '0', '0'};
 
-
 human_OL_save_params = {'', '', '0.454', '10', '6', '1.5', '35', '25', '0', '0', '0', '0', '0'};
-
 rat_OL_AUTOMATED_params = {'', '', '0.454', '10', '6', '0.5', '35', '25', '0', '0', '0', '0', '0'};
-
-
 
 [output] = GUI;
 save_params = cell(0);
+calibrate = 1;
 
 while (calibrate)
     name = get((output.name), 'String');
@@ -127,20 +50,58 @@ while (calibrate)
     minLength = str2double(get((output.minLength), 'String'));
     DAPIsize = str2double(get((output.DAPIsize), 'String'));
     
-    nanoYN = get((output.Nano_YN), 'value');
+    nanoYN = get((output.checkbox12), 'value');
     combineRG = get((output.Combine_RG), 'value');
     verbose = get((output.verbose), 'value');
     calibrate = get((output.calib), 'value');
     match_words = get((output.match_full_name), 'value');
+    bool_load_five = get((output.checkbox11), 'value');
+    adapt_his = get((output.Nano_YN), 'value');
+    divide_im = get((output.checkbox13), 'value');
     
     save_params = {name, batch, scale, diameterFiber, sigma, sensitivity, minLength, DAPIsize, nanoYN...
-        ,verbose, calibrate, match_words};
+        ,verbose, calibrate, match_words, bool_load_five, adapt_his, divide_im};
     
     if calibrate
         sensitivity = calib(diameterFiber, minLength, name, fillHoles, DAPIsize, calibrate, mag, DAPImetric, scale, sensitivity, sigma, foldername, cur_dir);
         defaultans{10} = num2str(sensitivity);
     end
 end
+
+%% TO ADD as GUI prompts:
+%square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
+%square_cut_w = 7200;
+
+square_cut_h = 1460; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
+square_cut_w = 1936;
+
+enhance_RED = 'N'; % ==> set as 'Y' for other human OL trials!!!
+remove_nets = 'Y'; % background subtraction for O4
+
+mag = 'N';
+enhance = 'Y';   % (Background subtraction for DAPI + O4 images) CLEM ==> doesn't need this
+
+%% PRESET and scaled
+DAPImetric = 0.3;   % Lower b/c some R not picked up due to shape...
+percentDilate = 2;   % for cores
+hor_factor = 2;   
+near_join = round(10 / (scale));  % in um
+fillHoles = round(8 / (scale * scale));  % in um^2
+squareDist = round(50 / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
+coreMin = 0;
+elim_O4 = round(20 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
+
+%% ADD TO MENU:
+ if bool_load_five == 1
+     load_five = 5;
+ else
+     load_five = 1;
+ end
+ 
+if load_five == 5
+    allChoices = choosedialog2();   %% read in choices  %%% SWITCH TO FROM GUI.m
+end
+    
 
 batch_skip = 'N';
 batch_run = 'N';
@@ -149,13 +110,6 @@ batch = cell(2);   % intialize empty
 
 %% Clem:
 %batch = {'Clem1-', 'Clem2-', 'Ctr'};
-
-%% MODIFIY THESE:
-% coreMin = 20;
-% diameterFiber = 10;
-% sigma = 6;
-% minLength = 20;
-% sensitivity = 1;
 
 save_params = {'', '', '0.454', '10', '4', '0.9', '35', '25', '0', '0', '0', '0', '0'};
 
@@ -271,7 +225,7 @@ while (moreTrials == 'Y')
         
         
         % decide if want to run as WHOLE image, or cut into squares
-        if run_full_im == 'Y'
+        if divide_im == 0
             size_red = size(redImage);
             %redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
             %square_cut_h = size_red(1);
@@ -456,13 +410,13 @@ while (moreTrials == 'Y')
                 
                 %% (8) Check CBs to see if wrapped or not
                 fibers_sub_cb = bwmorph(cb, 'thicken', 3);
-                [locFibers, allLengths, s] = wrappingAnalysis(fibers_sub_cb, locFibers, allLengths, siz, minLength, isGreen, dense, s);
+                [locFibers, allLengths, s] = wrappingAnalysis(fibers_sub_cb, locFibers, allLengths, siz, minLength, isGreen, s);
                 
                 %% (9) Check remaining fibers with fibers_sub_cb (real), to see if wrapped or not
                 % COUNT AGAIN, with a FULL fibers_sub_cb, to get all the fibers NOT directly connected to stuff
                 % and use only the REMAINING fibers (i.e. fibers(locFibers) = 0) ==> set to zero the already found ones
                 fibers_sub_cb = imbinarize(combined_im - cb);  % THE REAL FIBERS_sub_cb
-                [sub_locFibers, allLengths, s] = wrappingAnalysis(fibers_sub_cb, locFibers, allLengths, siz, minLength, isGreen, dense, s);
+                [sub_locFibers, allLengths, s] = wrappingAnalysis(fibers_sub_cb, locFibers, allLengths, siz, minLength, isGreen, s);
                 
                 locFibers = sub_locFibers; % THESE ARE THE FIBERS STILL UN-ASSOCIATED
                 

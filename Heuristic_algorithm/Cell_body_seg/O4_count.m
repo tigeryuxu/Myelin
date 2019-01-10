@@ -1,11 +1,11 @@
-function [cores,  cb,  cb_O4, s] = O4_count(O4_im, cores, cb, siz, diameterFiber, density, s)
+function [cores,  cb,  cb_O4, s] = O4_count(O4_im, cores, cb, siz, diameterFiber, clean_s, s)
 
-%% ***USER PICKED, maybe different for low vs. high density images???
-if density == 'N'
-    clean_s = 200; % for LOW DENSITY
-elseif density == 'Y'
-    clean_s = 1000; % for HIGH DENSITY???
-end
+% %% ***USER PICKED, maybe different for low vs. high density images???
+% if density == 'N'
+%     clean_s = 200; % for LOW DENSITY
+% elseif density == 'Y'
+%     clean_s = 1000; % for HIGH DENSITY???
+% end
 
 %% Pre-process:
 % by closing image (i.e. try to associate nearby things)
