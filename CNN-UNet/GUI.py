@@ -14,7 +14,7 @@ class GUI:
         master.title("Myelin Quantification - Parameters")
 
         self.secret_number = random.randint(1, 100)
-        self.guess = None
+        self.guess = 0
         self.num_guesses = 0
         
         
@@ -28,26 +28,26 @@ class GUI:
 
 
         # ROW 1:        
-        self.label1, self.entry1 = self.new_param(master, "Scale (um/px): ")
+        self.label1, self.entry1 = self.new_param(master, "Scale (um/px, default 0.69): ")
         self.label1.grid(row=1, column=0, columnspan=1, sticky=W)
         self.entry1.grid(row=1, column=1, columnspan=1, sticky=W)
         
         # ROW 2:
-        self.label2, self.entry2 = self.new_param(master, "minLength: ")
+        self.label2, self.entry2 = self.new_param(master, "minLength (um, default 12): ")
         self.label2.grid(row=2, column=0, columnspan=1, sticky=W)
         self.entry2.grid(row=2, column=1, columnspan=1, sticky=W)        
 
         # ROW 3:
-        self.label3, self.entry3 = self.new_param(master, "Sensitivity (2 - 4): ")
+        self.label3, self.entry3 = self.new_param(master, "Sensitivity (range 2 - 4, default 3): ")
         self.label3.grid(row=3, column=0, columnspan=1, sticky=W)
         self.entry3.grid(row=3, column=1, columnspan=1, sticky=W)        
         
                 
-        self.guess_button = Button(master, text="Ok", command=self.guess_number)
-        self.reset_button = Button(master, text="Reset", command=self.reset, state=DISABLED)       
+        self.guess_button = Button(master, text="Ok", command=self.close)
+        #self.reset_button = Button(master, text="Reset", command=self.reset, state=DISABLED)       
         
-        self.guess_button.grid(row=10, column=0)
-        self.reset_button.grid(row=10, column=1)
+        self.guess_button.grid(row=10, column=0, columnspan=2)
+        #self.reset_button.grid(row=10, column=1)
 
     def new_param(self, master, new_text):
         
@@ -67,18 +67,34 @@ class GUI:
             self.guess = None
             return True
 
-        try:
-            """ SEE IF TEXT ENTERED IS INT"""
-            guess = int(new_text)
-            if 1 <= guess <= 100:
-                self.guess = guess
-                return True
-            else:
-                return False
-        except ValueError:
-            return False
+#        try:
+#            """ SEE IF TEXT ENTERED IS INT"""
+#            guess = int(new_text)
+#            if 1 <= guess <= 100:
+#                self.guess = guess
+#                return True
+#            else:
+#                return False
+#        except ValueError:
+#            return False
 
-    def guess_number(self):
+        return True
+
+
+    def reset(self):
+        self.entry.delete(0, END)
+        self.secret_number = random.randint(1, 100)
+        self.guess = 0
+        self.num_guesses = 0
+
+        self.message = "Guess a number from 1 to 100"
+        self.label_text.set(self.message)
+
+        self.guess_button.configure(state=NORMAL)
+        self.reset_button.configure(state=DISABLED)
+        
+        
+    def close(self):
         self.num_guesses += 1
 
         if self.guess is None:
@@ -96,8 +112,8 @@ class GUI:
             """ SAVE PARAMETERS??? Then do pop-out to give message"""       
             try:
                 """ SEE IF TEXT ENTERED ARE INTEGERS"""
-                if 1 <= int(self.entry.get()) <= 100 and 1 <= int(self.entry2.get()) <= 100 and 1 <= int(self.entry3.get()) <= 100:
-                    self.scale = self.entry.get()
+                if 0 <= float(self.entry1.get()) <= 100 and 0 <= float(self.entry2.get()) <= 100 and 0 <= float(self.entry3.get()) <= 100:
+                    self.scale = self.entry1.get()
                     self.minLength = self.entry2.get()
                     self.sensitivity = self.entry3.get()
                    
@@ -111,24 +127,12 @@ class GUI:
 
         self.label_text.set(self.message)
 
-        print("Parameters saved: " + "Scale: " + self.scale)
-
-    def reset(self):
-        self.entry.delete(0, END)
-        self.secret_number = random.randint(1, 100)
-        self.guess = 0
-        self.num_guesses = 0
-
-        self.message = "Guess a number from 1 to 100"
-        self.label_text.set(self.message)
-
-        self.guess_button.configure(state=NORMAL)
-        self.reset_button.configure(state=DISABLED)
+                
+        self.master.destroy()
         
     
-root = Tk()
-my_gui = GUI(root)
-root.mainloop()
-
-
+#root = Tk()
+#my_gui = GUI(root)
+#root.mainloop()
+#root.destroy
 #return my_gui.scale, my_gui.minLength, my_gui.sensitivity

@@ -18,11 +18,25 @@ import os
     
 debug = 0
 
+""" LOAD UP GUI """
+root = Tk()
+my_gui = GUI(root)
+root.mainloop()
 
-min_microns = 12
-im_scale = 0.6904  #0.519, 0.6904, 0.35
+im_scale = my_gui.scale
+min_microns = my_gui.minLength
+sensitivity = my_gui.sensitivity
+
+print("Parameters saved: " + "Scale: " + im_scale + " minLength: " + min_microns + " Sensitivity: " + sensitivity)
+
+im_scale = float(im_scale)
+min_microns = float(min_microns)
+sensitivity = float(sensitivity)
+
+#min_microns = 12
+#im_scale = 0.6904  #0.519, 0.6904, 0.35
 minLength = min_microns / im_scale
-minSingle = (minLength * 3) / im_scale
+minSingle = (minLength * sensitivity) / im_scale
 minLengthDuring = 4/im_scale
 radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
 
@@ -40,16 +54,6 @@ if rotate:
     width_x = 1024
 jacc_test = 0
 
-
-
-""" LOAD UP GUI """
-#root = Tk()
-#my_gui = GUI(root)
-#root.mainloop()
-#
-#im_scale = my_gui.scale
-#min_microns = my_gui.minLength
-#sensitvity = my_gui.sensitivity
 
 """ Best so far is 980000 for rotated """
 checkpoint = '301000'
