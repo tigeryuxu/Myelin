@@ -30,7 +30,7 @@
 
         pip install tensorflow
         
-    * (Optional, for GPU compatibility...)uba
+   * (Optional, for GPU compatibility...)
 
   #### 4.	Download files
   * Navigate to home-page of this repository again
