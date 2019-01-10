@@ -2,8 +2,6 @@
 """
 Created on Tue Jan 30 22:53:34 2018
 
-Initializes cost function and weights
-
 @author: Tiger
 """
 
