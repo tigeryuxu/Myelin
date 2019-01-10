@@ -26,12 +26,10 @@
   
         conda install -c https://conda.anaconda.org/conda-forge mahotas 
    
-   For tensorflow installation, type one of two options in command-line:
+   For tensorflow installation:
 
         pip install tensorflow
-        
-   * (Optional, for GPU compatibility...)
-
+       
   #### 4.	Download files
   * Navigate to home-page of this repository again
   * On the right-hand side, click the green button to "Clone or download ZIP file" of repo
@@ -46,22 +44,24 @@
 
   #### 2.	Install packages
 
-      pip install numpy pillow scipy matplotlib natsort scikit-image
+      pip install numpy pillow scipy matplotlib natsort scikit-image opencv-python mahotas
       
-  For tensorflow installation, type one of two options in command-line:
-
-      pip install tensorflow-cpu  // if no GPU
-      pip install tensorflow-gpu  // if computer has GPU
+  For tensorflow installation:
+  
+      pip install tensorflow
 
   #### 3.	Download files
-  * Clone or download git repo
-  * extract all files
+  * Navigate to home-page of this repository again
+  * On the right-hand side, click the green button to "Clone or download ZIP file" of repo
+  * Download ZIP and extract all files
+  * Save anywhere on your computer
+  
 
 ## Usage:
   ### 1.	Data format
    * please ensure all images are “.tiff” format
    *	channels are NOT separated
-   *	all files to be analyzed are located in a SINGLE folder (see example below)
+   *	all files to be analyzed are located in a SINGLE folder (see "Demo-data" folder for example)
 
   ### 2.	Run main file
    In command console type:
@@ -76,9 +76,21 @@
 
   ### 3. Understanding the output/results:
   Under the directory you selected to save all files, you should find:
-    * ...
-    * ...
-    * ...
+    * all_fibers_image_name-of-file.pkl   --- contains sheaths identified in original matrix form
+    * all_fibers_image_name-of-file.png   --- sheaths identified with cell labels as PNG
+    * candidates0_name-of-file.tif        --- candidates selected for analysis
+    * final_image_name-of-file.tif        --- sheaths overlaid ontop of original input image
+    * masked_out_dil_name-of-file.csv     --- Output data
+        * Rows correspond to:
+            1. lengths of individual sheaths (in pixels, each excel array is a single sheath)
+            2. number of ensheathed cells identified
+            3. number of sheaths per cell (each excel array is a single cell)
+            4. mean sheath length per cell (each excel array is a single cell)
+            5. number of candidate cells analyzed
+            6. number of total cell nuclei identified
+  
+  For examples of these files, check under "Results/Demo-data"
+    
 
 ## Training:
 
