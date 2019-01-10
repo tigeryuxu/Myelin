@@ -4,7 +4,7 @@
 ## Installation:
 ### **Windows installation**
   #### 1.	Install Anaconda
-  * Download here: <a href="https://www.anaconda.com/download/" target="_blank">https://www.anaconda.com/download/</a>
+  * Download here: [https://www.anaconda.com/download/](https://www.anaconda.com/download/)
   
   * Select "Python 3.7 version" and the corresponding "64-bit" or "32-bit" processor version
      
@@ -20,6 +20,7 @@
   
         pip install numpy pillow scipy matplotlib natsort scikit-image
   Then
+  
         conda install -c https://conda.anaconda.org/conda-forge mahotas 
    
    For tensorflow installation, type one of two options in command-line:
