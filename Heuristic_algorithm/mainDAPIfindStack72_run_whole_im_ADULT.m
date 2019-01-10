@@ -1,3 +1,7 @@
+%% Need to add:
+% 1) Save the "load_five" params ect...
+% 2) Get rid of the batching
+
 
 %% Main function to run heuristic algorithm
 opengl hardware;
@@ -47,8 +51,8 @@ while (calibrate)
     diameterFiber = str2double(get((output.diameter_F), 'String'));
     sigma = str2double(get((output.sigma), 'String'));
     sensitivity = str2double(get((output.sensitivity), 'String'));
-    minLength = str2double(get((output.minLength), 'String'));
-    DAPIsize = str2double(get((output.DAPIsize), 'String'));
+    minLength = str2double(get((output.minLength), 'String'))  / scale;
+    DAPIsize = str2double(get((output.DAPIsize), 'String')) / (scale * scale);
     
     nanoYN = get((output.checkbox12), 'value');
     combineRG = get((output.Combine_RG), 'value');
@@ -112,6 +116,9 @@ batch = cell(2);   % intialize empty
 %batch = {'Clem1-', 'Clem2-', 'Ctr'};
 
 save_params = {'', '', '0.454', '10', '4', '0.9', '35', '25', '0', '0', '0', '0', '0'};
+
+save_params = {'', '', '0.227', '20', '8', '0.9', '12', '8', '0', '0', '0', '0', '0'};
+
 
 %% Run Analysis
 while (moreTrials == 'Y')
@@ -315,7 +322,7 @@ while (moreTrials == 'Y')
                 siz = size(combined_im);
                 
                 %% (1) Find peaks for DAPI
-                DAPIsize = 10;
+                %DAPIsize = 10;
                 [mat, objDAPI, DAPI_bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance, siz);  % function
                 
                 if length(objDAPI) > 8000
