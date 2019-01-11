@@ -45,11 +45,16 @@
   #### 2.	Install packages
   Open a command-terminal and type:
   
-      pip install numpy pillow scipy matplotlib natsort scikit-image opencv-python mahotas
+      pip3 install numpy pillow scipy matplotlib natsort scikit-image opencv-python tensorflow
       
-  For tensorflow installation:
+  To install the final package, mahotas, you will need to first install xcode:
   
-      pip install tensorflow
+      xcode-select --install
+  
+  A pop-up will jump out after the command above. Follow the instructions to install. Then type:
+  
+      pip3 install mahotas
+      
 
   #### 3.	Download files
   * Navigate to home-page of this repository again
@@ -65,11 +70,17 @@
    *	all files to be analyzed are located in a SINGLE folder (see "Demo-data" folder for example)
 
   ### 2.	Run main file
-   In command console type:
+  1a. For Anaconda (Windows):
+      * Search for "Spyder" in Windows search bar
+      * Open the file "main_UNet.py" using Spyder
+      * run by pressing the green run button
+      
+  1b. For Mac (command console):
+      * In command console type:
            
-           python main_UNet.py
+           python3 main_UNet.py
   
-   Then navigate the GUI
+  2. Then navigate the GUI
    * First thing that appears prompts you to enter some parameters for the analysis
    *	Then navigate to and select the directory containing the checkpoint file ("Checkpoint") directory
    *	Then navigate to and select the directory you wish to save the output
