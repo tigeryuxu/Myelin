@@ -17,8 +17,7 @@
   * enter "y" if prompted
        
   #### 3.	Install packages
-  Open command-terminal by typing “cmd” in windows search bar, then press "Enter"
-  In command-terminal, type:
+  In Anaconda command-terminal, type:
   
         pip install natsort opencv-python
         
