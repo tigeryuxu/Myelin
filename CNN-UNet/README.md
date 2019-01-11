@@ -40,9 +40,11 @@
 
   #### 1. Check to update python version
   * ensure version 3.6
+  * if not, find a downloadable version here: [https://www.python.org/downloads/release/python-368/](https://www.python.org/downloads/release/python-368/)
 
   #### 2.	Install packages
-
+  Open a command-terminal and type:
+  
       pip install numpy pillow scipy matplotlib natsort scikit-image opencv-python mahotas
       
   For tensorflow installation:
