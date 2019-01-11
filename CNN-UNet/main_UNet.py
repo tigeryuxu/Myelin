@@ -4,13 +4,13 @@ Created on Tue Jul 31 10:11:38 2018
 @author: Neuroimmunology Unit
 """
 
-from sys import path
+#from sys import path
 from os import getcwd
 cur_dir = getcwd()
-path.append(cur_dir + "\\Data_functions") #Yes, i'm on windows
+#path.append(cur_dir + "\\Data_functions") #Yes, i'm on windows
 
-from Data_functions import *
-import test_network as UNet
+#from Data_functions import *
+import Data_functions.test_network as UNet
 from GUI import *
 
 import tkinter

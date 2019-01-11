@@ -6,15 +6,17 @@ Created on Tue Jan 30 22:53:34 2018
 """
 
 import tensorflow as tf
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib import *
 import numpy as np
 import scipy
 import math
 
-from plot_functions import *
-from data_functions import *
-from post_process_functions import *
-from UNet import *
+from Data_functions.plot_functions import *
+from Data_functions.data_functions import *
+from Data_functions.post_process_functions import *
+from Data_functions.UNet import *
 
 
 

@@ -10,13 +10,15 @@ import numpy as np
 from PIL import Image
 from os import listdir
 from os.path import isfile, join
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from skimage import measure
 
-from plot_functions import *
-from data_functions import *
-from post_process_functions import *
-from UNet import *
+from Data_functions.plot_functions import *
+from Data_functions.data_functions import *
+from Data_functions.post_process_functions import *
+from Data_functions.UNet import *
 
 import cv2
 from scipy import ndimage as ndi

@@ -21,10 +21,10 @@ import scipy.io as sio
 import zipfile
 import bz2
 
-from plot_functions import *
-from data_functions import *
-from post_process_functions import *
-from UNet import *
+from Data_functions.plot_functions import *
+from Data_functions.data_functions import *
+from Data_functions.post_process_functions import *
+from Data_functions.UNet import *
 
 
 

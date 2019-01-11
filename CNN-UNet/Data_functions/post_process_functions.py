@@ -8,6 +8,8 @@ Created on Sun Dec 31 16:25:15 2017
 from skimage.morphology import skeletonize
 from skimage.morphology import *
 from skimage import data
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from skimage.util import invert
 import mahotas as mah
@@ -18,9 +20,9 @@ import csv
 from PIL import Image
 import pickle as pickle
 
-from data_functions import *
-from plot_functions import *
-from UNet import *
+from Data_functions.data_functions import *
+from Data_functions.plot_functions import *
+from Data_functions.UNet import *
 
 
 """ defines a cell object for saving output """

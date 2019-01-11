@@ -10,6 +10,8 @@ import numpy as np
 from PIL import Image
 from os import listdir
 from os.path import isfile, join
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from natsort import natsort_keygen, ns
 from skimage import measure
@@ -17,12 +19,12 @@ import pickle
 import os
 from skimage.filters import threshold_mean
 
-from plot_functions import *
-from data_functions import *
-from post_process_functions import *
-from UNet import *
+from Data_functions.plot_functions import *
+from Data_functions.data_functions import *
+from Data_functions.post_process_functions import *
+from Data_functions.UNet import *
 from random import randint
-from pre_processing import *
+from Data_functions.pre_processing import *
 
 from skimage import data, exposure, img_as_float
 
@@ -146,7 +148,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             length = size[1]
                 
             while True:
-                print('bad crop')
+                print('Adapt crop')
                 c_width = int(coords[1]) - int(coords[0])
                 c_length = int(coords[3]) - int(coords[2])
                 if c_width > width:      coords[1] = coords[1] - 1
