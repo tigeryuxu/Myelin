@@ -8,6 +8,8 @@ from sys import path
 from os import getcwd
 cur_dir = getcwd()
 path.append(cur_dir + "\\Data_functions") #Yes, i'm on windows
+
+from Data_functions import *
 import test_network as UNet
 from GUI import *
 
