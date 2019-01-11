@@ -70,18 +70,20 @@
    *	all files to be analyzed are located in a SINGLE folder (see "Demo-data" folder for example)
 
   ### 2.	Run main file
-  1a. For Anaconda (Windows):
+  1. (a) For Anaconda (Windows):
+  
       * Search for "Spyder" in Windows search bar
       * Open the file "main_UNet.py" using Spyder
       * run by pressing the green run button
       
-  1b. For Mac (command console):
+  1. (b) For Mac (command console):
+  
       * In command console type:
            
            python3 main_UNet.py
   
   2. Then navigate the GUI
-   * First thing that appears prompts you to enter some parameters for the analysis
+   *  First thing that appears prompts you to enter some parameters for the analysis
    *	Then navigate to and select the directory containing the checkpoint file ("Checkpoint") directory
    *	Then navigate to and select the directory you wish to save the output
    *	Then navigate to and select the directory that contains the ".tiff" images to be analyzed
