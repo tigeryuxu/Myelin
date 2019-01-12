@@ -1,4 +1,4 @@
-function [mat, objDAPI, bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance, siz)
+function [mat, objDAPI, bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance, DAPI_bb_size)
 
 % Cell DAPI nuclei counter by performing standard binarization and watershed operations:
 % - removes high intensity pixels (> 0.15) to get better binarization
@@ -26,7 +26,7 @@ I = intensityValueDAPI;
 
 %% Subtract background:
 if enhance == 'Y'
-    background = imopen(I,strel('disk',25));
+    background = imopen(I,strel('disk',DAPI_bb_size));
     I2 = I - background;
     I = I2;
     I = adapthisteq(I);
@@ -40,7 +40,7 @@ tmpArt = bwconncomp(tmpArt);
 idxArt = [];
 i = 1;
 while i < length(tmpArt.PixelIdxList)
-    if length(tmpArt.PixelIdxList{i}) > 15000
+    if length(tmpArt.PixelIdxList{i}) > 150000
         idxArt = [idxArt; tmpArt.PixelIdxList{i}];
         I(idxArt) = 0;
         tmpArt = imbinarize(I);
@@ -49,6 +49,7 @@ while i < length(tmpArt.PixelIdxList)
         tmpTmp = tmpArt;
         tmpArt = bwconncomp(tmpArt);
         i = 1;
+        
     else
         i = i+1;
     end
@@ -113,7 +114,7 @@ for k = 1:length(B)
     area = stats(k).Area;                                       % obtain the area calculation corresponding to label 'k'
     metric = 4*pi*area/perimeter^2;                      % compute roundness metric
     metric_string = sprintf('%2.2f',metric);           % display
-    if metric >= thresholdDAPI   && (area > DAPIsize && area < 100000)  %and within size range
+    if metric >= thresholdDAPI   && (area > DAPIsize && area < 1000000)  %and within size range
         centroid = stats(k).Centroid;
         %plot(centroid(1),centroid(2),'k.');
         mat = [mat ; [centroid(1) centroid(2)]];       % add to matrix of indexes

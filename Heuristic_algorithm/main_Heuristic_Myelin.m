@@ -51,7 +51,7 @@ while (calibrate)
     sensitivity = str2double(get((output.sensitivity), 'String'));
     minLength = str2double(get((output.minLength), 'String'))  / scale;
     DAPIsize = str2double(get((output.DAPIsize), 'String')) / (scale * scale);
-    
+    unscaled_DAPI = str2double(get((output.DAPIsize), 'String'));
     nanoYN = get((output.checkbox12), 'value');
     combineRG = get((output.Combine_RG), 'value');
     verbose = get((output.verbose), 'value');
@@ -70,7 +70,7 @@ while (calibrate)
     end
 end
 cd(saveDirName);
-save('Parameters used', 'save_params');
+save('z_Parameters used', 'save_params');
 cd(cur_dir);
 
 %% TO ADD as GUI prompts:
@@ -96,6 +96,8 @@ squareDist = round(50 / (scale));  % in um (is the height of the cell that must 
 coreMin = 0;
 elim_O4 = round(20 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
 
+DAPI_bb_size = round(unscaled_DAPI / (scale * 2));
+
 %% ADD TO MENU:
 if bool_load_five == 1
     load_five = 5;
@@ -107,7 +109,7 @@ if load_five == 5
     allChoices = choosedialog2();   %% read in choices  %%% SWITCH TO FROM GUI.m
 end
 
-batch_skip = 'N';
+batch_skip = 'N';   % SHOULD BE ADDED TO GUI
 batch_run = 'N';
 batch_num = 0;
 batch = cell(2);   % intialize empty
@@ -124,9 +126,9 @@ batch = cell(2);   % intialize empty
 
 %batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
 
-%batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
+batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
-batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
+%batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
 
 %% Run Analysis
@@ -337,7 +339,7 @@ while (moreTrials == 'Y')
                 
                 %% (1) Find peaks for DAPI
                 %DAPIsize = 10;
-                [mat, objDAPI, DAPI_bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance, siz);  % function
+                [mat, objDAPI, DAPI_bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance, DAPI_bb_size);  % function
                 
                 if length(objDAPI) > 8000
                     continue;
@@ -574,7 +576,8 @@ while (moreTrials == 'Y')
         end
         
         cd(saveDirName);
-        save(num2str(fileNum_sav), 'allS');
+        save(strcat(name, '_', num2str(fileNum_sav)), 'allS');
+            
         allS = [];
         cd(cur_dir);
         
