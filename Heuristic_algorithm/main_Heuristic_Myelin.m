@@ -244,11 +244,13 @@ while (moreTrials == 'Y')
         if divide_im == 0
             size_red = size(redImage);
             %redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
-            %square_cut_h = size_red(1);
-            %square_cut_w = size_red(2);
+            square_cut_h = size_red(1);
+            square_cut_w = size_red(2);
         else
             redImage = redImage(1:square_cut_h * 4, 1:square_cut_w * 4, :);
         end
+        width = square_cut_w;
+        height = square_cut_h;
         
         
         intensityValueDAPI = im2double(redImage(:,:,3));
@@ -279,6 +281,9 @@ while (moreTrials == 'Y')
         
         [all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
         
+        if load_five == 1
+            greenImage = redImage;
+        end
         [all_MBP_im_split] = split_imV2(greenImage, square_cut_h, square_cut_w);
         
         %% LOOP
@@ -494,7 +499,7 @@ while (moreTrials == 'Y')
                 if load_five == 5 && fileNum > 1
                     fileNum_sav = ((fileNum - 1)/load_five) + 1;
                 else
-                    fileNum_sav = (fileNum + 2 - 1)/2;
+                    fileNum_sav = (fileNum);
                 end
                 
                 %% Print images of results
@@ -567,80 +572,82 @@ while (moreTrials == 'Y')
                 counter = counter + 1;
             end
         end
+        
         cd(saveDirName);
         save(num2str(fileNum_sav), 'allS');
         allS = [];
         cd(cur_dir);
         
-        %  end
-        fclose(fileID);      %%%close after so it can append, but next time it writes file, it will over-write    %%% in the future maybe just append??? and have hours log
-        
-        cd(saveDirName);
-        %% (2) "Summary.txt" is for summary of ALL the images
-        proportionR = sumWrappedR/(sumUnWrappedR + sumWrappedR);
-        proportionG = sumWrappedG/(sumUnWrappedG + sumWrappedG);
-        
-        nameTmp = strcat('summary', name, '.txt');
-        fileID = fopen(nameTmp,'w');
-        fprintf(fileID,'Total num images analyzed: %d \n', numfids/5);
-        fprintf(fileID,'Num wrapped R cells: %d \n', sumWrappedR);
-        fprintf(fileID,'Num un-wrapped R cells: %d \n', sumUnWrappedR);
-        fprintf(fileID,'Proportion wrapped R: %.2f \n', proportionR);
-        
-        fprintf(fileID,'Num wrapped G cells: %d \n', sumWrappedG);
-        fprintf(fileID,'Num un-wrapped G cells: %d \n', sumUnWrappedG);
-        fprintf(fileID,'Proportion wrapped G: %.2f \n\n', proportionG);
-        
-        fprintf(fileID,'Proportion Wrapped / O4+ cells: %.2f \n', sumWrappedR/ sumO4);
-        fprintf(fileID,'Proportion O4+ / Total cells: %.2f \n', sumO4 / (sumWrappedR + sumUnWrappedR));
-        fprintf(fileID,'Total num O4+ cells: %d \n', sumO4);
-        fprintf(fileID,'Total num cells: %d \n', sumWrappedR + sumUnWrappedR);
-        
-        fprintf(fileID,'Total num R Fibers: %d \n', sumFibersPerPatchR);
-        fprintf(fileID,'Avg length of wrapping per R fiber: %f \n\n', mean2(allLengthFibers));
-        
-        fprintf(fileID,'Total num G Fibers: %d \n', sumFibersPerPatchG);
-        fprintf(fileID,'Avg length of wrapping per G fiber: %f \n', mean2(allLengthFibersG));
-        
-        fprintf(fileID,'Sensitivity of line segmentation: %.2f \n', sensitivity);
-        
-        fprintf(fileID,'User selected parameters %s -', save_params{:});
-        fclose(fileID);
-        
-        cd(cur_dir);
-        
-        %% For stats later:
-        allWrappedR = [allWrappedR sumWrappedR];
-        allWrappedG = [allWrappedG sumWrappedG];
-        allTotalCells = [allTotalCells (sumWrappedR + sumUnWrappedR)];
-        allNames{trialNum} = name;
-        allTrialLengths{trialNum} = allLengthFibers * scale;   %% SCALED values are saved
-        allTrialSheathsR{trialNum} = allNumSheathsR;
-        allTrialSheathsG{trialNum} = allNumSheathsG;
-        
-        allTrialMeanFLC{trialNum} = allMeanLPC;
-        allTrialS{trialNum} = allS;
-        
-        allSumO4 = [allSumO4 sumO4];
-        allSumMBP = [allSumMBP sumMBP];
-        
-        allInfoInfo{trialNum} = allInfo;
-        
-        %% Prompt if want to re-start the analysis
-        moreTrials = 'N';
-        
-        %     if batch_run == 'N'
-        %         questTitle='More Samples?';
-        %         start(timer('StartDelay',1,'TimerFcn',@(o,e)set(findall(0,'Tag',questTitle),'WindowStyle','normal')));
-        %         button2 = questdlg('Another analysis?', questTitle, 'Y','N','Y','Y');
-        %         moreTrials = button2;
-        %
-        %     end
-        %     trialNum = trialNum + 1;
-        
     end
+    fclose(fileID);      %%%close after so it can append, but next time it writes file, it will over-write    %%% in the future maybe just append??? and have hours log
+    
+    cd(saveDirName);
+    %% (2) "Summary.txt" is for summary of ALL the images
+    proportionR = sumWrappedR/(sumUnWrappedR + sumWrappedR);
+    proportionG = sumWrappedG/(sumUnWrappedG + sumWrappedG);
+    
+    nameTmp = strcat('summary', name, '.txt');
+    fileID = fopen(nameTmp,'w');
+    fprintf(fileID,'Total num images analyzed: %d \n', numfids/5);
+    fprintf(fileID,'Num wrapped R cells: %d \n', sumWrappedR);
+    fprintf(fileID,'Num un-wrapped R cells: %d \n', sumUnWrappedR);
+    fprintf(fileID,'Proportion wrapped R: %.2f \n', proportionR);
+    
+    fprintf(fileID,'Num wrapped G cells: %d \n', sumWrappedG);
+    fprintf(fileID,'Num un-wrapped G cells: %d \n', sumUnWrappedG);
+    fprintf(fileID,'Proportion wrapped G: %.2f \n\n', proportionG);
+    
+    fprintf(fileID,'Proportion Wrapped / O4+ cells: %.2f \n', sumWrappedR/ sumO4);
+    fprintf(fileID,'Proportion O4+ / Total cells: %.2f \n', sumO4 / (sumWrappedR + sumUnWrappedR));
+    fprintf(fileID,'Total num O4+ cells: %d \n', sumO4);
+    fprintf(fileID,'Total num cells: %d \n', sumWrappedR + sumUnWrappedR);
+    
+    fprintf(fileID,'Total num R Fibers: %d \n', sumFibersPerPatchR);
+    fprintf(fileID,'Avg length of wrapping per R fiber: %f \n\n', mean2(allLengthFibers));
+    
+    fprintf(fileID,'Total num G Fibers: %d \n', sumFibersPerPatchG);
+    fprintf(fileID,'Avg length of wrapping per G fiber: %f \n', mean2(allLengthFibersG));
+    
+    fprintf(fileID,'Sensitivity of line segmentation: %.2f \n', sensitivity);
+    
+    fprintf(fileID,'User selected parameters %s -', save_params{:});
+    fclose(fileID);
+    
+    cd(cur_dir);
+    
+    %% For stats later:
+    allWrappedR = [allWrappedR sumWrappedR];
+    allWrappedG = [allWrappedG sumWrappedG];
+    allTotalCells = [allTotalCells (sumWrappedR + sumUnWrappedR)];
+    allNames{trialNum} = name;
+    allTrialLengths{trialNum} = allLengthFibers * scale;   %% SCALED values are saved
+    allTrialSheathsR{trialNum} = allNumSheathsR;
+    allTrialSheathsG{trialNum} = allNumSheathsG;
+    
+    allTrialMeanFLC{trialNum} = allMeanLPC;
+    allTrialS{trialNum} = allS;
+    
+    allSumO4 = [allSumO4 sumO4];
+    allSumMBP = [allSumMBP sumMBP];
+    
+    allInfoInfo{trialNum} = allInfo;
+    
+    %% Prompt if want to re-start the analysis
+    if batch_run == 'Y'
+        moreTrials = 'Y';
+    end
+       
+    %     if batch_run == 'N'
+    %         questTitle='More Samples?';
+    %         start(timer('StartDelay',1,'TimerFcn',@(o,e)set(findall(0,'Tag',questTitle),'WindowStyle','normal')));
+    %         button2 = questdlg('Another analysis?', questTitle, 'Y','N','Y','Y');
+    %         moreTrials = button2;
+    %
+    %     end
+    %     trialNum = trialNum + 1;
     
 end
+
 
 %% Combine individual *mat files to single .csvs
 cd(cur_dir)
