@@ -109,8 +109,8 @@ if load_five == 5
     allChoices = choosedialog2();   %% read in choices  %%% SWITCH TO FROM GUI.m
 end
 
-batch_skip = 'N';   % SHOULD BE ADDED TO GUI
-batch_run = 'N';
+batch_skip = 'Y';   % SHOULD BE ADDED TO GUI
+batch_run = 'Y';
 batch_num = 0;
 batch = cell(2);   % intialize empty
 
@@ -126,7 +126,7 @@ batch = cell(2);   % intialize empty
 
 %batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
 
-batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
+%batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
 %batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
@@ -408,7 +408,9 @@ while (moreTrials == 'Y')
                 [s] = small_del_O4(new_combined_im, minLength, squareDist, siz, s);
                 
                 %% (5) Line seg:
+                % 2019-01-17: for Annick Baron, sens = 10, sigma = 1
                 [fibers, fibers_idx, Lambda2R] = line_seg(O4_im_ridges_adapted, zeros(size(O4_im)), sigma, siz, sensitivity);
+                figure; imshow(fibers)
                 %         if nanoYN == 'Y' % only if there are fibers
                 %             fibers = imopen(fibers, strel('disk', 3));    % first erodes away some holes
                 %             fibers = imclose(fibers, strel('disk', 3));    % then CLOSES HOLES
