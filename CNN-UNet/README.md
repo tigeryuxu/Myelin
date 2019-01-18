@@ -13,7 +13,8 @@
   * In the black command window that pops up, type:
   
         conda install python=3.6
-        
+  
+  * Since Tensorflow is only compatible with Python 3.6, please ensure that you enter the command above to install Python 3.6 alongside the default 3.7 in anaconda.
   * enter "y" if prompted
        
   #### 3.	Install packages
