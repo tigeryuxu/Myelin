@@ -262,6 +262,10 @@ while (moreTrials == 'Y')
         DAPIimage = redImage(:, :, 3);
         DAPIimage = im2double(DAPIimage);
         %intensityValueDAPI = im2double(rgb2gray(DAPIimage));
+
+         
+        greenImage = redImage(:, :, 2);
+        greenImage = im2double(greenImage);
         
         % (4) Red
         %filename = natfnames{fileNum + 1};
@@ -283,9 +287,9 @@ while (moreTrials == 'Y')
         
         [all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
         
-        if load_five == 1
-            greenImage = redImage;
-        end
+%         if load_five == 1
+%             greenImage = redImage;
+%         end
         [all_MBP_im_split] = split_imV2(greenImage, square_cut_h, square_cut_w);
         
         %% LOOP
@@ -382,11 +386,12 @@ while (moreTrials == 'Y')
                 %% Print * for DAPI and O4+
                 if enhance_RED == 'Y'
                     tmpDAPI = imadjust(intensityValueDAPI);
+                    O4_original = adapthisteq(adapthisteq(adapthisteq(O4_original)));
                 else
                     tmpDAPI = adapthisteq(adapthisteq(adapthisteq(intensityValueDAPI)));
-                    O4_original = adapthisteq(adapthisteq(adapthisteq(O4_original)));
+                   
                 end
-                wholeImage = cat(3, O4_original, zeros(size(O4_im)), tmpDAPI);
+                wholeImage = cat(3, O4_im_ridges_adapted, zeros(size(O4_im)), tmpDAPI);
                 
                 figure(5); imshow(wholeImage); title('Output Image'); hold on;
                 for Y = 1:length({s.objDAPI})
@@ -410,7 +415,7 @@ while (moreTrials == 'Y')
                 %% (5) Line seg:
                 % 2019-01-17: for Annick Baron, sens = 10, sigma = 1
                 [fibers, fibers_idx, Lambda2R] = line_seg(O4_im_ridges_adapted, zeros(size(O4_im)), sigma, siz, sensitivity);
-                figure; imshow(fibers)
+                %figure; imshow(fibers)
                 %         if nanoYN == 'Y' % only if there are fibers
                 %             fibers = imopen(fibers, strel('disk', 3));    % first erodes away some holes
                 %             fibers = imclose(fibers, strel('disk', 3));    % then CLOSES HOLES
@@ -428,7 +433,10 @@ while (moreTrials == 'Y')
                 
                 %% (7) NEW LINE ANALYSIS (transforms ridges to lines)
                 % Horizontal lines are more dim
-                [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength);
+                if scale > 0.5
+                    dil_lines = 'N';
+                end
+                [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength, dil_lines);
                 
                 locFibers =  locFibers(~cellfun('isempty',locFibers));   % delete from the list if not a line
                 allLengths = allLengths(~cellfun('isempty', allLengths));   % delete from the list if not a line

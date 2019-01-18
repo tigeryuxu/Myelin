@@ -1,4 +1,4 @@
-function [all_lines, locFibers, all_lengths, mask, fibers] = ridges2lines(ridges, siz, hor_factor, minLength)
+function [all_lines, locFibers, all_lengths, mask, fibers] = ridges2lines(ridges, siz, hor_factor, minLength, dilate)
 
 %Skeletonize fibers, and find junctions
 %then trace lines going in certain orientation, maybe split into segments via junctions?
@@ -78,9 +78,12 @@ while N > 0
     N = N - 1;
 end
 clean_v = imbinarize(clean_v);
-clean_v = imdilate(clean_v, ones(5, 5));
-clean_v = imerode(clean_v, ones(10, 1));
 
+% Option to make lines thicker at the end
+if dilate == 'Y'
+    clean_v = imdilate(clean_v, ones(5, 5));
+    clean_v = imerode(clean_v, ones(10, 1));
+end
 %[B,L] = bwboundaries(clean_v, 'noholes');
 vv = regionprops(clean_v, 'PixelIdxList', 'MajorAxisLength');
 
