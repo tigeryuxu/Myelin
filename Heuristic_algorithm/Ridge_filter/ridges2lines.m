@@ -87,23 +87,27 @@ end
 %[B,L] = bwboundaries(clean_v, 'noholes');
 vv = regionprops(clean_v, 'PixelIdxList', 'MajorAxisLength');
 
-% hh = regionprops(c_hort, 'PixelIdxList', 'MajorAxisLength');
-% clean_h = zeros(siz);
-% N = length(hh);
-% while N > 0
-%     if hh(N).MajorAxisLength < minLength * hor_factor
-%         hh(N) = [];
-%     else
-%         clean_h(hh(N).PixelIdxList) = 1;
-%     end
-%     N = N - 1;
-% end
-% clean_h = imbinarize(clean_h);
-% clean_h = imdilate(clean_h, ones(5, 5));
-% hh = regionprops(clean_h, 'PixelIdxList', 'MajorAxisLength');
+if hor_factor == 1
+    hh = regionprops(c_hort, 'PixelIdxList', 'MajorAxisLength');
+    clean_h = zeros(siz);
+    N = length(hh);
+    while N > 0
+        if hh(N).MajorAxisLength < minLength * hor_factor
+            hh(N) = [];
+        else
+            clean_h(hh(N).PixelIdxList) = 1;
+        end
+        N = N - 1;
+    end
+    clean_h = imbinarize(clean_h);
+    clean_h = imdilate(clean_h, ones(5, 5));
+    hh = regionprops(clean_h, 'PixelIdxList', 'MajorAxisLength');
+    
+    all_lines = [vv; hh]; % combines all lines together
+else
+    all_lines = [vv]; % combines all lines together
+end
 
-%all_lines = [vv; hh]; % combines all lines together
-all_lines = [vv]; % combines all lines together
 
 %% NOW FIND LENGTHS:
 % shouild I clean with geodesicfirst??? or just use MajorAxisLength???
@@ -114,6 +118,8 @@ locFibers = c(2, :);
 
 % Give different weights so look different on final mask
 mask(clean_v) = 500;
-%mask(clean_h) = 200;
+
+if hor_factor == 1
+    mask(clean_h) = 200;
 
 end

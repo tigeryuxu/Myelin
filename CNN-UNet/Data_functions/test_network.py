@@ -353,8 +353,8 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         output = []; skel = []; truth_im = [];
     
         """ SAVING """
-        with open(sav_dir + 'all_fibers' + '_' + filename_split + '_' + str(i) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
-           pickle.dump([all_fibers], f) 
+        #with open(sav_dir + 'all_fibers' + '_' + filename_split + '_' + str(i) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+        #   pickle.dump([all_fibers], f) 
         
         """ Skeletonize and output
         """

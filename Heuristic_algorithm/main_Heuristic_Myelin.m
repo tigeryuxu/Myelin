@@ -60,6 +60,7 @@ while (calibrate)
     bool_load_five = get((output.checkbox11), 'value');
     adapt_his = get((output.Nano_YN), 'value');
     divide_im = get((output.checkbox13), 'value');
+    hor_factor = get((output.checkbox16), 'value');
     
     save_params = {name, batch, scale, diameterFiber, sigma, sensitivity, minLength, DAPIsize, nanoYN...
         ,verbose, calibrate, match_words, bool_load_five, adapt_his, divide_im};
@@ -89,7 +90,7 @@ enhance = 'Y';   % (Background subtraction for DAPI + O4 images) CLEM ==> doesn'
 %% PRESET and scaled
 DAPImetric = 0.3;   % Lower b/c some R not picked up due to shape...
 percentDilate = 2;   % for cores
-hor_factor = 2;
+%hor_factor = 2;
 near_join = round(10 / (scale));  % in um
 fillHoles = round(8 / (scale * scale));  % in um^2
 squareDist = round(50 / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
@@ -112,7 +113,7 @@ end
 batch_skip = 'Y';   % SHOULD BE ADDED TO GUI
 batch_run = 'Y';
 batch_num = 0;
-batch = cell(2);   % intialize empty
+batch = cell(1);   % intialize empty
 
 % Clem:
 %batch = {'Clem1-', 'Clem2-', 'Ctr'};
@@ -128,10 +129,11 @@ batch = cell(2);   % intialize empty
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
-%batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
+batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
 
 %% Run Analysis
+batch_numFiles = [];
 while (moreTrials == 'Y')
     
     %% Batch processing
@@ -182,6 +184,7 @@ while (moreTrials == 'Y')
     trialNames = namecell;
     numfids = length(trialNames);   %%% divided by 5 b/c 5 files per pack currently
     
+    batch_numFiles = [batch_numFiles, numfids];
     %% Read in images
     for fileNum = 1 : load_five: numfids
         
@@ -385,10 +388,10 @@ while (moreTrials == 'Y')
                 
                 %% Print * for DAPI and O4+
                 if enhance_RED == 'Y'
-                    tmpDAPI = imadjust(intensityValueDAPI);
+                    tmpDAPI = adapthisteq(intensityValueDAPI);
                     O4_original = adapthisteq(adapthisteq(adapthisteq(O4_original)));
                 else
-                    tmpDAPI = adapthisteq(adapthisteq(adapthisteq(intensityValueDAPI)));
+                    tmpDAPI = adapthisteq(intensityValueDAPI);
                    
                 end
                 wholeImage = cat(3, O4_im_ridges_adapted, zeros(size(O4_im)), tmpDAPI);
@@ -433,7 +436,8 @@ while (moreTrials == 'Y')
                 
                 %% (7) NEW LINE ANALYSIS (transforms ridges to lines)
                 % Horizontal lines are more dim
-                if scale > 0.5
+                dil_lines = 'Y';
+                if scale > 0.3
                     dil_lines = 'N';
                 end
                 [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength, dil_lines);
@@ -588,7 +592,12 @@ while (moreTrials == 'Y')
         cd(saveDirName);
         save(strcat(name, '_', num2str(fileNum_sav)), 'allS');
             
-        allS = [];
+        %% Tiger: 20/01/19 - should add switch here so if batching, doesn't clear "allS"
+        if length(batch) > 1
+            allS = allS;   % doesn't delete it b/c it's batching
+        else
+            allS = [];
+        end
         cd(cur_dir);
         
     end
@@ -704,6 +713,12 @@ all_individual_trials_lengths = cell(0);
 all_individual_trials_log = cell(0);
 all_individual_trials_LPC = cell(0);
 
+batch_sort = 0;
+if length(batch_numFiles) > 1
+    batch_sort = length(batch_numFiles);
+end
+
+
 for fileNum = 1 : numfids
     
     allNumSheathsR = [];
@@ -792,8 +807,8 @@ for fileNum = 1 : numfids
         all_individual_trials = [all_individual_trials; [length({s.objDAPI}), num_O4_individual,num_sheaths_individual,num_sheaths_individual/ num_O4_individual* 100 ]];
         
     else
-        
         all_individual_trials = [all_individual_trials; [0,  num_O4_individual,num_sheaths_individual,num_sheaths_individual/ num_O4_individual* 100 ]];
+    
     end
     num_sheaths_individual
     all_individual_trials_sheaths{end + 1} = allNumSheathsR;
@@ -824,31 +839,63 @@ fid2 = fopen('output_lengths.csv', 'w') ;
 fid3 = fopen('output_log.csv', 'w') ;
 fid4 = fopen('output_LPC.csv', 'w') ;
 
-for idx = 1:length(all_individual_trials_sheaths)
-    
-    if isempty(all_individual_trials_sheaths{1, idx})
-        all_individual_trials_sheaths{1, idx} = 0;
+if length(batch_numFiles) == 1
+    for idx = 1:length(all_individual_trials_sheaths)
+        
+        if isempty(all_individual_trials_sheaths{1, idx})
+            all_individual_trials_sheaths{1, idx} = 0;
+        end
+        
+        if isempty(all_individual_trials_lengths{1, idx})
+            all_individual_trials_lengths{1, idx} = 0;
+        end
+        
+        if isempty(all_individual_trials_log{1, idx})
+            all_individual_trials_log{1, idx} = 0;
+        end
+        
+        if isempty(all_individual_trials_LPC{1, idx})
+            all_individual_trials_LPC{1, idx} = 0;
+        end
+        
+        dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, idx), '-append') ;
+        dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, idx), '-append') ;
+        dlmwrite('output_log.csv', all_individual_trials_log(1, idx), '-append') ;
+        dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, idx), '-append') ;
     end
     
-    if isempty(all_individual_trials_lengths{1, idx})
-        all_individual_trials_lengths{1, idx} = 0;
+else
+    total_counter = batch_numFiles(1);
+    for idx = 1:length(batch_numFiles)
+        %cycle_files = 0;
+        %while cycle_files < batch_numFiles(idx)
+        
+        if isempty(all_individual_trials_sheaths{1, total_counter})
+            all_individual_trials_sheaths{1, total_counter} = 0;
+        end
+        
+        if isempty(all_individual_trials_lengths{1, total_counter})
+            all_individual_trials_lengths{1, total_counter} = 0;
+        end
+        
+        if isempty(all_individual_trials_log{1, total_counter})
+            all_individual_trials_log{1, total_counter} = 0;
+        end
+        
+        if isempty(all_individual_trials_LPC{1, total_counter})
+            all_individual_trials_LPC{1, total_counter} = 0;
+        end
+        
+        dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, total_counter), '-append') ;
+        dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, total_counter), '-append') ;
+        dlmwrite('output_log.csv', all_individual_trials_log(1, total_counter), '-append') ;
+        dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, total_counter), '-append') ;
+        %end
+        %cycle_files = cycle_files + 1;
+        total_counter = total_counter + batch_numFiles(idx);
     end
-    
-    if isempty(all_individual_trials_log{1, idx})
-        all_individual_trials_log{1, idx} = 0;
-    end
-    
-    if isempty(all_individual_trials_LPC{1, idx})
-        all_individual_trials_LPC{1, idx} = 0;
-    end
-    
-    dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, idx), '-append') ;
-    dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, idx), '-append') ;
-    dlmwrite('output_log.csv', all_individual_trials_log(1, idx), '-append') ;
-    dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, idx), '-append') ;
-    
-    
 end
+
 fclose(fid1);
 fclose(fid2);
 fclose(fid3);
@@ -909,15 +956,15 @@ fclose(fid4);
 %     T1 = table(norm_props_R, norm_props_G, propW_O4, allWrappedR, allSumO4, allTotalCells, propW_total, allWrappedG,'RowNames', allNames);
 %
 %     writetable(T1, 'Result_table.csv', 'WriteRowNames',true);
-%
-%     %% Make csv files for data analysis
-%     name_csv = 'Result_names.csv';
-%     Row_Names = allNames;
-%     T1 = table(Row_Names);
-%
-%     writetable(T1, name_csv, 'WriteRowNames',true);
-%
-%     dlmwrite(name_csv, ' ', '-append');
+
+    %% Make csv files for data analysis
+    name_csv = 'Result_names.csv';
+    Row_Names = batch;
+    T1 = table(Row_Names);
+
+    writetable(T1, name_csv, 'WriteRowNames',true);
+
+    dlmwrite(name_csv, ' ', '-append');
 %
 %     name_csv = 'Result_num_sheaths.csv';
 %     %dlmwrite(name_csv, 'NumWrapped,', '-append');
