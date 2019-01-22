@@ -871,8 +871,7 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
     masked[combined == 0] = 0
 
     """ Eliminate anything smaller than minLength, and in wrong orientation, then add to cell object """
-    num_MBP_pos = 8000
-    N = 8000
+    N = 100000
         
     list_cells = []
     for M in range(N):
@@ -913,7 +912,7 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
 
     """ Print out pickles for jaccard testing """
     if jacc_test:   
-        for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, s_path=s_path, N=8000)
+        for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, N, s_path=s_path)
 
     
     return dil_final
@@ -924,7 +923,7 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
     
     
 """ FOR JACCARD TESTING """
-def for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, s_path, N=8000):
+def for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, N, s_path):
        
     import pickle as pickle
     """ Print text onto image """

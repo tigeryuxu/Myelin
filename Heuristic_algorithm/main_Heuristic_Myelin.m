@@ -71,7 +71,7 @@ while (calibrate)
     end
 end
 cd(saveDirName);
-save('z_Parameters used', 'save_params');
+save('___Parameters used___', 'save_params');
 cd(cur_dir);
 
 %% TO ADD as GUI prompts:
@@ -97,7 +97,7 @@ squareDist = round(50 / (scale));  % in um (is the height of the cell that must 
 coreMin = 0;
 elim_O4 = round(20 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
 
-DAPI_bb_size = round(unscaled_DAPI / (scale * 2));
+DAPI_bb_size = round(unscaled_DAPI / (scale));
 
 %% ADD TO MENU:
 if bool_load_five == 1
@@ -129,7 +129,7 @@ batch = cell(1);   % intialize empty
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
-batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
+%batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
 
 %% Run Analysis

@@ -100,7 +100,11 @@ if hor_factor == 1
         N = N - 1;
     end
     clean_h = imbinarize(clean_h);
-    clean_h = imdilate(clean_h, ones(5, 5));
+    
+    if dilate == 'Y'
+        clean_h = imdilate(clean_h, ones(5, 5));
+        clean_v = imerode(clean_h, ones(10, 1));
+    end
     hh = regionprops(clean_h, 'PixelIdxList', 'MajorAxisLength');
     
     all_lines = [vv; hh]; % combines all lines together

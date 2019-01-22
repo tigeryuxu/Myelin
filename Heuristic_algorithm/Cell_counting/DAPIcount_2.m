@@ -95,12 +95,11 @@ bw3 = bw;
 bw3(Ld2 == 0) = 0;
 bw = bw3;
 
-%figure(100); title('DAPI watershed');
+figure(100); title('DAPI watershed');
 [B,L] = bwboundaries(bw, 'noholes');
-
-%imshow(bw);
-%imshow(label2rgb(L, @jet, [.5 .5 .5]));
-%hold on;
+imshow(bw);
+imshow(label2rgb(L, @jet, [.5 .5 .5]));
+hold on;
 
 %% Roundness metric
 stats = regionprops(L,'Area','Centroid', 'PixelIdxList'); %%%***good way to get info about region!!!
