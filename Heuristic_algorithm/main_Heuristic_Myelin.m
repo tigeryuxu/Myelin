@@ -7,6 +7,7 @@ opengl hardware;
 close all;
 
 cur_dir = pwd;
+
 addpath(strcat(cur_dir, '\Cell_body_seg'))  % adds path to functions
 addpath(strcat(cur_dir, '\Cell_counting'))  % adds path to functions
 addpath(strcat(cur_dir, '\Demo-data'))  % adds path to functions
@@ -521,6 +522,7 @@ while (moreTrials == 'Y')
                 %% Print images of results
                 cd(saveDirName);
                 figure(5);
+                set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
                 filename = strcat('Result', name, num2str(fileNum_sav), '_', num2str(counter));
                 print(filename,'-dpng')
                 hold off;

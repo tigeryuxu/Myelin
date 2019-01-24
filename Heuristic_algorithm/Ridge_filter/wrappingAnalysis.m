@@ -137,7 +137,7 @@ if ~isempty(ordered)  % if there are some cells at least
     
     figure(5);
     if ~isempty(allWrappedCenters) && ~isGreen
-        text(allWrappedCenters(:, 1), allWrappedCenters(:, 2), '*',  'color','g' ,'Fontsize',30);   % writes "wrapped" besides every wrapped neuron
+        text(allWrappedCenters(:, 1), allWrappedCenters(:, 2), '*',  'color','w' ,'Fontsize',30);   % writes "wrapped" besides every wrapped neuron
     elseif ~isempty(allWrappedCenters)
         text(allWrappedCenters(:, 1), allWrappedCenters(:, 2), 'wG',  'color','y' ,'Fontsize',3);
     end
