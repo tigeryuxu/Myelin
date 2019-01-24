@@ -22,7 +22,7 @@ function  varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 21-Jan-2019 16:44:36
+% Last Modified by GUIDE v2.5 24-Jan-2019 13:06:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -306,7 +306,8 @@ set((handles.match_full_name), 'value', double(save_params{13}));
 set((handles.checkbox11), 'value', double(save_params{14}));
 set((handles.Nano_YN), 'value', double(save_params{15}));
 set((handles.checkbox13), 'value', double(save_params{16}));
-set((handles.checkbox16), 'value', double(save_params{17}));   
+set((handles.checkbox16), 'value', double(save_params{17}));
+set((handles.checkbox17), 'value', double(save_params{18}));
 
 
 % --- Executes on button press in save_p.
@@ -335,6 +336,7 @@ save_params{14} = get((handles.checkbox11), 'value');
 save_params{15} = get((handles.Nano_YN), 'value');
 save_params{16} = get((handles.checkbox13), 'value');
 save_params{17} = get((handles.checkbox16), 'value');
+save_params{18} = get((handles.checkbox17), 'value');
 
 cur_dir = pwd;
 foldername = uigetdir();
@@ -574,3 +576,12 @@ function checkbox16_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox16
+
+
+% --- Executes on button press in checkbox17.
+function checkbox17_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox17

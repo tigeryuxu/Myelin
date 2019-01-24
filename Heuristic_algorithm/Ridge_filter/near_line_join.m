@@ -1,4 +1,4 @@
-function [locFibers, s] = near_line_join(locFibers, max_thresh, siz, verbose, s)
+function [locFibers, s, bw] = near_line_join(locFibers, max_thresh, siz, verbose, s)
 
 % Joins remaining lines to nearest WRAPPED cell body by adding
 % the line to the "struct" of the wrapped cell
@@ -93,6 +93,7 @@ labelled = label2rgb(round(colorTmp*255));
 figure(31); imshow(labelled); hold on;
 title('near line join');
 
+bw = colorTmp;
 if ~isempty(plotNumbers)
     for L = 1:length(plotNumbers(:, 1))
         text(plotNumbers(L, 3), plotNumbers(L, 2), num2str(plotNumbers(L, 1)),  'color','k' ,'Fontsize',10);   % writes "peak" besides everything

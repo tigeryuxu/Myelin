@@ -1,6 +1,13 @@
 %% Need to add:
 % 1) Save the "load_five" params ect...
 % 2) Get rid of the batching
+% 3) %%***NOTE: sheaths have to be in RED channel
+% 4) Get areas per cell
+% 5) Put in lower threshold for STEM/O4 identification
+% 6) Make the near line join thresh smaller
+% 7) Get correct scale
+
+% ***ADDED AN adapthisteq to imageAdjust.mat... 2019-01-24
 
 %% Main function to run heuristic algorithm
 opengl hardware;
@@ -62,6 +69,7 @@ while (calibrate)
     adapt_his = get((output.Nano_YN), 'value');
     divide_im = get((output.checkbox13), 'value');
     hor_factor = get((output.checkbox16), 'value');
+    switch_sheaths = get((output.checkbox17), 'value');
     
     save_params = {name, batch, scale, diameterFiber, sigma, sensitivity, minLength, DAPIsize, nanoYN...
         ,verbose, calibrate, match_words, bool_load_five, adapt_his, divide_im};
@@ -96,7 +104,7 @@ near_join = round(10 / (scale));  % in um
 fillHoles = round(8 / (scale * scale));  % in um^2
 squareDist = round(50 / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
 coreMin = 0;
-elim_O4 = round(20 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
+elim_O4 = round(40 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
 
 DAPI_bb_size = round(unscaled_DAPI / (scale));
 
@@ -132,6 +140,7 @@ batch = cell(1);   % intialize empty
 
 %batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
+%batch = {'12 wpg', '16 wpg'};
 
 %% Run Analysis
 batch_numFiles = [];
@@ -360,10 +369,10 @@ while (moreTrials == 'Y')
                 strucMat = num2cell(mat, 2);
                 s = struct('objDAPI', objDAPI', 'centerDAPI', strucMat, 'Core', cell(length(objDAPI), 1)...
                     ,'CB', cell(length(objDAPI), 1), 'Fibers', cell(length(objDAPI), 1), 'Mean_Fiber_L_per_C', cell(length(objDAPI), 1), 'Bool_W', c...
-                    , 'im_num', c, 'O4_bool', c);
+                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c);
+                
                 
                 %% (2) Extract cores
-                
                 [s] = reg_core_filt(combined_im, diameterFiber, siz, percentDilate, s);  % small cores
                 [cb, no_dilate_cb, s] = cell_body_filt(combined_im, diameterFiber, siz, coreMin, s);        % cell body
                 
@@ -393,9 +402,24 @@ while (moreTrials == 'Y')
                     O4_original = adapthisteq(adapthisteq(adapthisteq(O4_original)));
                 else
                     tmpDAPI = adapthisteq(intensityValueDAPI);
-                   
+                                      
                 end
-                wholeImage = cat(3, O4_im_ridges_adapted, zeros(size(O4_im)), tmpDAPI);
+                
+                %% Switch the sheaths for Annick's analysis
+                if switch_sheaths == 1
+                    greenOrig = MBP_im;
+                    MBP_im = adapthisteq(MBP_im);                   
+                else
+                   MBP_im = zeros(size(O4_im)); 
+                end
+                
+                wholeImage = cat(3, O4_im_ridges_adapted, MBP_im, tmpDAPI);
+                
+                
+                %% Switch the sheaths for Annick's analysis
+                if switch_sheaths == 1
+                    O4_im_ridges_adapted = MBP_im;
+                end
                 
                 figure(5); imshow(wholeImage); title('Output Image'); hold on;
                 for Y = 1:length({s.objDAPI})
@@ -430,9 +454,12 @@ while (moreTrials == 'Y')
                 %         end
                 %
                 %% (6) Clean fibers by subtracting out CB
-                fibers = imbinarize(fibers - cb);
-                if mag == 'Y'
-                    fibers = imopen(fibers, strel('disk', 2));   % to get rid of straggling thin strands
+                %% 19/01/24 - Tiger added: don't sub cell bodies for Annick
+                if switch_sheaths == 0
+                    fibers = imbinarize(fibers - cb);
+                    if mag == 'Y'
+                        fibers = imopen(fibers, strel('disk', 2));   % to get rid of straggling thin strands
+                    end
                 end
                 
                 %% (7) NEW LINE ANALYSIS (transforms ridges to lines)
@@ -459,7 +486,7 @@ while (moreTrials == 'Y')
                 locFibers = sub_locFibers; % THESE ARE THE FIBERS STILL UN-ASSOCIATED
                 
                 %% (10) Associate the remaining lines with the nearest DAPI point
-                [locFibers, s] = near_line_join(locFibers, near_join, siz, verbose, s);
+                [locFibers, s, bw_final_fibers] = near_line_join(locFibers, near_join, siz, verbose, s);
                 
                 %% SAVE RESULTS:
                 idx_wrap = find([s.Bool_W] == 1);
@@ -519,37 +546,88 @@ while (moreTrials == 'Y')
                     fileNum_sav = (fileNum);
                 end
                 
+                %% ALSO get the MBP area ==> also need to colocalize the identified sheaths with original
+                % (a) want the area of MBP overall in the whole image (can
+                % normalize later to # of cells)
+                % (b) want the area of MBP colocalized with identified
+                % sheaths ==> use Julia's algo
+                [bw_green, originalGreen] = imageAdjust(MBP_im, fillHoles, enhance);   % image adjust
+                s(1).AreaOverall = nnz(bw_green); % gets area
+                s(1).numO4 = sumO4;
+                
+                
+                %% UPDATED FOR WIDTH/AREA ect...
+                for N = 1:length({s.objDAPI})
+                    if s(N).Bool_W == 1
+                        fibers_cell = [];
+                        s(N).OtherStats = cell(0);
+                        for Y = 1:length(s(N).Fibers)
+                            tmp_ridges = imbinarize(bw_final_fibers);
+                            tmp_fibers = zeros(size(bw_final_fibers));
+                            tmp_fibers(s(N).Fibers{Y}) = 1;
+                            tmp_fibers = imdilate(tmp_fibers, strel('disk', 4));
+                            tmp_ridges(tmp_fibers == 0) = 0;
+                            stats = regionprops(tmp_ridges,MBP_im,'MeanIntensity', 'Area', 'Perimeter', 'MinorAxisLength', 'PixelValues');
+                            if length(stats) > 1
+                                [val, idx] = max([stats(:).Area]);
+                                s(N).OtherStats{end + 1} = stats(idx);
+                            else
+                                s(N).OtherStats{end + 1} = stats;
+                            end
+                        end
+                    end
+                end
+                
+                
                 %% Print images of results
                 cd(saveDirName);
                 figure(5);
                 set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
-                filename = strcat('Result', name, num2str(fileNum_sav), '_', num2str(counter));
+                filename = strcat('Result', name, num2str(fileNum_sav), '_', num2str(counter), '1) All channels');
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(1);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), 'Combined_im') ;
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '2) Cell body BW') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 % Saves image
                 figure(100);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), 'DAPI') ;
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '3) Cell nuclei') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(31);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), 'final_fibers') ;
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '4) final_fibers') ;
                 print(filename,'-dpng')
                 hold off;
                 
-                figure(67); imshowpair(wholeImage, fibers); title('Filter ridges');
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), 'Filter ridges') ;
+                bw_final_fibers(bw_final_fibers > 0) = 1;
+                
+                figure(67); imshowpair(wholeImage, mask); title('Filter ridges');
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '5) Filter ridges') ;
                 print(filename,'-dpng'); hold off;
                 
-                figure(88); imshowpair(wholeImage, mask); title('Ridges to lines after sub core');  hold on;
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), 'Skeletonized ridges') ;
+                figure(188); figure; imshow(cat(3, zeros(size(MBP_im)), MBP_im,  zeros(size(MBP_im))));
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '6) MBP alone') ;
+                print(filename,'-dpng')
+                hold off;
+                
+                figure(189); figure; imshow(cat(3, O4_original, zeros(size(MBP_im)),  zeros(size(MBP_im))));
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '7) Cell Body alone') ;
+                print(filename,'-dpng')
+                hold off;
+                
+                figure(88); imshowpair(wholeImage, imbinarize(bw_final_fibers)); title('Ridges to lines after sub core');  hold on;
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '8) Skeletonized ridges') ;
                 print(filename,'-dpng'); hold off;
+                
+                figure(32); imshow(bw_green);
+                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '9) MBP bw') ;
+                print(filename,'-dpng')
+                hold off;
+
                 
                 %% Print to file:
                 %(1) "allAnalysis.txt" is for EACH image
@@ -659,6 +737,7 @@ while (moreTrials == 'Y')
     %% Prompt if want to re-start the analysis
     if batch_run == 'Y'
         moreTrials = 'Y';
+        trialNum = trialNum + 1;
     end
        
     %     if batch_run == 'N'
@@ -746,7 +825,7 @@ for fileNum = 1 : numfids
             if s(N).Bool_W == 1
                 % Put the fibers into a tmp array so can find MajorAxisLength
                 fibers_cell = [];
-                tmp = zeros([width, height]);
+                tmp = zeros([height, width]);
                 for Y = 1:length(s(N).Fibers)
                     tmp(s(N).Fibers{Y}) = 1;
                 end
@@ -763,7 +842,7 @@ for fileNum = 1 : numfids
                 new_vv = cell(0);
                 for Y = 1:length(vv)
                     len = vv(Y).MajorAxisLength;
-                    if len > minSingle / scale
+                    if len > minLength
                         new_vv{end + 1} = len;
                     end
                 end
@@ -782,7 +861,7 @@ for fileNum = 1 : numfids
                 
                 for Y = 1:length(vv)
                     len = vv{Y};
-                    if len > minSingle / scale
+                    if len > minLength
                         allLengthFibersR = [allLengthFibersR len * scale];
                         fibers_cell = [fibers_cell len * scale];
                         log_length = log10(len * scale);
@@ -806,10 +885,10 @@ for fileNum = 1 : numfids
                 
             end
         end
-        all_individual_trials = [all_individual_trials; [length({s.objDAPI}), num_O4_individual,num_sheaths_individual,num_sheaths_individual/ num_O4_individual* 100 ]];
+        all_individual_trials = [all_individual_trials; [length({s.objDAPI}), num_O4_individual,num_sheaths_individual]];
         
     else
-        all_individual_trials = [all_individual_trials; [0,  num_O4_individual,num_sheaths_individual,num_sheaths_individual/ num_O4_individual* 100 ]];
+        all_individual_trials = [all_individual_trials; [0,  num_O4_individual,num_sheaths_individual]];
     
     end
     num_sheaths_individual
