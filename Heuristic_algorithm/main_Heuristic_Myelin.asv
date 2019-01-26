@@ -457,9 +457,7 @@ while (moreTrials == 'Y')
                 end
                 %% (5) Line seg:
                 % 2019-01-17: for Annick Baron, sens = 10, sigma = 1
-                if adapt_his
-                   O4_im_ridges_adapted = adapthisteq(O4_im_ridges_adapted); 
-                end
+                if ad
                 [fibers, fibers_idx, Lambda2R] = line_seg(O4_im_ridges_adapted, zeros(size(O4_im)), sigma, siz, sensitivity);
                 %figure; imshow(fibers)
                 %         if nanoYN == 'Y' % only if there are fibers

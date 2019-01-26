@@ -34,7 +34,7 @@ end
     
 
 bw = imbinarize(I, level);
-figure; imshow(bw);
+%figure; imshow(bw);
 
 modImage = imcomplement(bw);   % invert
 modImage = bwareaopen(modImage, fillHoles);  % Eliminate holes
