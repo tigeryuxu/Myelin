@@ -8,6 +8,14 @@
 % 7) Get correct scale ==> ***NOTE: changing scale right now changes a LOT
 % of stuff... maybe b/c of elim_O4??? or other elim stuff???
 
+
+% IF WANT TO ADJUST/Elim background, use ImageJ
+% ==> 1) Split channels, 2) Select ROI, 3) go to "Edit/Clear outside"
+% 4) Merge Channels, 5) Convert "Stack to RGB", 6) Save image
+
+%***Note for Annick: ==> could also use ADAPTHISTEQ MBP for area at end...
+%but too much???
+
 % ***ADDED AN adapthisteq to imageAdjust.mat... 2019-01-24
 
 %% Main function to run heuristic algorithm
@@ -144,7 +152,7 @@ batch = cell(1);   % intialize empty
 
 %batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
-%batch = {'12 wpg', '16 wpg'};
+batch = {'12 wpg', '16 wpg'};
 
 %% Run Analysis
 batch_numFiles = [];
@@ -420,7 +428,14 @@ while (moreTrials == 'Y')
                 %% Switch the sheaths for Annick's analysis
                 if switch_sheaths == 1
                     greenOrig = MBP_im;
-                    MBP_im = adapthisteq(MBP_im);                   
+                    MBP_im = adapthisteq(MBP_im); 
+                     
+%                     I = imgaussfilt(MBP_im, 2);
+%                     
+%                     background = imopen(I,strel('disk',10));
+%                     I2 = I - background;
+%                     I = I2;
+%                     I = adapthisteq(I);
                 else
                    MBP_im = zeros(size(O4_im)); 
                 end
@@ -473,12 +488,12 @@ while (moreTrials == 'Y')
                 %
                 %% (6) Clean fibers by subtracting out CB
                 %% 19/01/24 - Tiger added: don't sub cell bodies for Annick
-                %if switch_sheaths == 0
-                fibers = imbinarize(fibers - cb);
-                if mag == 'Y'
-                    fibers = imopen(fibers, strel('disk', 2));   % to get rid of straggling thin strands
+                if switch_sheaths == 0
+                    fibers = imbinarize(fibers - cb);
+                    if mag == 'Y'
+                        fibers = imopen(fibers, strel('disk', 2));   % to get rid of straggling thin strands
+                    end
                 end
-                %end
                 
                 %% (7) NEW LINE ANALYSIS (transforms ridges to lines)
                 % Horizontal lines are more dim
@@ -538,7 +553,7 @@ while (moreTrials == 'Y')
                     
                     %% Now okay to do rest of analysis below b/c watershed left spaces between CBs
                     
-                   combined_im = bw;
+                    combined_im = bw;
                 end
                 
                 fibers_sub_cb = imbinarize(combined_im - cb);  % THE REAL FIBERS_sub_cb
@@ -640,6 +655,119 @@ while (moreTrials == 'Y')
                 end
                 
                 
+                %% For Annick's analysis, do another watershed first - 19/19/01
+                
+                if switch_sheaths == 1
+                    
+                    % First find cores of ENSHEATHED cells to use for "imposemin"
+                    tmp_CBs = zeros(size(bw));
+                    for cell_num = 1:length(s(:, 1))
+                        if s(cell_num).Bool_W
+                            CB_area = s(cell_num).CB;
+                            tmp_CBs(CB_area) = 1;
+                        end
+                    end
+                    
+                    %O4_adapt = adapthisteq(O4_original);
+                    [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance);
+
+                    bw = ~bwareaopen(~combined_im, 10);  % clean
+                    D = -bwdist(~bw);  % EDT
+                    D2 = imimposemin(D, tmp_CBs);
+                    
+                    Ld2 = watershed(D2);
+                    bw3 = bw;
+                    bw3(Ld2 == 0) = 0;
+                    bw = bw3;
+                    
+                    figure(120); title('CB watershed');
+                    [B,L] = bwboundaries(bw, 'noholes');
+                    imshow(bw);
+                    imshow(label2rgb(L, @jet, [.5 .5 .5]));
+                    hold on;
+                    
+                    % Colocalize with CBs and only keep the remainder
+                    obj_CBs = bwconncomp(bw);
+                    cb_CB_idx  = obj_CBs.PixelIdxList;
+                    
+                    cores_CB = zeros(size(bw));
+                    idx_new = cell(0);
+                    for Y = 1:length(cb_CB_idx)
+                        cur_CB = cb_CB_idx{Y};
+                        if isempty(cur_CB)   %% SPEED UP CODE BY REDUCING REDUNDANCY
+                            continue;
+                        end
+                        for T = 1:length({s.CB})
+                            if s(T).Bool_W == 1
+                                CB_obj = s(T).CB;
+                                same = ismember(CB_obj, cur_CB);
+                                if ~isempty(find(same, 1))
+                                    overlap_idx = find(same);
+                                    overlap = CB_obj(overlap_idx);
+                                    cores_CB(cur_CB) = T;
+                                    break;
+                                end
+                            end
+                        end
+                    end
+                    figure(121); title('CB watershed ensheathed');
+                    %[B,L] = bwboundaries(cores_CB, 'noholes');
+                    %imshow(cores_CB);
+                    imshow(label2rgb(cores_CB, @lines, [.5 .5 .5]));
+                    hold on;
+                    
+                    figure(122); title('Ensheathed Cores');
+                    imshow(tmp_CBs);
+                    
+
+                    %% SOMEHOW CORRELATE NOW WITH MBP???
+                    %% DO YOU WANT ORIGINAL OR ENHANCED MBP???
+                    
+                    bw_MBP = imbinarize(greenOrig);
+                    bw_MBP(~cores_CB) = 0;
+                    
+                    obj_MBP = bwconncomp(bw_MBP);
+                    cb_MBP_idx  = obj_MBP.PixelIdxList;
+                    
+                    obj_CB_E = bwconncomp(cores_CB);
+                    cb_CB_E_idx = obj_CB_E.PixelIdxList;
+
+                    cores_MBP = zeros(size(bw));
+                    idx_new = cell(0);
+                    for Y = 1:length(cb_MBP_idx)
+                        cur_MBP = cb_MBP_idx{Y};
+                        if isempty(cur_MBP)   %% SPEED UP CODE BY REDUCING REDUNDANCY
+                            continue;
+                        end
+                        for T = 1:length(cb_CB_E_idx)
+                            MBP_obj = cb_CB_E_idx{T};
+                            same = ismember(MBP_obj, cur_MBP);
+                            if ~isempty(find(same, 1))
+                                overlap_idx = find(same);
+                                overlap = MBP_obj(overlap_idx);
+                                cores_MBP(cur_MBP) = T;
+                                break;
+                            end
+                            
+                        end
+                    end
+                    
+                    figure(123); title('MBP of ensheathed');
+                    imshow(label2rgb(cores_MBP, @lines, [.5 .5 .5]));
+                    hold on;       
+                    
+                    %% NOW LOOP THROUGH AND COUNT HOW MUCH MBP PER CELL!!! THEN SAVE the results!!!
+                    cell_numbers = unique(cores_MBP);
+                    area_per_cell = [];
+                    for T = 2:length(cell_numbers)
+                        a = length(cores_MBP(cores_MBP == T));   % gets the area
+                        area_per_cell = [area_per_cell, a];    % ***AREA might be ZERO ==> b/c not ADAPTHISTEQ
+                    end
+                    
+                    s(1).AreaOverall = area_per_cell;
+                    
+                end
+                    
                 %% Print images of results
                 cd(saveDirName);
                 figure(5);
@@ -670,7 +798,7 @@ while (moreTrials == 'Y')
                 filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '5) Filter ridges') ;
                 print(filename,'-dpng'); hold off;
                 
-                figure(188); figure; imshow(cat(3, zeros(size(MBP_im)), MBP_im,  zeros(size(MBP_im))));
+                figure(188); figure; imshow(cat(3, zeros(size(MBP_im)), greenOrig,  zeros(size(MBP_im))));
                 filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '6) MBP alone') ;
                 print(filename,'-dpng')
                 hold off;
@@ -689,6 +817,25 @@ while (moreTrials == 'Y')
                 print(filename,'-dpng')
                 hold off;
 
+                if switch_sheaths
+                    figure(121);
+                    filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '10) CB watershed ensheathed') ;
+                    print(filename,'-dpng')
+                    hold off;
+                    
+                    figure(122);
+                    filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '11) Ensheathed cores') ;
+                    print(filename,'-dpng')
+                    hold off;
+                    
+                    figure(123);
+                    filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '12) MBP per cell') ;
+                    print(filename,'-dpng')
+                    hold off;
+ 
+                end
+
+                
                 
                 %% Print to file:
                 %(1) "allAnalysis.txt" is for EACH image
@@ -854,6 +1001,7 @@ all_individual_trials_sheaths = cell(0);
 all_individual_trials_lengths = cell(0);
 all_individual_trials_log = cell(0);
 all_individual_trials_LPC = cell(0);
+all_individual_trials_area_per_cell = cell(0);
 
 batch_sort = 0;
 if length(batch_numFiles) > 1
@@ -867,6 +1015,7 @@ for fileNum = 1 : numfids
     allLengthFibersR = [];
     allMeanLPC = [];
     allLog = [];
+    all_area_per_cell = [];
     num_O4_individual = 0;
     num_sheaths_individual = 0;
     
@@ -876,6 +1025,7 @@ for fileNum = 1 : numfids
     
     % Count allNumSheaths and allLengths  ***using LENGTH OF SKELETON
     if ~isempty(s)
+        all_area_per_cell = s(1).AreaOverall;
         for N = 1:length({s.objDAPI})
             
             if isfield(s, 'O4_bool') && s(N).O4_bool
@@ -957,7 +1107,7 @@ for fileNum = 1 : numfids
     all_individual_trials_lengths{end + 1} = allLengthFibersR;
     all_individual_trials_log{end + 1} =  allLog;
     all_individual_trials_LPC{end + 1} = allMeanLPC;
-    
+    all_individual_trials_area_per_cell{end + 1} = all_area_per_cell;
 end
 
 cd(cur_dir);
@@ -980,6 +1130,7 @@ fid1 = fopen('output_sheaths.csv', 'w') ;
 fid2 = fopen('output_lengths.csv', 'w') ;
 fid3 = fopen('output_log.csv', 'w') ;
 fid4 = fopen('output_LPC.csv', 'w') ;
+fid5 = fopen('output_area_per_cell.csv', 'w');
 
 if length(batch_numFiles) == 1
     for idx = 1:length(all_individual_trials_sheaths)
@@ -1000,13 +1151,19 @@ if length(batch_numFiles) == 1
             all_individual_trials_LPC{1, idx} = 0;
         end
         
+        if isempty(all_individual_trials_area_per_cell{1, idx})
+            all_individual_trials_area_per_cell{1, idx} = 0;
+        end
+        
+        
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, idx), '-append') ;
         dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, idx), '-append') ;
         dlmwrite('output_log.csv', all_individual_trials_log(1, idx), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, idx), '-append') ;
+        dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, idx), '-append') 
     end
     
-else
+else  % if BATCHED with user input
     total_counter = batch_numFiles(1);
     for idx = 1:length(batch_numFiles)
         %cycle_files = 0;
@@ -1028,10 +1185,15 @@ else
             all_individual_trials_LPC{1, total_counter} = 0;
         end
         
+        if isempty(all_individual_trials_area_per_cell{1, total_counter})
+            all_individual_trials_area_per_cell{1, total_counter} = 0;
+        end
+        
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, total_counter), '-append') ;
         dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, total_counter), '-append') ;
         dlmwrite('output_log.csv', all_individual_trials_log(1, total_counter), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, total_counter), '-append') ;
+        dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, total_counter), '-append')
         %end
         %cycle_files = cycle_files + 1;
         total_counter = total_counter + batch_numFiles(idx);
@@ -1042,6 +1204,7 @@ fclose(fid1);
 fclose(fid2);
 fclose(fid3);
 fclose(fid4);
+fclose(fid5);
 
 %% Prompt to plot everything:
 % questTitle='Plot Data?';
