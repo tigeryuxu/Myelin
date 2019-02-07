@@ -146,7 +146,7 @@ batch = cell(1);   % intialize empty
 %batch = {'*KOSkap2_20x', '*WT_20x'};
 %batch = {''};
 
-%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
+batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
@@ -186,7 +186,7 @@ while (moreTrials == 'Y')
     allS = []; allInfo = [];
     
     cd(saveDirName);
-    nameTmp = strcat('allAnalysis', name, '.txt');   % Output file
+    nameTmp = strcat('allAnalysis', erase(name, '*'), '.txt');   % Output file
     fileID = fopen(nameTmp,'w');
     cd(cur_dir);
     
@@ -390,6 +390,8 @@ while (moreTrials == 'Y')
                     ,'CB', cell(length(objDAPI), 1), 'Fibers', cell(length(objDAPI), 1), 'Mean_Fiber_L_per_C', cell(length(objDAPI), 1), 'Bool_W', c...
                     , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c);
                 
+                %% ***^^^ADD "OtherStats"
+                
                 
                 %% (2) Extract cores
                 [s] = reg_core_filt(combined_im, diameterFiber, siz, percentDilate, s);  % small cores
@@ -426,8 +428,8 @@ while (moreTrials == 'Y')
                 end
                 
                 %% Switch the sheaths for Annick's analysis
+                greenOrig = MBP_im;
                 if switch_sheaths == 1
-                    greenOrig = MBP_im;
                     MBP_im = adapthisteq(MBP_im); 
                      
 %                     I = imgaussfilt(MBP_im, 2);
@@ -772,64 +774,64 @@ while (moreTrials == 'Y')
                 cd(saveDirName);
                 figure(5);
                 set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
-                filename = strcat('Result', name, num2str(fileNum_sav), '_', num2str(counter), '1) All channels');
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', num2str(counter), '1) All channels');
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(1);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '2) Cell body BW') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '2) Cell body BW') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 % Saves image
                 figure(100);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '3) Cell nuclei') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '3) Cell nuclei') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(31);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '4) final_fibers') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '4) final_fibers') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 bw_final_fibers(bw_final_fibers > 0) = 1;
                 
                 figure(67); imshowpair(wholeImage, mask); title('Filter ridges');
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '5) Filter ridges') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '5) Filter ridges') ;
                 print(filename,'-dpng'); hold off;
                 
-                figure(188); figure; imshow(cat(3, zeros(size(MBP_im)), greenOrig,  zeros(size(MBP_im))));
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '6) MBP alone') ;
+                figure(188); imshow(cat(3, zeros(size(MBP_im)), greenOrig,  zeros(size(MBP_im))));
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '6) MBP alone') ;
                 print(filename,'-dpng')
                 hold off;
                 
-                figure(189); figure; imshow(cat(3, O4_original, zeros(size(MBP_im)),  zeros(size(MBP_im))));
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '7) Cell Body alone') ;
+                figure(189); imshow(cat(3, O4_original, zeros(size(MBP_im)),  zeros(size(MBP_im))));
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '7) Cell Body alone') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(88); imshowpair(wholeImage, imbinarize(bw_final_fibers)); title('Ridges to lines after sub core');  hold on;
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '8) Skeletonized ridges') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '8) Skeletonized ridges') ;
                 print(filename,'-dpng'); hold off;
                 
                 figure(32); imshow(bw_green);
-                filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '9) MBP bw') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '9) MBP bw') ;
                 print(filename,'-dpng')
                 hold off;
 
                 if switch_sheaths
                     figure(121);
-                    filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '10) CB watershed ensheathed') ;
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '10) CB watershed ensheathed') ;
                     print(filename,'-dpng')
                     hold off;
                     
                     figure(122);
-                    filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '11) Ensheathed cores') ;
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '11) Ensheathed cores') ;
                     print(filename,'-dpng')
                     hold off;
                     
                     figure(123);
-                    filename = strcat('Result', name, num2str(fileNum_sav),  '_', num2str(counter), '12) MBP per cell') ;
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '12) MBP per cell') ;
                     print(filename,'-dpng')
                     hold off;
  
@@ -841,7 +843,7 @@ while (moreTrials == 'Y')
                 %(1) "allAnalysis.txt" is for EACH image
                 
                 %%if file is already open, then no need to open it again
-                fprintf(fileID,'Image No. : %d              File name: %s \n', (fileNum_sav), name);
+                fprintf(fileID,'Image No. : %d              File name: %s \n', (fileNum_sav), erase(name, '*'));
                 fprintf(fileID,'Num wrapped R cells: %d \n', wrappedR);
                 fprintf(fileID,'Num un-wrapped R cells: %d \n', unwrappedR);
                 fprintf(fileID,'Proportion wrapped R: %.2f \n\n', wrappedR/(unwrappedR + wrappedR));
@@ -878,7 +880,7 @@ while (moreTrials == 'Y')
         end
         
         cd(saveDirName);
-        save(strcat(name, '_', num2str(fileNum_sav)), 'allS');
+        save(strcat(erase(name, '*'), '_', num2str(fileNum_sav)), 'allS');
             
         %% Tiger: 20/01/19 - should add switch here so if batching, doesn't clear "allS"
         if length(batch) > 1
@@ -896,7 +898,7 @@ while (moreTrials == 'Y')
     proportionR = sumWrappedR/(sumUnWrappedR + sumWrappedR);
     proportionG = sumWrappedG/(sumUnWrappedG + sumWrappedG);
     
-    nameTmp = strcat('summary', name, '.txt');
+    nameTmp = strcat('summary', erase(name, '*'), '.txt');
     fileID = fopen(nameTmp,'w');
     fprintf(fileID,'Total num images analyzed: %d \n', numfids/5);
     fprintf(fileID,'Num wrapped R cells: %d \n', sumWrappedR);
