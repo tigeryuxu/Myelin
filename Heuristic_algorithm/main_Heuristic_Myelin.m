@@ -146,7 +146,7 @@ batch = cell(1);   % intialize empty
 %batch = {'*KOSkap2_20x', '*WT_20x'};
 %batch = {''};
 
-batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
+%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
