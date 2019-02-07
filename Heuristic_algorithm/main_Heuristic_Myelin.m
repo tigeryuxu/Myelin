@@ -152,7 +152,7 @@ batch = cell(1);   % intialize empty
 
 %batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
-batch = {'12 wpg', '16 wpg'};
+%batch = {'12 wpg', '16 wpg'};
 
 %% Run Analysis
 batch_numFiles = [];
