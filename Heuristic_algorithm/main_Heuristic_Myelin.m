@@ -447,7 +447,8 @@ while (moreTrials == 'Y')
                 
                 %% Switch the sheaths for Annick's analysis
                 if switch_sheaths == 1
-                    O4_im_ridges_adapted = MBP_im;
+                    %O4_im_ridges_adapted = MBP_im;
+                    O4_im_ridges_adapted = greenOrig;
                 end
                 
                 figure(5); imshow(wholeImage); title('Output Image'); hold on;
