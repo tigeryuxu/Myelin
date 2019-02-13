@@ -146,7 +146,9 @@ batch = cell(1);   % intialize empty
 %batch = {'*KOSkap2_20x', '*WT_20x'};
 %batch = {''};
 
-%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
+batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
+
+batch = {'*RR2'};
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
@@ -1049,7 +1051,7 @@ for fileNum = 1 : numfids
         batch_counter = batch_counter + batch_numFiles(size_counter);
         %batch_counter = batch_counter + 1;
         size_counter = size_counter + 1;
-        figure; imshow(tmp);
+        %figure; imshow(tmp);
     end
     
     % Count allNumSheaths and allLengths  ***using LENGTH OF SKELETON
@@ -1193,10 +1195,11 @@ if length(batch_numFiles) == 1
     end
     
 else  % if BATCHED with user input
-    total_counter = batch_numFiles(1);
+    total_counter = 0;
     for idx = 1:length(batch_numFiles)
         %cycle_files = 0;
         %while cycle_files < batch_numFiles(idx)
+        total_counter = total_counter + batch_numFiles(idx);
         
         if isempty(all_individual_trials_sheaths{1, total_counter})
             all_individual_trials_sheaths{1, total_counter} = 0;
@@ -1225,7 +1228,7 @@ else  % if BATCHED with user input
         dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, total_counter), '-append')
         %end
         %cycle_files = cycle_files + 1;
-        total_counter = total_counter + batch_numFiles(idx);
+
     end
 end
 
@@ -1334,3 +1337,4 @@ fclose(fid5);
 %
 %     cd(cur_dir);
 % end
+
