@@ -80,8 +80,8 @@ while (calibrate)
     hor_factor = get((output.checkbox16), 'value');
     switch_sheaths = get((output.checkbox17), 'value');
     
-    save_params = {name, batch, scale, diameterFiber, sigma, sensitivity, minLength, DAPIsize, nanoYN...
-        ,verbose, calibrate, match_words, bool_load_five, adapt_his, divide_im};
+    save_params = {name, batch, scale, diameterFiber, sigma, sensitivity, minLength * scale, unscaled_DAPI, nanoYN...
+        ,combineRG ,verbose, calibrate, match_words, bool_load_five, adapt_his, divide_im, hor_factor, switch_sheaths};
     
     if calibrate
         sensitivity = calib(diameterFiber, minLength, name, fillHoles, DAPIsize, calibrate, mag, DAPImetric, scale, sensitivity, sigma, foldername, cur_dir);
@@ -146,7 +146,7 @@ batch = cell(1);   % intialize empty
 %batch = {'*KOSkap2_20x', '*WT_20x'};
 %batch = {''};
 
-%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR31'};
+%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
@@ -156,6 +156,7 @@ batch = cell(1);   % intialize empty
 
 %% Run Analysis
 batch_numFiles = [];
+batch_sizes = [];
 while (moreTrials == 'Y')
     
     %% Batch processing
@@ -186,7 +187,11 @@ while (moreTrials == 'Y')
     allS = []; allInfo = [];
     
     cd(saveDirName);
-    nameTmp = strcat('allAnalysis', erase(name, '*'), '.txt');   % Output file
+    if isempty(name)
+        name = '';   % Output file        
+    end
+        nameTmp = strcat('allAnalysis', erase(name, '*'), '.txt');   % Output file
+    
     fileID = fopen(nameTmp,'w');
     cd(cur_dir);
     
@@ -278,6 +283,11 @@ while (moreTrials == 'Y')
         end
         width = square_cut_w;
         height = square_cut_h;
+        
+        %% Store the size of images for batch processing - Tiger 12/02/19
+        if fileNum == 1
+           batch_sizes = [batch_sizes; [height, width]]; 
+        end
         
         
         intensityValueDAPI = im2double(redImage(:,:,3));
@@ -388,7 +398,7 @@ while (moreTrials == 'Y')
                 strucMat = num2cell(mat, 2);
                 s = struct('objDAPI', objDAPI', 'centerDAPI', strucMat, 'Core', cell(length(objDAPI), 1)...
                     ,'CB', cell(length(objDAPI), 1), 'Fibers', cell(length(objDAPI), 1), 'Mean_Fiber_L_per_C', cell(length(objDAPI), 1), 'Bool_W', c...
-                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c);
+                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c, 'OtherStats', c);
                 
                 %% ***^^^ADD "OtherStats"
                 
@@ -1007,8 +1017,14 @@ all_individual_trials_LPC = cell(0);
 all_individual_trials_area_per_cell = cell(0);
 
 batch_sort = 0;
+batch_counter = 0;
+size_counter = 1;
 if length(batch_numFiles) > 1
     batch_sort = length(batch_numFiles);
+    height = batch_sizes(size_counter, 1); % picks new size
+    width = batch_sizes(size_counter, 2);
+    batch_counter = batch_numFiles(size_counter);
+    size_counter = size_counter + 1;
 end
 
 
@@ -1025,6 +1041,16 @@ for fileNum = 1 : numfids
     filename = trialNames{fileNum};
     s = load(filename);
     s = s.allS;
+   
+    %% use diff sizes taken from the batch-runs if batched - Tiger 13/02/19
+    if batch_counter == fileNum - 1 && batch_counter < numfids
+        height = batch_sizes(size_counter, 1); % picks new size
+        width = batch_sizes(size_counter, 2);
+        batch_counter = batch_counter + batch_numFiles(size_counter);
+        %batch_counter = batch_counter + 1;
+        size_counter = size_counter + 1;
+        figure; imshow(tmp);
+    end
     
     % Count allNumSheaths and allLengths  ***using LENGTH OF SKELETON
     if ~isempty(s)
@@ -1308,4 +1334,3 @@ fclose(fid5);
 %
 %     cd(cur_dir);
 % end
-
