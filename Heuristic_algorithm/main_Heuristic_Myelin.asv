@@ -398,22 +398,7 @@ while (moreTrials == 'Y')
                 strucMat = num2cell(mat, 2);
                 s = struct('objDAPI', objDAPI', 'centerDAPI', strucMat, 'Core', cell(length(objDAPI), 1)...
                     ,'CB', cell(length(objDAPI), 1), 'Fibers', cell(length(objDAPI), 1), 'Mean_Fiber_L_per_C', cell(length(objDAPI), 1), 'Bool_W', c...
-                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c, 'im_size', c, 'OtherStats', c);
-                
-                
-                %% Added "size" metric to keep track of size of image - Tiger 16/02/2019
-                size_red = size(intensityValueDAPI);
-                %redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
-                height = size_red(1);
-                width = size_red(2);
-                
-                s(1).im_size = [height, width];
-                
-                %% Store the size of images for batch processing - Tiger 12/02/19
-                if fileNum == 1 || length(batch_numFiles) == 1
-                    batch_sizes = [batch_sizes; [height, width]];
-                end
-                
+                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c, 'numO4', c, 'OtherStats', c);
                 
                 %% ***^^^ADD "OtherStats"
                 
@@ -1069,7 +1054,7 @@ for fileNum = 1 : numfids
         batch_counter = batch_counter + batch_numFiles(size_counter);
         %batch_counter = batch_counter + 1;
         size_counter = size_counter + 1;
-        %figure; imshow(tmp);
+        figure; imshow(tmp);
     end
     
     % Count allNumSheaths and allLengths  ***using LENGTH OF SKELETON
