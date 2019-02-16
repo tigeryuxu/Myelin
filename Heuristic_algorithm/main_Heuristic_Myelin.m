@@ -146,9 +146,7 @@ batch = cell(1);   % intialize empty
 %batch = {'*KOSkap2_20x', '*WT_20x'};
 %batch = {''};
 
-batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
-
-batch = {'*RR2'};
+%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
@@ -287,7 +285,7 @@ while (moreTrials == 'Y')
         height = square_cut_h;
         
         %% Store the size of images for batch processing - Tiger 12/02/19
-        if fileNum == 1
+        if fileNum == 1 || length(batch_numFiles) == 1
            batch_sizes = [batch_sizes; [height, width]]; 
         end
         
@@ -516,6 +514,11 @@ while (moreTrials == 'Y')
                 if scale > 0.3
                     dil_lines = 'N';
                 end
+                
+                if width > 7000  % if the image is very large, then also dilate the fibers
+                   dil_lines = 'Y'; 
+                end
+                
                 [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength, dil_lines);
                 
                 locFibers =  locFibers(~cellfun('isempty',locFibers));   % delete from the list if not a line
@@ -1154,14 +1157,14 @@ cd(cur_dir);
 
 % SAVE CSV FOR ALL INDIVIDUAL TRIALS
 cd(saveDirName);
-csvwrite('output_props.csv', all_individual_trials);
-
+%csvwrite('output_props.csv', all_individual_trials);
 
 fid1 = fopen('output_sheaths.csv', 'w') ;
 fid2 = fopen('output_lengths.csv', 'w') ;
 fid3 = fopen('output_log.csv', 'w') ;
 fid4 = fopen('output_LPC.csv', 'w') ;
 fid5 = fopen('output_area_per_cell.csv', 'w');
+fid6 = fopen('output_props.csv', 'w');
 
 if length(batch_numFiles) == 1
     for idx = 1:length(all_individual_trials_sheaths)
@@ -1186,12 +1189,16 @@ if length(batch_numFiles) == 1
             all_individual_trials_area_per_cell{1, idx} = 0;
         end
         
+        if isempty(all_individual_trials{1, idx})
+            all_individual_trials{1, idx} = 0;
+        end
         
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, idx), '-append') ;
         dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, idx), '-append') ;
         dlmwrite('output_log.csv', all_individual_trials_log(1, idx), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, idx), '-append') ;
         dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, idx), '-append') 
+        dlmwrite('output_props.csv', all_individual_trials(1, idx), '-append')
     end
     
 else  % if BATCHED with user input
@@ -1221,11 +1228,16 @@ else  % if BATCHED with user input
             all_individual_trials_area_per_cell{1, total_counter} = 0;
         end
         
+        if isempty(all_individual_trials{1, total_counter})
+            all_individual_trials{1, total_counter} = 0;
+        end
+        
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, total_counter), '-append') ;
         dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, total_counter), '-append') ;
         dlmwrite('output_log.csv', all_individual_trials_log(1, total_counter), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, total_counter), '-append') ;
         dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, total_counter), '-append')
+        dlmwrite('output_props.csv', all_individual_trials(1, total_counter), '-append')
         %end
         %cycle_files = cycle_files + 1;
 
@@ -1237,6 +1249,7 @@ fclose(fid2);
 fclose(fid3);
 fclose(fid4);
 fclose(fid5);
+fclose(fid6);
 
 %% Prompt to plot everything:
 % questTitle='Plot Data?';
@@ -1294,14 +1307,14 @@ fclose(fid5);
 %
 %     writetable(T1, 'Result_table.csv', 'WriteRowNames',true);
 
-    %% Make csv files for data analysis
-    name_csv = 'Result_names.csv';
-    Row_Names = batch;
-    T1 = table(Row_Names);
+%% Make csv files for data analysis
+name_csv = 'Result_names.csv';
+Row_Names = batch;
+T1 = table(Row_Names);
 
-    writetable(T1, name_csv, 'WriteRowNames',true);
+writetable(T1, name_csv, 'WriteRowNames',true);
 
-    dlmwrite(name_csv, ' ', '-append');
+dlmwrite(name_csv, ' ', '-append');
 %
 %     name_csv = 'Result_num_sheaths.csv';
 %     %dlmwrite(name_csv, 'NumWrapped,', '-append');
