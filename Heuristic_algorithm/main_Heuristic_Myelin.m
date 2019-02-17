@@ -96,10 +96,21 @@ cd(cur_dir);
 %square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
 %square_cut_w = 7200;
 
+
+% FOR HUMAN TRIALS, need to eliminate more smaller cells???
+human_OL = 'Y';
+if human_OL == 'Y'
+    squareDist = 150;
+    %enhance_RED = 'Y'; % ==> set as 'Y' for other human OL trials!!!
+else
+    squareDist = 50;
+end
+
+
+
 square_cut_h = 1460; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
 square_cut_w = 1936;
 
-enhance_RED = 'N'; % ==> set as 'Y' for other human OL trials!!!
 remove_nets = 'Y'; % background subtraction for O4
 
 mag = 'N';
@@ -111,7 +122,7 @@ percentDilate = 2;   % for cores
 %hor_factor = 2;
 near_join = round(3 / (scale));  % in um
 fillHoles = round(8 / (scale * scale));  % in um^2
-squareDist = round(50 / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
+squareDist = round(squareDist / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
 coreMin = 0;
 %elim_O4 = round(40 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
 
@@ -275,9 +286,20 @@ while (moreTrials == 'Y')
         % decide if want to run as WHOLE image, or cut into squares
         if divide_im == 0
             size_red = size(redImage);
-            %redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
             square_cut_h = size_red(1);
             square_cut_w = size_red(2);
+            
+            
+            % makes the image smaller, else runs out of RAM
+            if square_cut_h > 5000
+                square_cut_h = 5000;
+            end
+            if square_cut_w > 6500
+                square_cut_w = 6500;
+            end
+            
+            redImage = redImage(1:square_cut_h, 1: square_cut_w, :);
+        
         else
             redImage = redImage(1:square_cut_h * 4, 1:square_cut_w * 4, :);
         end
@@ -327,10 +349,15 @@ while (moreTrials == 'Y')
 %         end
         [all_MBP_im_split] = split_imV2(greenImage, square_cut_h, square_cut_w);
         
+        if load_five == 5 && fileNum > 1
+            fileNum_sav = ((fileNum - 1)/load_five) + 1;
+        else
+            fileNum_sav = (fileNum);
+        end
+        
         %% LOOP
         counter = 0;
         for Q = 1:length(all_DAPI_im_split(:, 1))
-            
             for R = 1:length(all_DAPI_im_split(1, :))
                 if isempty(all_DAPI_im_split{Q, R})
                     continue;
@@ -445,7 +472,7 @@ while (moreTrials == 'Y')
                 %% Print * for DAPI and O4+
                 if enhance_RED == 'Y'
                     tmpDAPI = adapthisteq(intensityValueDAPI);
-                    O4_original = adapthisteq(adapthisteq(adapthisteq(O4_original)));
+                    O4_tmp = adapthisteq(O4_original);
                 else
                     tmpDAPI = adapthisteq(intensityValueDAPI);
                     O4_tmp = adapthisteq(O4_im_ridges_adapted);
@@ -530,7 +557,7 @@ while (moreTrials == 'Y')
                     dil_lines = 'N';
                 end
                 
-                if width > 7000  % if the image is very large, then also dilate the fibers
+                if width > 5500  % if the image is very large, then also dilate the fibers
                    dil_lines = 'Y'; 
                 end
                 
@@ -648,12 +675,7 @@ while (moreTrials == 'Y')
                     s(Y).im_num = image_number;
                 end
                 
-                
-                if load_five == 5 && fileNum > 1
-                    fileNum_sav = ((fileNum - 1)/load_five) + 1;
-                else
-                    fileNum_sav = (fileNum);
-                end
+               
                 
                 %% ALSO get the MBP area ==> also need to colocalize the identified sheaths with original
                 % (a) want the area of MBP overall in the whole image (can
@@ -911,6 +933,7 @@ while (moreTrials == 'Y')
         end
         
         cd(saveDirName);
+
         save(strcat(erase(name, '*'), '_', num2str(fileNum_sav)), 'allS');
             
         %% Tiger: 20/01/19 - should add switch here so if batching, doesn't clear "allS"
