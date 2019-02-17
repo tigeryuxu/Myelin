@@ -1061,14 +1061,18 @@ for fileNum = 1 : numfids
     filename = trialNames{fileNum};
     s = load(filename);
     s = s.allS;
-   
+    
+    size_im = s(1).im_size;
+    height = size_im(1);
+    width = size_im(2);
+    
     %% use diff sizes taken from the batch-runs if batched - Tiger 13/02/19
     if batch_counter == fileNum - 1 && batch_counter < numfids
-        height = batch_sizes(size_counter, 1); % picks new size
-        width = batch_sizes(size_counter, 2);
-        batch_counter = batch_counter + batch_numFiles(size_counter);
+        %height = batch_sizes(size_counter, 1); % picks new size
+        %width = batch_sizes(size_counter, 2);
+        %batch_counter = batch_counter + batch_numFiles(size_counter);
         %batch_counter = batch_counter + 1;
-        size_counter = size_counter + 1;
+        %size_counter = size_counter + 1;
         %figure; imshow(tmp);
     end
     
@@ -1181,7 +1185,7 @@ fid4 = fopen('output_LPC.csv', 'w') ;
 fid5 = fopen('output_area_per_cell.csv', 'w');
 fid6 = fopen('output_props.csv', 'w');
 
-if length(batch_numFiles) == 1
+if length(batch_numFiles) < 2
     for idx = 1:length(all_individual_trials_sheaths)
         
         if isempty(all_individual_trials_sheaths{1, idx})
@@ -1204,8 +1208,8 @@ if length(batch_numFiles) == 1
             all_individual_trials_area_per_cell{1, idx} = 0;
         end
         
-        if isempty(all_individual_trials{1, idx})
-            all_individual_trials{1, idx} = 0;
+        if isempty(all_individual_trials)
+            all_individual_trials = 0;
         end
         
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, idx), '-append') ;
@@ -1213,7 +1217,7 @@ if length(batch_numFiles) == 1
         dlmwrite('output_log.csv', all_individual_trials_log(1, idx), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, idx), '-append') ;
         dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, idx), '-append') 
-        dlmwrite('output_props.csv', all_individual_trials(1, idx), '-append')
+        dlmwrite('output_props.csv', all_individual_trials(idx, :), '-append')
     end
     
 else  % if BATCHED with user input
