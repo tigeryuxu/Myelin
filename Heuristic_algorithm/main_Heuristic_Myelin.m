@@ -150,7 +150,7 @@ batch = cell(1);   % intialize empty
 
 %batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
-batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
+%batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
 %batch = {'12 wpg', '16 wpg'};
 
@@ -1247,8 +1247,8 @@ else  % if BATCHED with user input
             all_individual_trials_area_per_cell{1, total_counter} = 0;
         end
         
-        if isempty(all_individual_trials{1, total_counter})
-            all_individual_trials{1, total_counter} = 0;
+        if isempty(all_individual_trials)
+            all_individual_trials = 0;
         end
         
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, total_counter), '-append') ;
@@ -1256,7 +1256,7 @@ else  % if BATCHED with user input
         dlmwrite('output_log.csv', all_individual_trials_log(1, total_counter), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, total_counter), '-append') ;
         dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, total_counter), '-append')
-        dlmwrite('output_props.csv', all_individual_trials(1, total_counter), '-append')
+        dlmwrite('output_props.csv', all_individual_trials, '-append')
         %end
         %cycle_files = cycle_files + 1;
 
