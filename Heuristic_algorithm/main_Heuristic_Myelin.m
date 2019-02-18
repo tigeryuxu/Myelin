@@ -1270,8 +1270,8 @@ else  % if BATCHED with user input
             all_individual_trials_area_per_cell{1, total_counter} = 0;
         end
         
-        if isempty(all_individual_trials{1, total_counter})
-            all_individual_trials{1, total_counter} = 0;
+        if isempty(all_individual_trials)
+            all_individual_trials = 0;
         end
         
         dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, total_counter), '-append') ;
@@ -1279,7 +1279,7 @@ else  % if BATCHED with user input
         dlmwrite('output_log.csv', all_individual_trials_log(1, total_counter), '-append') ;
         dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, total_counter), '-append') ;
         dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, total_counter), '-append')
-        dlmwrite('output_props.csv', all_individual_trials(1, total_counter), '-append')
+        dlmwrite('output_props.csv', all_individual_trials, '-append')
         %end
         %cycle_files = cycle_files + 1;
 
