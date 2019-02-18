@@ -558,7 +558,7 @@ while (moreTrials == 'Y')
                 end
                 
                 if width > 5500  % if the image is very large, then also dilate the fibers
-                   dil_lines = 'Y'; 
+                   dil_lines = 'Y';
                 end
                 
                 [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength, dil_lines);
