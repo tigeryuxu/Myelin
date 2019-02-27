@@ -12,10 +12,6 @@ class GUI:
     def __init__(self, master):
         self.master = master
         master.title("Myelin Quantification - Parameters")
-
-#        self.secret_number = random.randint(1, 100)
-#        self.guess = 0
-#        self.num_guesses = 0
     
         self.scale = None
         self.minLength = None
@@ -65,51 +61,15 @@ class GUI:
         if not new_text: # the field is being cleared
             self.guess = None
             return True
-
-#        try:
-#            """ SEE IF TEXT ENTERED IS INT"""
-#            guess = int(new_text)
-#            if 1 <= guess <= 100:
-#                self.guess = guess
-#                return True
-#            else:
-#                return False
-#        except ValueError:
-#            return False
-
         return True
-
-
-#    def reset(self):
-#        self.entry.delete(0, END)
-#        self.secret_number = random.randint(1, 100)
-#        self.guess = 0
-#        self.num_guesses = 0
-#
-#        self.message = "Guess a number from 1 to 100"
-#        self.label_text.set(self.message)
-#
-#        self.guess_button.configure(state=NORMAL)
-#        self.reset_button.configure(state=DISABLED)
-        
         
     def close(self):
-        self.num_guesses += 1
-
-        if self.guess is None:
-            self.message = "Please enter a value"
-
-#        elif self.guess == self.secret_number:
-#            suffix = '' if self.num_guesses == 1 else 'es'
-#            self.message = "Congratulations! You guessed the number after %d guess%s." % (self.num_guesses, suffix)
-#            self.guess_button.configure(state=DISABLED)
-#            self.reset_button.configure(state=NORMAL)
-#
-#        elif self.guess < self.secret_number:
-#            self.message = "Too low! Guess again!"
-        else:
-            """ SAVE PARAMETERS??? Then do pop-out to give message"""       
-            try:
+        #if self.guess is None:
+        #    self.message = "Please enter a value"
+            
+        #else:
+        """ SAVE PARAMETERS??? Then do pop-out to give message"""       
+        try:
                 """ SEE IF TEXT ENTERED ARE INTEGERS"""
                 if 0 <= float(self.entry1.get()) <= 100 and 0 <= float(self.entry2.get()) <= 100 and 0 <= float(self.entry3.get()) <= 100:
                     self.scale = self.entry1.get()
@@ -118,11 +78,11 @@ class GUI:
                    
                 else:
                     return False
-            except ValueError:
+        except ValueError:
                 
                 return False
         
-            self.message = "Parameters saved: " + "Scale: " + self.scale
+        self.message = "Parameters saved: " + "Scale: " + self.scale
 
         self.label_text.set(self.message)
 

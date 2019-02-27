@@ -103,7 +103,7 @@ if hor_factor == 1
     
     if dilate == 'Y'
         clean_h = imdilate(clean_h, ones(5, 5));
-        clean_v = imerode(clean_h, ones(10, 1));
+        clean_h = imerode(clean_h, ones(1, 10));
     end
     hh = regionprops(clean_h, 'PixelIdxList', 'MajorAxisLength');
     

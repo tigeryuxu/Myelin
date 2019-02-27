@@ -98,12 +98,18 @@ cd(cur_dir);
 
 
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
-human_OL = 'Y';
+enhance_RED = 'N';
+
+
+
+
+human_OL = 'N';
 if human_OL == 'Y'
     squareDist = 150;
-    %enhance_RED = 'Y'; % ==> set as 'Y' for other human OL trials!!!
+    enhance_RED = 'Y'; % ==> set as 'Y' for other human OL trials!!!
 else
     squareDist = 50;
+    %squareDist = 150;
 end
 
 
@@ -159,7 +165,7 @@ batch = cell(1);   % intialize empty
 
 %batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
 
-%batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
+batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
 
 %batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
 
