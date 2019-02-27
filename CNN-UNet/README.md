@@ -85,7 +85,6 @@
   
   2. Then navigate the GUI
    *  First thing that appears prompts you to enter some parameters for the analysis
-   *	Then navigate to and select the directory containing the checkpoint file ("Checkpoint") directory
    *	Then navigate to and select the directory you wish to save the output
    *	Then navigate to and select the directory that contains the ".tiff" images to be analyzed
 
