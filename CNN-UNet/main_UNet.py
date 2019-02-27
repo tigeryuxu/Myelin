@@ -16,7 +16,9 @@ from GUI import *
 import tkinter
 from tkinter import filedialog
 import os
-    
+
+tf.reset_default_graph()
+        
 debug = 0
 
 """ LOAD UP GUI """
@@ -36,7 +38,7 @@ if im_scale == None or min_microns == None or sensitivity == None:
     print("Nothing entered, switching to default")    
 
 
-print("Parameters saved: " + "Scale: " + im_scale + " minLength: " + min_microns + " Sensitivity: " + sensitivity)
+print("Parameters saved: " + "\nScale: " + im_scale + " \nminLength: " + min_microns + "\nSensitivity: " + sensitivity)
 
 im_scale = float(im_scale)
 min_microns = float(min_microns)
@@ -68,9 +70,11 @@ jacc_test = 0
 checkpoint = '301000'
 
 root = tkinter.Tk()
-s_path = filedialog.askdirectory(parent=root, initialdir=cur_dir,
-                                        title='Please select checkpoint directory')
-s_path = s_path + '/'
+#s_path = filedialog.askdirectory(parent=root, initialdir=cur_dir,
+#                                        title='Please select checkpoint directory')
+#s_path = s_path + '/'
+s_path = './Checkpoints/'
+
 
 sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
                                         title='Please select saving directory')
@@ -97,7 +101,7 @@ for i in range(len(list_folder)):
 
     name_folder = list_folder[i].split('/')
         
-    sav_dir_folder = sav_dir + name_folder[-2] + '/'
+    sav_dir_folder = sav_dir + name_folder[-2] + '_output/'
     
     if not os.path.exists(sav_dir_folder):
         os.makedirs(sav_dir_folder)

@@ -105,6 +105,7 @@ if human_OL == 'Y'
     enhance_RED = 'Y'; % ==> set as 'Y' for other human OL trials!!!
 else
     squareDist = 150;
+    %squareDist = 50;
 end
 
 
@@ -1019,12 +1020,12 @@ end
 
 
 %% Main function to run heuristic algorithm
-cur_dir = pwd;
-addpath(strcat(cur_dir, '\IO_func'))  % adds path to functions
-cd(cur_dir);
-saveDirName = uigetdir();   % get directory
-batch_numFiles = []; minLength = 12;
-scale = 0.454;
+% cur_dir = pwd;
+% addpath(strcat(cur_dir, '\IO_func'))  % adds path to functions
+% cd(cur_dir);
+% saveDirName = uigetdir();   % get directory
+% batch_numFiles = []; minLength = 12;
+% scale = 0.454;
 
 %% Combine individual *mat files to single .csvs
 cd(cur_dir)
