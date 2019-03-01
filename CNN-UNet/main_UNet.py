@@ -11,14 +11,13 @@ cur_dir = getcwd()
 
 #from Data_functions import *
 import Data_functions.test_network as UNet
+import Data_functions.post_process_functions as post_process
 from GUI import *
 
 import tkinter
 from tkinter import filedialog
 import os
-
-tf.reset_default_graph()
-        
+    
 debug = 0
 
 """ LOAD UP GUI """
@@ -36,8 +35,6 @@ if im_scale == None or min_microns == None or sensitivity == None:
     min_microns = '12'
     sensitivity = '3'
     print("Nothing entered, switching to default")    
-
-
 print("Parameters saved: " + "\nScale: " + im_scale + " \nminLength: " + min_microns + "\nSensitivity: " + sensitivity)
 
 im_scale = float(im_scale)
@@ -66,33 +63,36 @@ if rotate:
 jacc_test = 0
 
 
-""" Best so far is 980000 for rotated """
-checkpoint = '301000'
 
-root = tkinter.Tk()
 #s_path = filedialog.askdirectory(parent=root, initialdir=cur_dir,
 #                                        title='Please select checkpoint directory')
 #s_path = s_path + '/'
-s_path = './Checkpoints/'
 
-
-sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
-                                        title='Please select saving directory')
-sav_dir = sav_dir + '/'
-
-# get input folders
-another_folder = 'y';
-list_folder = []
-input_path = cur_dir
-while(another_folder == 'y'):
-    input_path = filedialog.askdirectory(parent=root, initialdir= input_path,
-                                        title='Please select input directory')
-    input_path = input_path + '/'
+""" Prompt user to select input and output directories """
+#""" Best so far is 980000 for rotated """
+try:
+    checkpoint = '301000'
+    root = tkinter.Tk()
+    s_path = './Checkpoints/'
+    sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
+                                            title='Please select saving directory')
+    sav_dir = sav_dir + '/'
     
-#    another_folder = input();   # currently hangs forever
-    another_folder = 'n';
-
-    list_folder.append(input_path)
+    # get input folders
+    another_folder = 'y';
+    list_folder = []
+    input_path = cur_dir
+    while(another_folder == 'y'):
+        input_path = filedialog.askdirectory(parent=root, initialdir= input_path,
+                                            title='Please select input directory')
+        input_path = input_path + '/'
+        
+    #    another_folder = input();   # currently hangs forever
+        another_folder = 'n';
+    
+        list_folder.append(input_path)
+except:
+    print("Error in selecting input directories. Please re-load script.")
 
 
 
@@ -108,15 +108,22 @@ for i in range(len(list_folder)):
     
     input_path = list_folder[i]
     
+    try:
+        UNet.run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
+                     im_scale, minLength, minSingle, minLengthDuring, radius,
+                     len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
+                     debug)
 
-    UNet.run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
-                 im_scale, minLength, minSingle, minLengthDuring, radius,
-                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
-                 debug)
+        print("Analysis of image " + str(i + 1) + " successfully completed.")
+        post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)  
 
-    #tf.reset_default_graph()
+    except:
+        print("Analysis of image " + str(i + 1) + " failed. Exiting program.")
+        
+
+  
+        
     
 
-print("Analysis successfully completed")
     
     

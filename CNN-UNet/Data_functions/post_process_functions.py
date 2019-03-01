@@ -18,6 +18,7 @@ import numpy as np
 from skimage import measure
 import csv
 from PIL import Image
+from os import listdir
 import pickle as pickle
 
 from Data_functions.data_functions import *
@@ -124,18 +125,6 @@ def find_branch_points(sk):
     return br
 
 
-
-#""" re-runs all the VALIDATION IMAGES to modify the fiber threshold"""
-#def rerun_VALIDATION():    
-#    input_path = 'C:/Users/Tiger/Anaconda3/AI stuff/MyelinUNet_new/Testing/Valid_fibers/'
-#    all_names = read_file_names(input_path)   
-#    for T in range(len(all_csv)):
-#        all_fibers_im = readIm_counter(DAPI_path,all_names,T)
-#        all_fibers = np.asarray(all_fibers_im, dtype=float)          
-#        #all_fibers = load_pkl(input_path, all_csv[T])
-#        skeletonize_all_fibers(all_fibers, T, DAPI_tmp = np.zeros([8208,8208]), minLength=25, minLengthSingle=150)    
-
-
 """ re-runs all the outputs to modify the fiber threshold"""
 def rerun_all():    
     input_path = './SPATIAL_W_301000_Laminin_PDL/'
@@ -155,29 +144,33 @@ def rerun_all():
 ***NEED TO FIX ==> when row is empty, still must add empty slot!!!
 
  """
-def read_and_comb_csv_as_SINGLES():
+def read_and_comb_csv_as_SINGLES(input_path):
     all_fibers = []
     all_numCells = []
     all_numShea = []
     all_numMFLC = []
     
-    import tkinter
-    from tkinter import filedialog
-    root = tkinter.Tk()
-    input_path = filedialog.askdirectory(parent=root, initialdir="D:/Tiger/AI stuff/RESULTS/",
-                                    title='Please select input directory')
-    input_path = input_path + '/'
+    #import tkinter
+    #from tkinter import filedialog
+    #root = tkinter.Tk()
+    #input_path = filedialog.askdirectory(parent=root, initialdir="D:/Tiger/AI stuff/RESULTS/",
+    #                                title='Please select input directory')
+    #input_path = input_path + '/'
 
-    all_csv = read_file_names(input_path)
+    filenames = listdir(input_path)
+    all_csv  = [filename for filename in filenames if filename.endswith(".csv") ]
+    #all_csv = read_file_names(input_path)
     first = 1;
     output_name = all_csv[0] 
     output_name = output_name.split('.')[0]
     
-    
-    with open('Results_' + output_name + '_num_sheaths.csv', 'w') as sheaths:
-        with open('Results_' +  output_name + '_lengths.csv', 'w') as lengths:
-            with open('Results_' + output_name + '_cells.csv', 'w') as cells:
-               with open('Results_' + output_name + '_mFLC.csv', 'w') as mFLC:
+    directory = input_path + 'combined_CSVs/'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w') as sheaths:
+        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w') as lengths:
+            with open(directory + 'Results_' + output_name + '_cells.csv', 'w') as cells:
+               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w') as mFLC:
 
                     for T in range(len(all_csv)):
                         
@@ -188,7 +181,7 @@ def read_and_comb_csv_as_SINGLES():
                             counter = 0
                         
                             for row in spamreader:
-                                print(', '.join(row))
+                                #print(', '.join(row))
                                 
                                 row = list(filter(lambda a: a != '[]', row))
                                 
@@ -201,6 +194,9 @@ def read_and_comb_csv_as_SINGLES():
                                     if row[t] == '[]' or not row[t] :
                                         continue
                                     row[t] =  float(row[t])
+                                    
+                                if row == []:
+                                   row = ['-']
 
                                 if counter == 0:   all_fibers.append(row); wr = csv.writer(lengths, quoting=csv.QUOTE_ALL); wr.writerow(all_fibers[0]);
 
@@ -231,385 +227,6 @@ def read_and_comb_csv_as_SINGLES():
                             
                         if not empty:
                             first = 0    
-
-""" Read and combine csv """
-def read_and_comb_csv():
-    all_fibers = []
-    all_numCells = []
-    all_numShea = []
-    all_numMFLC = []
-    
-    import tkinter
-    from tkinter import filedialog
-    root = tkinter.Tk()
-    input_path = filedialog.askdirectory(parent=root, initialdir="D:/Tiger/AI stuff/RESULTS/",
-                                    title='Please select input directory')
-    input_path = input_path + '/'
-
-    all_csv = read_file_names(input_path)
-    output_name = 'Combined' + '_' + all_csv[0]    
-    first = 1;
-    for T in range(len(all_csv)):
-        
-        filename = all_csv[T]
-        empty = 0
-        with open(input_path + filename, 'r') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-            counter = 0
-        
-            for row in spamreader:
-                print(', '.join(row))
-                
-                row = list(filter(lambda a: a != '[]', row))
-                
-                if first == 1 and not row and counter == 0:
-                    print('skip')
-                    empty = 1
-                    break
-                
-                if counter % 2 != 0 or not row:
-                    counter = counter + 1
-                    continue
-                
-                for t in range(len(row)):
-                    if row[t] == '[]' or not row[t] :
-                        continue
-                    row[t] =  float(row[t])
-                if first:
-                    if row[0] and counter == 0:   all_fibers.append(row)
-                    elif row[0] and counter == 2: all_numCells.append(row)
-                    elif row[0] and counter == 4: all_numShea.append(row)
-                    elif row[0] and counter == 6: all_numMFLC.append(row)
-                elif not first and row:
-                    if row[0] and counter == 0:   all_fibers[0].extend(row)
-                    elif row[0] and counter == 2: all_numCells[0].extend(row)
-                    elif row[0] and counter == 4: all_numShea[0].extend(row)
-                    elif row[0] and counter == 6: all_numMFLC[0].extend(row)                                
-                                
-                if counter == 6:
-                    break
-                counter = counter + 1
-            
-        if not empty:
-            first = 0    
-    #l = [all_fibers[0], all_numCells[0], all_numShea[0], all_numMFLC[0]]
-        
-    with open(output_name, 'w') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(all_fibers[0])
-        wr.writerow(all_numCells[0])
-        wr.writerow(all_numShea[0])
-        wr.writerow(all_numMFLC[0])    
-        
-        
-""" Read and combine csv """
-def read_and_comb_csv_ALL_TOGETHER_4_FILES():
-    all_fibers = []
-    all_numCells = []
-    all_numShea = []
-    all_numMFLC = []
-    
-    import tkinter
-    from tkinter import filedialog
-    root = tkinter.Tk()
-    input_path = filedialog.askdirectory(parent=root, initialdir="/Users/Neuroimmunology Unit/Anaconda3/AI stuff/MyelinUNet/Source/",
-                                    title='Please select input directory')
-    input_path = input_path + '/'
-       
-
-    all_csv = read_file_names(input_path)    
-    with open('all_lengths' + all_csv[0], 'w') as lengths:
-        with open('all_EnsheathCells' + all_csv[0], 'w') as ensheathed:
-            with open('all_NumSheaths' + all_csv[0], 'w') as numSheaths:
-                with open('all_mFLC' + all_csv[0], 'w') as mFLC:
-    
-                    for T in range(len(all_csv)):
-                        
-                        filename = all_csv[T]
-                        empty = 0
-                        with open(input_path + filename, 'r') as csvfile:
-                            spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                            counter = 1
-                        
-                            for row in spamreader:
-                                print(', '.join(row))
-                                
-                                row = list(filter(lambda a: a != '[]', row))
-                                
-#                                if not row:
-#                                    print('skip')
-#                                    empty = 1
-#                                    break
-                                                    
-                                if counter == 1:
-                                    wr = csv.writer(lengths, quoting=csv.QUOTE_ALL)
-                                    wr.writerow(row)
-            
-                                if counter == 3:
-                                    wr = csv.writer(ensheathed, quoting=csv.QUOTE_ALL)
-                                    wr.writerow(row)
-                                    
-                                if counter == 5:
-                                    wr = csv.writer(numSheaths, quoting=csv.QUOTE_ALL)
-                                    wr.writerow(row)
-                                    
-                                if counter == 7:
-                                    wr = csv.writer(mFLC, quoting=csv.QUOTE_ALL)
-                                    wr.writerow(row)
-            
-                                counter = counter + 1
-        
-""" Read and combine csv """
-def read_and_comb_csv_16():       
-    fold_nam = 'uFNet-5_CSVs/'
-    input_path = './' + fold_nam 
-
-    all_csv = read_file_names(input_path)
-    
-    X = 0
-    while X < len(all_csv):
-
-        output_name = 'Combined' + '_' + all_csv[X]    
-        first = 1;
-        all_fibers = []
-        all_numCells = []
-        all_numShea = []
-        all_numMFLC = []
-        print(output_name)
-        for T in range(16):
-            filename = all_csv[X + T]
-            empty = 0
-            with open(input_path + filename, 'r') as csvfile:
-                spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                counter = 0
-            
-                for row in spamreader:
-                    #print(', '.join(row))
-                    
-                    row = list(filter(lambda a: a != '[]', row))
-                    
-                    if first == 1 and not row and counter == 0:
-                        print('skip')
-                        empty = 1
-                        break
-                    
-                    if counter % 2 != 0 or not row:
-                        counter = counter + 1
-                        continue
-                    
-                    for t in range(len(row)):
-                        if row[t] == '[]' or not row[t] :
-                            continue
-                        row[t] =  float(row[t])
-                    if first:
-                        if row[0] and counter == 0:   all_fibers.append(row)
-                        elif row[0] and counter == 2: all_numCells.append(row)
-                        elif row[0] and counter == 4: all_numShea.append(row)
-                        elif row[0] and counter == 6: all_numMFLC.append(row)
-                    elif not first and row:
-                        if row[0] and counter == 0:   all_fibers[0].extend(row)
-                        elif row[0] and counter == 2: all_numCells[0].extend(row)
-                        elif row[0] and counter == 4: all_numShea[0].extend(row)
-                        elif row[0] and counter == 6: all_numMFLC[0].extend(row)                                
-                                    
-                    if counter == 6:
-                        break
-                    counter = counter + 1
-                
-            if not empty:
-                first = 0    
-        #l = [all_fibers[0], all_numCells[0], all_numShea[0], all_numMFLC[0]]
-            
-        with open(output_name, 'w') as myfile:
-            wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-            if all_fibers:
-                wr.writerow(all_fibers[0])
-                wr.writerow(all_numCells[0])
-                wr.writerow(all_numShea[0])
-                wr.writerow(all_numMFLC[0])    
-            
-        X = X + 16
-        
-        
-        
-""" Read and combine csv """
-def read_and_comb_csv_doubles():       
-    fold_nam = 'uFNet-5_CSVs/1) doubles/'
-    input_path = './' + fold_nam 
-
-    all_csv = read_file_names(input_path)
-    
-    X = 0
-    count = 0
-    while X < len(all_csv):
-        output_name = 'Combined' + '_' + all_csv[X]    
-        first = 1;
-        all_fibers = []
-        all_numCells = []
-        all_numShea = []
-        all_numMFLC = []
-        print(output_name)
-        for T in range(2):
-            filename = all_csv[X + T * 3]
-            empty = 0
-            with open(input_path + filename, 'r') as csvfile:
-                spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                counter = 0
-            
-                for row in spamreader:
-                    #print(', '.join(row))
-                    
-                    row = list(filter(lambda a: a != '[]', row))
-                    
-                    if first == 1 and not row and counter == 0:
-                        print('skip')
-                        empty = 1
-                        break
-                    
-                    if counter % 2 != 0 or not row:
-                        counter = counter + 1
-                        continue
-                    
-                    for t in range(len(row)):
-                        if row[t] == '[]' or not row[t] :
-                            continue
-                        row[t] =  float(row[t])
-                    if first or not all_fibers or not all_numCells or not all_numShea or not all_numMFLC:
-                        if row[0] and counter == 0:   all_fibers.append(row)
-                        elif row[0] and counter == 2: all_numCells.append(row)
-                        elif row[0] and counter == 4: all_numShea.append(row)
-                        elif row[0] and counter == 6: all_numMFLC.append(row)
-                    elif not first and row:
-                        if row[0] and counter == 0:   all_fibers[0].extend(row)
-                        elif row[0] and counter == 2: all_numCells[0].extend(row)
-                        elif row[0] and counter == 4: all_numShea[0].extend(row)
-                        elif row[0] and counter == 6: all_numMFLC[0].extend(row)                                
-                                    
-                    if counter == 6:
-                        break
-                    counter = counter + 1
-                
-            if not empty:
-                first = 0    
-        #l = [all_fibers[0], all_numCells[0], all_numShea[0], all_numMFLC[0]]
-            
-        with open(output_name, 'w') as myfile:
-            wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-            if all_fibers:
-                wr.writerow(all_fibers[0])
-                wr.writerow(all_numCells[0])
-                wr.writerow(all_numShea[0])
-                wr.writerow(all_numMFLC[0])    
-            
-        if count == 2:
-            count = 0
-            X = X + 5
-        else:
-            X = X + 1
-            count = count + 1
-    
-
-""" Read and combine csv """
-def read_and_comb_csv_duplicates():       
-    fold_nam = 'uFNet-5_CSVs/2) combined_doubles/'
-    input_path = './' + fold_nam 
-
-    all_csv = read_file_names(input_path)
-    
-    X = 0
-    count = 0
-    while X < len(all_csv):
-        output_name = 'Combined' + '_' + all_csv[X]    
-        first = 1;
-        all_fibers = []
-        all_numCells = []
-        all_numShea = []
-        all_numMFLC = []
-        print(output_name)
-        for T in range(2):
-            filename = all_csv[X + T * 3]
-            empty = 0
-            with open(input_path + filename, 'r') as csvfile:
-                spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                counter = 0
-            
-                for row in spamreader:
-                    #print(', '.join(row))
-                    
-                    row = list(filter(lambda a: a != '[]', row))
-                    
-                    if first == 1 and not row and counter == 0:
-                        print('skip')
-                        empty = 1
-                        break
-                    
-                    if counter % 2 != 0 or not row:
-                        counter = counter + 1
-                        continue
-                    
-                    for t in range(len(row)):
-                        if row[t] == '[]' or not row[t] :
-                            continue
-                        row[t] =  float(row[t])
-                    if first or not all_fibers or not all_numCells or not all_numShea or not all_numMFLC:
-                        if row[0] and counter == 0:   all_fibers.append(row)
-                        elif row[0] and counter == 2: all_numCells.append(row)
-                        elif row[0] and counter == 4: all_numShea.append(row)
-                        elif row[0] and counter == 6: all_numMFLC.append(row)
-                    elif not first and row:
-                        if row[0] and counter == 0:   all_fibers[0].extend(row)
-                        elif row[0] and counter == 2: all_numCells[0].extend(row)
-                        elif row[0] and counter == 4: all_numShea[0].extend(row)
-                        elif row[0] and counter == 6: all_numMFLC[0].extend(row)                                
-                                    
-                    if counter == 6:
-                        break
-                    counter = counter + 1
-                
-            if not empty:
-                first = 0    
-        #l = [all_fibers[0], all_numCells[0], all_numShea[0], all_numMFLC[0]]
-            
-        with open(output_name, 'w') as myfile:
-            wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-            if all_fibers:
-                wr.writerow(all_fibers[0])
-                wr.writerow(all_numCells[0])
-                wr.writerow(all_numShea[0])
-                wr.writerow(all_numMFLC[0])    
-            
-        X = X + 1
-
-
-""" Read and combine csv """
-def read_and_comb_csv_FINAL_singles():
-    all_fibers = []
-    all_numCells = []
-    all_numShea = []
-    all_numMFLC = []
-    
-    fold_nam = 'uFNet-5_CSVs/3) combined_duplicates/'
-    input_path = './' + fold_nam 
-    all_csv = read_file_names(input_path)
-
-    output_name = 'FINAL_ALL' + '_' + all_csv[0]    
-    first = 1;
-    with open(output_name, 'w') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        for T in range(len(all_csv)):
-            
-            filename = all_csv[T]
-            empty = 0
-            with open(input_path + filename, 'r') as csvfile:
-                spamreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                counter = 0
-            
-                for row in spamreader:
-                    print(', '.join(row))
-                    
-                    row = list(filter(lambda a: a != '[]', row))
-                    
-                    wr.writerow(row)
 
 
 """ go through list_cells to get all the information """
@@ -922,55 +539,55 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
     
     
     
-""" FOR JACCARD TESTING """
-def for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, N, s_path):
-       
-    import pickle as pickle
-    """ Print text onto image """
-    #output_name = 'masked_out_dil' + str(im_num) + '.png'
-    #add_text_to_image(new_fibers, filename=output_name)
-           
-    """ Sort through the final DAPI ==> for Jaccard testing only"""
-    list_cells = []
-    for M in range(N):
-         cell = Cell(N)
-         list_cells.append(cell)
-    list_cells_sorted, final_counted_new = fiber_to_list(new_fibers, all_fibers, list_cells, minLength)
-    DAPI_ensheathed = extract_ensheathed_DAPI(DAPI_tmp, list_cells_sorted)
-    plt.imsave(s_path + 'DAPI_ensheathed_second' + str(im_num) + '.tif', (DAPI_ensheathed * 255).astype(np.uint16))
-    with open(s_path + 'DAPI_ensheathed' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
-       pickle.dump([DAPI_ensheathed], f)    
-       
-       
-       
-    """ Create for ==> GLOBAL JACCARD """
-    # first find all unique values
-    uniq = np.unique(new_fibers)
-    
-    binary_all_fibers = all_fibers > 0
-    labelled = measure.label(binary_all_fibers)
-    cc_overlap = measure.regionprops(labelled, intensity_image=all_fibers)
-    
-    final_counted = np.zeros(all_fibers.shape)
-    for Q in range(len(cc_overlap)):
-        cell_num = cc_overlap[Q]['MinIntensity']
-        cell_num = int(cell_num) 
-        overlap_coords = cc_overlap[Q]['coords']
-            
-        fiber = 0
-        for T in range(len(uniq)):
-            if cell_num == uniq[T]:
-                fiber = 1
-                #print(uniq[T])
-                break
-    
-        if fiber:
-            for T in range(len(overlap_coords)):
-                final_counted[overlap_coords[T,0], overlap_coords[T,1]] = cell_num
-
-    import pickle
-    with open(s_path + 'final_jacc_fibers' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
-       pickle.dump([final_counted], f)       
+#""" FOR JACCARD TESTING """
+#def for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, N, s_path):
+#       
+#    import pickle as pickle
+#    """ Print text onto image """
+#    #output_name = 'masked_out_dil' + str(im_num) + '.png'
+#    #add_text_to_image(new_fibers, filename=output_name)
+#           
+#    """ Sort through the final DAPI ==> for Jaccard testing only"""
+#    list_cells = []
+#    for M in range(N):
+#         cell = Cell(N)
+#         list_cells.append(cell)
+#    list_cells_sorted, final_counted_new = fiber_to_list(new_fibers, all_fibers, list_cells, minLength)
+#    DAPI_ensheathed = extract_ensheathed_DAPI(DAPI_tmp, list_cells_sorted)
+#    plt.imsave(s_path + 'DAPI_ensheathed_second' + str(im_num) + '.tif', (DAPI_ensheathed * 255).astype(np.uint16))
+#    with open(s_path + 'DAPI_ensheathed' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+#       pickle.dump([DAPI_ensheathed], f)    
+#       
+#       
+#       
+#    """ Create for ==> GLOBAL JACCARD """
+#    # first find all unique values
+#    uniq = np.unique(new_fibers)
+#    
+#    binary_all_fibers = all_fibers > 0
+#    labelled = measure.label(binary_all_fibers)
+#    cc_overlap = measure.regionprops(labelled, intensity_image=all_fibers)
+#    
+#    final_counted = np.zeros(all_fibers.shape)
+#    for Q in range(len(cc_overlap)):
+#        cell_num = cc_overlap[Q]['MinIntensity']
+#        cell_num = int(cell_num) 
+#        overlap_coords = cc_overlap[Q]['coords']
+#            
+#        fiber = 0
+#        for T in range(len(uniq)):
+#            if cell_num == uniq[T]:
+#                fiber = 1
+#                #print(uniq[T])
+#                break
+#    
+#        if fiber:
+#            for T in range(len(overlap_coords)):
+#                final_counted[overlap_coords[T,0], overlap_coords[T,1]] = cell_num
+#
+#    import pickle
+#    with open(s_path + 'final_jacc_fibers' + str(im_num) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+#       pickle.dump([final_counted], f)       
        
        
        
