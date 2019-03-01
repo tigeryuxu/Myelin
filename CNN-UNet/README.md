@@ -66,9 +66,11 @@
 
 ## Usage:
   ### 1.	Data format
-   * please ensure all images are “.tiff” format
-   *	channels are NOT separated
-   *	all files to be analyzed are located in a SINGLE folder (see "Demo-data" folder for example)
+   *  Please ensure all images are “.tiff” format
+   *	Channels are NOT separated
+   *  The stained sheaths (either MBP or O4) are in the **RED** channel.
+   *  Cell nuclei are in the **BLUE** channel
+   *	All files to be analyzed are located in a SINGLE folder (see "Demo-data" folder for example)
 
   ### 2.	Run main file
   1. (a) For Anaconda (Windows):
@@ -84,7 +86,10 @@
            python3 main_UNet.py
   
   2. Then navigate the GUI
-   *  First thing that appears prompts you to enter some parameters for the analysis
+   *  First thing that appears prompts you to enter some parameters for the analysis:
+       1. Scale = scale of image in um/px
+       2. min Length = minimum length threshold for sheaths (default 12 um)
+       3. Senstivity = length factor for cells that are single or doubly ensheathed (2 == lowest, 4 == highest sensitivity)
    *	Then navigate to and select the directory you wish to save the output
    *	Then navigate to and select the directory that contains the ".tiff" images to be analyzed
 
@@ -94,8 +99,8 @@
   * all_fibers_image_name-of-file.png   --- sheaths identified with cell labels as PNG
   * candidates0_name-of-file.tif        --- candidates selected for analysis
   * final_image_name-of-file.tif        --- sheaths overlaid ontop of original input image
-  * masked_out_dil_name-of-file.csv     --- Output data
-    * Rows correspond to:
+  * masked_out_dil_name-of-file.csv     --- Output data corresponding to EACH INDIVIDUAL input image
+    * Within this file, the rows, from top to bottom, correspond to:
        1. lengths of individual sheaths (in pixels, each excel array is a single sheath)
        2. number of ensheathed cells identified
        3. number of sheaths per cell (each excel array is a single cell)
@@ -103,16 +108,16 @@
        5. number of candidate cells analyzed
        6. number of total cell nuclei identified
   
-  For examples of these files, check under "Results/Demo-data"
+  * A folder named "combined_CSVs" which contains: the raw data from EACH INDIVIDUAL input image is then combined in the files "Result_masked_out....csv". There should be 4 combined files, each corresponding to a specific parameter from the raw data (cells, lengths, mSLC, num_sheaths). Within each of these excel sheets, each row contains the raw data from the original INDIVIDUAL input image .csvs.
+  
+  For examples of these files, check under "Results/Demo-data-output/"
     
 ## Demo run:
   ### Run the "main_UNet.py" file by following the directions in "Usage" above
   * when prompted with GUI, select the following folders:
-      * "Checkpoint"
-      * "Results"
-      * "Demo-data"
-    
-## Training: 
+      *  create your own folder, then select it for output folder
+      * "Demo-data" for input folder      
+
 
 ## Troubleshooting:
 1.  Recommended computational specifications:
@@ -125,5 +130,8 @@
         
 3.  If you would like to use your own checkpoint from training:
     * navigate to the folder “Checkpoints” and replace the files with your own checkpoint files.
+    
+    
+4. If the analysis is not picking up any sheaths, but they are evident to the human eye, consider enhancing the contrast in your images, either manually using Fiji, or an alternative algorithm like CLAHE.
 
 
