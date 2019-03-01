@@ -230,6 +230,8 @@ while (moreTrials == 'Y')
         
         cd(cur_dir);
         natfnames=natsort(trialNames);
+        filename_raw = natfnames{fileNum};
+        filename_raw = erase(filename_raw, '.tif');
         %% Decide if want to load individual channels or single image
         if load_five == 5
             [DAPIimage,redImage,binImage,greenImage,wholeImage] = NewFileReaderV4(trialNames, fileNum, allChoices, foldername, cur_dir);
@@ -278,8 +280,7 @@ while (moreTrials == 'Y')
             % (3) DAPI
             cd(foldername);
             % (4) Red
-            filename = natfnames{fileNum};
-            redImage = imread(filename);
+            redImage = imread(filename_raw);
             %O4_im = im2double(rgb2gray(redImage));
             
         end
@@ -333,9 +334,11 @@ while (moreTrials == 'Y')
         
         
         if enhance_RED == 'Y'
-            [all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
-            
+            %[all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
             redImage = imadjust(redImage);
+            if combineRG
+                greenImage = imadjust(greenImage);
+            end
         end
         %O4_im = im2double(rgb2gray(redImage));
         
@@ -494,6 +497,10 @@ while (moreTrials == 'Y')
                     %                     I = adapthisteq(I);
                 else
                     MBP_im = zeros(size(O4_im));
+                end
+                
+                if combineRG == 1
+                   MBP_im = imadjust(greenOrig); 
                 end
                 
                 wholeImage = cat(3, O4_tmp, MBP_im, tmpDAPI);
@@ -829,64 +836,64 @@ while (moreTrials == 'Y')
                 cd(saveDirName);
                 figure(5);
                 set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', num2str(counter), '1) All channels');
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', num2str(counter), '1) All channels');
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(1);
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '2) Cell body BW') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '2) Cell body BW') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 % Saves image
                 figure(100);
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '3) Cell nuclei') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '3) Cell nuclei') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(31);
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '4) final_fibers') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '4) final_fibers') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 bw_final_fibers(bw_final_fibers > 0) = 1;
                 
                 figure(67); imshowpair(wholeImage, mask); title('Filter ridges');
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '5) Filter ridges') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '5) Filter ridges') ;
                 print(filename,'-dpng'); hold off;
                 
                 figure(188); imshow(cat(3, zeros(size(MBP_im)), greenOrig,  zeros(size(MBP_im))));
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '6) MBP alone') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '6) MBP alone') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(189); imshow(cat(3, O4_original, zeros(size(MBP_im)),  zeros(size(MBP_im))));
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '7) Cell Body alone') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '7) Cell Body alone') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 figure(88); imshowpair(wholeImage, imbinarize(bw_final_fibers)); title('Ridges to lines after sub core');  hold on;
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '8) Skeletonized ridges') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '8) Skeletonized ridges') ;
                 print(filename,'-dpng'); hold off;
                 
                 figure(32); imshow(bw_green);
-                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '9) MBP bw') ;
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '9) MBP bw') ;
                 print(filename,'-dpng')
                 hold off;
                 
                 if switch_sheaths
                     figure(121);
-                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '10) CB watershed ensheathed') ;
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '10) CB watershed ensheathed') ;
                     print(filename,'-dpng')
                     hold off;
                     
                     figure(122);
-                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '11) Ensheathed cores') ;
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '11) Ensheathed cores') ;
                     print(filename,'-dpng')
                     hold off;
                     
                     figure(123);
-                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', num2str(counter), '12) MBP per cell') ;
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '12) MBP per cell') ;
                     print(filename,'-dpng')
                     hold off;
                     
