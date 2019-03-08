@@ -30,6 +30,10 @@ if enhance == 'Y'
     I2 = I - background;
     I = I2;
     I = adapthisteq(I);
+else
+    background = imopen(I,strel('disk',DAPI_bb_size));
+    I2 = I - background;
+    I = I2;
 end
 
 % %% To deal with artifacts: (remove???)

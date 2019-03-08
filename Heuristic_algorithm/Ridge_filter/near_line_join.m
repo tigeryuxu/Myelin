@@ -31,6 +31,20 @@ function [locFibers, s, bw] = near_line_join(locFibers, max_thresh, siz, verbose
 
 debugLocFibers = locFibers;
 
+
+%% Tiger edit - 2019-03-06 - generate map of fibers first with unique IDs
+% then later in loop can mask the areas needed to save time
+% all_fibers = zeros(siz);
+% for i = 1:length({s.Fibers})
+%     curFibers = s(i).Fibers;
+%     for N = 1:length(curFibers)
+%         if ~isempty(curFibers{N})   % if cell was identified as wrapped
+%             all_fibers(curFibers{N}) = i;   % GIVES UNIQUE ID
+%         end
+%     end
+% end
+        
+
 %% Loop through all the forgotten fibers
 for k = 1:length(locFibers)
     curFiber = locFibers{k};
@@ -43,6 +57,27 @@ for k = 1:length(locFibers)
         
         allMin = [];
         allIdx = [];
+        
+        %% Tiger edit - 2019-03-06 - generate map of fibers first with unique IDs
+        % then later in loop can mask the areas needed to save time
+%         [x_size, y_size] = ind2sub(siz, curFiber(1));
+%         width = siz(1);
+%         height = siz(2);
+%         
+%         if width > 3000 || height > 3000  % for larger images, do faster searching
+%             [mask] = create_mask(x_size, y_size, width, height, siz);
+%             masked_fibers = all_fibers;
+%             masked_fibers(~mask) = 0;
+%         else
+%             masked_fibers = all_fibers;
+%         end
+%         
+%         cc = bwconncomp(masked_fibers);
+%         for i = 1:length(cc.PixelIdxList)
+%             allMin = [allMin min(tmp(cc.PixelIdxList{i}))];
+%             idx_of_cell = all_fibers(cc.PixelIdxList{i}(1));
+%             allIdx = [allIdx idx_of_cell];  % INSTEAD OF 'i' for cell index, now need to get value of fiber!
+%         end
         
         %% Loop through all the fibers for each cell
         for i = 1:length({s.Fibers})
@@ -102,3 +137,45 @@ end
 
 
 end
+
+
+
+% function [mask] = create_mask(x_size, y_size, width, height, siz)
+% 
+%         total_length_x = 100;
+%         total_length_y = 100;
+%         
+%         x_left = x_size - total_length_x / 2;
+%         x_right = x_size + total_length_x / 2;
+%         
+%         % adaptive cropping for width (x-axis)
+%         if x_left <= 0
+%             x_right = x_right + abs(x_left) + 1;
+%             x_left = 1;
+%             
+%         elseif x_right > width
+%             x_left = x_left - (x_right - width);
+%             x_right = width;
+%         end
+%         
+%         % adaptive cropping for height (y-axis)
+%         y_top = y_size - total_length_y / 2;
+%         y_bottom = y_size + total_length_y / 2;
+%         if y_top <= 0
+%             y_bottom = y_bottom + abs(y_top) + 1;
+%             y_top = 1;
+%             
+%         elseif y_bottom > height
+%             y_top = y_top - (y_bottom - height);
+%             y_bottom = height;
+%         end
+%         
+%         % Final check to see if sizes are correct
+%         if (x_right - x_left) ~= 100 || (y_bottom - y_top) ~= 100
+%             %break;
+%             j = 'ERROR in crop size';
+%         end
+%         
+%         mask = zeros(siz);
+%         mask(x_left:x_right, y_top:y_bottom) = 1;
+% end

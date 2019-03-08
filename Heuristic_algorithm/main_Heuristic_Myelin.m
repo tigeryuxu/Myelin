@@ -96,6 +96,9 @@ cd(cur_dir);
 %square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
 %square_cut_w = 7200;
 
+%% FOR DARYAN: human_OL == N, enhance_DAPI == N, size == 1000, switch_sheaths on line 564 == 1
+
+
 
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
@@ -116,7 +119,9 @@ square_cut_w = 1936;
 remove_nets = 'Y'; % background subtraction for O4
 
 mag = 'N';
-enhance = 'Y';   % (Background subtraction for DAPI + O4 images) CLEM ==> doesn't need this
+enhance = 'Y';   % (Background subtraction O4 images) CLEM ==> doesn't need this
+enhance_DAPI = 'Y'; % (Background subtraction O4 images) Daryan images w/ noise ==> doesn't need this
+
 
 %% PRESET and scaled
 DAPImetric = 0.3;   % Lower b/c some R not picked up due to shape...
@@ -231,7 +236,6 @@ while (moreTrials == 'Y')
         cd(cur_dir);
         natfnames=natsort(trialNames);
         filename_raw = natfnames{fileNum};
-        filename_raw = erase(filename_raw, '.tif');
         %% Decide if want to load individual channels or single image
         if load_five == 5
             [DAPIimage,redImage,binImage,greenImage,wholeImage] = NewFileReaderV4(trialNames, fileNum, allChoices, foldername, cur_dir);
@@ -294,10 +298,11 @@ while (moreTrials == 'Y')
             
             
             % makes the image smaller, else runs out of RAM
+            %% TIGER - can modify this to analyze full-size images
             if square_cut_h > 5000
                 square_cut_h = 5000;
             end
-            if square_cut_w > 6500
+            if square_cut_w > 6000
                 square_cut_w = 6500;
             end
             
@@ -417,9 +422,10 @@ while (moreTrials == 'Y')
                 
                 %% (1) Find peaks for DAPI
                 %DAPIsize = 10;
-                [mat, objDAPI, DAPI_bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance, DAPI_bb_size);  % function
+                %% TIGER - CHANGED "enhance", "Human_OL", and "cropping size" ==> all for Daryan's stuff
+                [mat, objDAPI, DAPI_bw] = DAPIcount_2(intensityValueDAPI, DAPIsize, DAPImetric, enhance_DAPI, DAPI_bb_size);  % function
                 
-                if length(objDAPI) > 8000
+                if length(objDAPI) > 50000
                     continue;
                 end
                 
@@ -452,6 +458,9 @@ while (moreTrials == 'Y')
                 
                 %% (2) Extract cores
                 [s] = reg_core_filt(combined_im, diameterFiber, siz, percentDilate, s);  % small cores
+                %^^^TAKES A LONG TIME - Tiger Xu - 06/03/2019, tried to
+                %optimize
+                
                 [cb, no_dilate_cb, s] = cell_body_filt(combined_im, diameterFiber, siz, coreMin, s);        % cell body
                 
                 % Updates "cores"
@@ -697,32 +706,33 @@ while (moreTrials == 'Y')
                 
                 
                 %% UPDATED FOR WIDTH/AREA ect...
-                for N = 1:length({s.objDAPI})
-                    if s(N).Bool_W == 1
-                        fibers_cell = [];
-                        s(N).OtherStats = cell(0);
-                        for Y = 1:length(s(N).Fibers)
-                            tmp_ridges = imbinarize(bw_final_fibers);
-                            tmp_fibers = zeros(size(bw_final_fibers));
-                            tmp_fibers(s(N).Fibers{Y}) = 1;
-                            tmp_fibers = imdilate(tmp_fibers, strel('disk', 4));
-                            tmp_ridges(tmp_fibers == 0) = 0;
-                            stats = regionprops(tmp_ridges,MBP_im,'MeanIntensity', 'Area', 'Perimeter', 'MinorAxisLength', 'PixelValues');
-                            if length(stats) > 1
-                                [val, idx] = max([stats(:).Area]);
-                                s(N).OtherStats{end + 1} = stats(idx);
-                            else
-                                s(N).OtherStats{end + 1} = stats;
+                
+                %% For Annick's analysis, do another watershed first - 19/19/01
+                % 06/03/2019 - moved below for loop into Annick's analysis
+                % as well
+                if switch_sheaths == 1
+                    for N = 1:length({s.objDAPI})
+                        if s(N).Bool_W == 1
+                            fibers_cell = [];
+                            s(N).OtherStats = cell(0);
+                            for Y = 1:length(s(N).Fibers)
+                                tmp_ridges = imbinarize(bw_final_fibers);
+                                tmp_fibers = zeros(size(bw_final_fibers));
+                                tmp_fibers(s(N).Fibers{Y}) = 1;
+                                tmp_fibers = imdilate(tmp_fibers, strel('disk', 4));
+                                tmp_ridges(tmp_fibers == 0) = 0;
+                                stats = regionprops(tmp_ridges,MBP_im,'MeanIntensity', 'Area', 'Perimeter', 'MinorAxisLength', 'PixelValues');
+                                if length(stats) > 1
+                                    [val, idx] = max([stats(:).Area]);
+                                    s(N).OtherStats{end + 1} = stats(idx);
+                                else
+                                    s(N).OtherStats{end + 1} = stats;
+                                end
                             end
                         end
                     end
-                end
-                
-                
-                %% For Annick's analysis, do another watershed first - 19/19/01
-                
-                if switch_sheaths == 1
                     
+               
                     % First find cores of ENSHEATHED cells to use for "imposemin"
                     tmp_CBs = zeros(size(bw));
                     for cell_num = 1:length(s(:, 1))
@@ -833,6 +843,7 @@ while (moreTrials == 'Y')
                 end
                 
                 %% Print images of results
+                filename_raw = erase(filename_raw, '.tif');
                 cd(saveDirName);
                 figure(5);
                 set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
@@ -1151,7 +1162,7 @@ for fileNum = 1 : numfids
                 new_vv = cell(0);
                 for Y = 1:length(vv)
                     len = vv(Y).MajorAxisLength;
-                    if len > minLength
+                    if len > minLength / scale
                         new_vv{end + 1} = len;
                     end
                 end
@@ -1170,7 +1181,7 @@ for fileNum = 1 : numfids
                 
                 for Y = 1:length(vv)
                     len = vv{Y};
-                    if len > minLength
+                    if len > minLength / scale
                         allLengthFibersR = [allLengthFibersR len * scale];
                         fibers_cell = [fibers_cell len * scale];
                         log_length = log10(len * scale);
@@ -1205,15 +1216,6 @@ for fileNum = 1 : numfids
 end
 
 cd(cur_dir);
-
-% allNumSheathsR = allNumSheathsR';
-% allLengthFibersR = allLengthFibersR';
-% allMeanLPC = allMeanLPC';
-% allLog = allLog';
-%
-% propWrap = length(allNumSheathsR)/numO4
-% numO4
-% length(allNumSheathsR)
 
 % SAVE CSV FOR ALL INDIVIDUAL TRIALS
 cd(saveDirName);
@@ -1311,62 +1313,6 @@ fclose(fid4);
 fclose(fid5);
 fclose(fid6);
 
-%% Prompt to plot everything:
-% questTitle='Plot Data?';
-% start(timer('StartDelay',1,'TimerFcn',@(o,e)set(findall(0,'Tag',questTitle),'WindowStyle','normal')));
-% button3 = questdlg('Plot Data?', questTitle, 'Y','N','Y','Y');
-% ynPlot = button3;
-%
-% ynPlot = 'Y';
-%
-% if ynPlot == 'Y'
-%
-%     defaultans = {'', 'N'};
-%     prompt = {'Which trial number was control?'};
-%     dlg_title = 'Input';
-%     num_lines = 1;
-%     answer = inputdlg(prompt,dlg_title,num_lines,defaultans);
-%     control_idx = str2double(cell2mat(answer(1)));
-%
-%     %control_idx = 1;
-%
-%     name = 'O4';
-%     norm_props_R = plotProps(allNames, allWrappedR, allSumO4, allTotalCells, name, control_idx, saveDirName);
-%     cd(cur_dir);
-%
-%     name = 'MBP';
-%     norm_props_G = plotProps(allNames, allWrappedG, allSumO4, allTotalCells, name, control_idx, saveDirName);
-%     cd(cur_dir);
-%
-%     %% Calls function
-%     plotData(allNames, allTrialLengths, allTrialSheathsR, allTrialSheathsG, saveDirName, cur_dir);
-%     cd(cur_dir);
-%
-%     %% Save results
-%     clearvars -except allNames allTrialLengths allTrialSheathsR allTrialSheathsG allWrappedR allWrappedG allTotalCells...
-%         allInfoInfo allSumO4 allSumMBP saveDirName cur_dir norm_props_R norm_props_G squareDist allTrialS allTrialMeanFLC
-%     cd(saveDirName);
-%
-%
-%     %% Make Table
-%
-%     allWrappedR = allWrappedR';
-%     allSumO4 = allSumO4';
-%     allTotalCells = allTotalCells';
-%     allWrappedG = allWrappedG';
-%     allNames = allNames';
-%     norm_props_R = norm_props_R';
-%     norm_props_G = norm_props_G';
-%
-%     propW_O4 = allWrappedR./allSumO4 * 100;
-%
-%     propW_total = allWrappedR./allTotalCells * 100;
-%     save('Result data');
-%
-%     T1 = table(norm_props_R, norm_props_G, propW_O4, allWrappedR, allSumO4, allTotalCells, propW_total, allWrappedG,'RowNames', allNames);
-%
-%     writetable(T1, 'Result_table.csv', 'WriteRowNames',true);
-
 %% Make csv files for data analysis
 name_csv = 'Result_names.csv';
 Row_Names = batch;
@@ -1375,39 +1321,4 @@ T1 = table(Row_Names);
 writetable(T1, name_csv, 'WriteRowNames',true);
 
 dlmwrite(name_csv, ' ', '-append');
-%
-%     name_csv = 'Result_num_sheaths.csv';
-%     %dlmwrite(name_csv, 'NumWrapped,', '-append');
-%     for i = 1:length(allNames)
-%
-%         row = i + 1;
-%         col = 2;
-%
-%         trial_data = cell2mat(allTrialSheathsR(i));
-%         dlmwrite(name_csv, trial_data, '-append');
-%     end
-%
-%
-%     name_csv = 'Result_lengths.csv';
-%     for i = 1:length(allNames)
-%
-%         row = i + 1;
-%         col = 2;
-%
-%         trial_data = cell2mat(allTrialLengths(i));
-%         dlmwrite(name_csv, trial_data, '-append');
-%     end
-%
-%     name_csv = 'Result_mean_FLC.csv';
-%     for i = 1:length(allNames)
-%
-%         row = i + 1;
-%         col = 2;
-%
-%         trial_data = cell2mat(allTrialMeanFLC(i));
-%         dlmwrite(name_csv, trial_data, '-append');
-%     end
-%
-%     cd(cur_dir);
-% end
 
