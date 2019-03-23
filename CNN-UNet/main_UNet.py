@@ -14,6 +14,9 @@ import Data_functions.test_network as UNet
 import Data_functions.post_process_functions as post_process
 from GUI import *
 
+import logging
+import traceback
+
 import tkinter
 from tkinter import filedialog
 import os
@@ -28,18 +31,25 @@ root.mainloop()
 im_scale = my_gui.scale
 min_microns = my_gui.minLength
 sensitivity = my_gui.sensitivity
+rolling_ball = my_gui.rolling_ball
+CLAHE = my_gui.CLAHE
 
 # if nothing entered, switch to default
-if im_scale == None or min_microns == None or sensitivity == None:
+if im_scale == None or min_microns == None or sensitivity == None or rolling_ball == None:
     im_scale = '0.69'
     min_microns = '12'
     sensitivity = '3'
+    rolling_ball = '0'
+    CLAHE = '0'
     print("Nothing entered, switching to default")    
-print("Parameters saved: " + "\nScale: " + im_scale + " \nminLength: " + min_microns + "\nSensitivity: " + sensitivity)
+print("Parameters saved: " + "\nScale: " + im_scale + " \nminLength: " + min_microns + "\nSensitivity: " + sensitivity + 
+      "\nRolling ball size: " + rolling_ball + "\nCLAHE: " + CLAHE)
 
 im_scale = float(im_scale)
 min_microns = float(min_microns)
 sensitivity = float(sensitivity)
+rolling_ball = float(rolling_ball)
+CLAHE = float(CLAHE)
 
 #min_microns = 12
 #im_scale = 0.6904  #0.519, 0.6904, 0.35
@@ -51,8 +61,8 @@ radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in 
 len_x = 1024     # 1344, 1024
 width_x = 640   # 864, 640
 
+
 channels = 3
-CLAHE = 0
 green = 0
 
 
@@ -95,7 +105,6 @@ except:
     print("Error in selecting input directories. Please re-load script.")
 
 
-
 # make a saving directory for each input folder that is looped through
 for i in range(len(list_folder)):
 
@@ -111,14 +120,16 @@ for i in range(len(list_folder)):
     try:
         UNet.run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
                      im_scale, minLength, minSingle, minLengthDuring, radius,
-                     len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
+                     len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball,
                      debug)
 
         print("Analysis of image " + str(i + 1) + " successfully completed.")
         post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)  
 
-    except:
+    except Exception as error:
         print("Analysis of image " + str(i + 1) + " failed. Exiting program.")
+        #print(error)
+        logging.error(traceback.format_exc())
         
 
   

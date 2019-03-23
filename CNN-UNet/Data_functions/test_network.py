@@ -17,6 +17,7 @@ from natsort import natsort_keygen, ns
 from skimage import measure
 import pickle
 import os
+import cv2
 from skimage.filters import threshold_mean
 
 from Data_functions.plot_functions import *
@@ -32,7 +33,7 @@ from skimage import data, exposure, img_as_float
 
 def run_analysis(s_path, sav_dir, input_path, checkpoint,
                  im_scale, minLength, minSingle, minLengthDuring, radius,
-                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot,
+                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball,
                  debug):
     
     try:
@@ -81,6 +82,8 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             if filename.split('.')[-1] != 'tif':
                 continue
             
+            filename_split = filename.split('.')[0]
+
             """ Load image """
             #size = 3788 # 4775 and 6157 for the newest one
             input_arr = readIm_counter(input_path,onlyfiles_mask, counter[i]) 
@@ -89,14 +92,35 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             size = int((size_whole)) # 4775 and 6157 for the newest one
             input_arr = resize_adaptive(input_arr, size, method=Image.BICUBIC)
             size_whole = input_arr.size
+            
+            
             """ DO CLAHE """
+#            if CLAHE == 1:
+#                input_arr = exposure.equalize_adapthist(np.asarray(input_arr, dtype='uint8'), kernel_size=None, clip_limit=0.01, nbins=256)
+#                input_arr = np.asarray(input_arr * 255, dtype='uint8')
+#                input_arr = Image.fromarray(input_arr)
+            
+        
             if CLAHE == 1:
-                input_arr = exposure.equalize_adapthist(np.asarray(input_arr, dtype='uint8'), kernel_size=None, clip_limit=0.01, nbins=256)
-                input_arr = np.asarray(input_arr * 255, dtype='uint8')
+                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+                input_arr = np.asarray(input_arr)
+                red = clahe.apply(np.asarray(input_arr[:,:,0], dtype=np.uint8))
+                input_arr.setflags(write=1)
+                input_arr[:,:,0] = red
+                
+                DAPI = clahe.apply(np.asarray(input_arr[:,:,2], dtype=np.uint8))
+                input_arr[:,:,2] = DAPI
+                
                 input_arr = Image.fromarray(input_arr)
+                
+                
+            
             
             DAPI_size = round(radius * radius * math.pi);  
-            DAPI_tmp, total_matched_DAPI, total_DAPI = pre_process(input_arr, counter[i], DAPI_size, name=onlyfiles_mask[counter[i]], sav_dir=sav_dir)
+            DAPI_tmp, total_matched_DAPI, total_DAPI, back_subbed = pre_process(input_arr, counter[i], DAPI_size, rolling_ball, name=onlyfiles_mask[counter[i]], sav_dir=sav_dir)
+            if rolling_ball > 0:
+                plt.imsave(sav_dir + 'background_subbed' + '_' + filename_split + '_' + str(i) + '.tif', (Image.fromarray(np.asarray(back_subbed, dtype=np.uint8))))
+
             
             labelled = measure.label(DAPI_tmp)
             cc = measure.regionprops(labelled)
@@ -180,7 +204,6 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                     input_crop[:,:,1] = DAPI_crop
         
                 """ FOR ROTATING THE IMAGE OR ADDING BLACK LINES TO THE SIDES """
-                
                 deg_rotated = randint(0, 360)      
     
                 if rotate:
@@ -281,7 +304,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                 batch_x = []; batch_y = []      
                 total_counter = total_counter + 1      
                 N = N + 1
-                print('Tested: %d of total: %d candidate cells for image %d of %d files' %(total_counter, len(cc), i, len(onlyfiles_mask)))
+                print('Tested: %d of total: %d candidate cells for image %d of %d files' %(total_counter, len(cc), i + 1, len(onlyfiles_mask)))
            
             
             """ Get mask of regions that have overlap """
@@ -377,8 +400,8 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             
         sess.close()
     
-    except:
-        print("Error in analysis, please check file order and input directory");
+    except Exception as error:
+        print("Error in analysis, check file order and input directory");
         tf.reset_default_graph()
-        raise Exception('Error in analysis, code terminated early') 
+        raise Exception(error)
         
