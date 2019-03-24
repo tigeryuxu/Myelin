@@ -256,11 +256,13 @@ while (moreTrials == 'Y')
                 if mag == 'Y'
                     se = strel('disk', 30);    % maybe make the same size as the fibers???
                 else
-                    se = strel('disk', 8);
+                    %se = strel('disk', 8);
+                    se = strel('disk', 1);
                 end
                 I = nanoF_im;
                 J = imsubtract(imadd(I,imtophat(I,se)),imbothat(I,se));    % top-hat AND bottom-hat
-                J = imerode(J, strel('disk', 6));
+                %J = imerode(J, strel('disk', 6));
+                J = imerode(J, strel('disk', 2));
                 nanoF_im = J;
                 phaseThres = graythresh(nanoF_im);
                 nanoF_im = imbinarize(nanoF_im);  % binarizes
@@ -341,7 +343,14 @@ while (moreTrials == 'Y')
         if enhance_RED == 'Y'
             %[all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
             redImage = imadjust(redImage);
-            if combineRG
+            
+            %% TIGER - 08/03/2019 - ONLY ENHANCE GREEN IMAGE IF IT ISN'T CLOSE TO BEING EMPTY
+            % check by binarizing green image, then counting nonzero
+            % if overall # positive pixels > 1%, do the adjustment
+            bin_green = imbinarize(greenImage);
+            counted_green = nnz(bin_green);
+            
+            if combineRG && ((counted_green / (width * height)) * 100 > 1)
                 greenImage = imadjust(greenImage);
             end
         end
@@ -710,7 +719,7 @@ while (moreTrials == 'Y')
                 %% For Annick's analysis, do another watershed first - 19/19/01
                 % 06/03/2019 - moved below for loop into Annick's analysis
                 % as well
-                if switch_sheaths == 1
+                %%if switch_sheaths == 1
                     for N = 1:length({s.objDAPI})
                         if s(N).Bool_W == 1
                             fibers_cell = [];
@@ -734,7 +743,7 @@ while (moreTrials == 'Y')
                     
                
                     % First find cores of ENSHEATHED cells to use for "imposemin"
-                    tmp_CBs = zeros(size(bw));
+                    tmp_CBs = zeros(size(bw_final_fibers));
                     for cell_num = 1:length(s(:, 1))
                         if s(cell_num).Bool_W
                             CB_area = s(cell_num).CB;
@@ -743,6 +752,9 @@ while (moreTrials == 'Y')
                     end
                     
                     %O4_adapt = adapthisteq(O4_original);
+                    if switch_sheaths == 0
+                        O4_adapt = O4_original;
+                    end
                     [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance);
                     
                     bw = ~bwareaopen(~combined_im, 10);  % clean
@@ -840,7 +852,7 @@ while (moreTrials == 'Y')
                     
                     s(1).AreaOverall = area_per_cell;
                     
-                end
+                %%end
                 
                 %% Print images of results
                 filename_raw = erase(filename_raw, '.tif');
@@ -892,7 +904,7 @@ while (moreTrials == 'Y')
                 print(filename,'-dpng')
                 hold off;
                 
-                if switch_sheaths
+                %if switch_sheaths
                     figure(121);
                     filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '10) CB watershed ensheathed') ;
                     print(filename,'-dpng')
@@ -908,7 +920,7 @@ while (moreTrials == 'Y')
                     print(filename,'-dpng')
                     hold off;
                     
-                end
+                %end
                 
                 
                 

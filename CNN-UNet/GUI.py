@@ -16,6 +16,9 @@ class GUI:
         self.scale = None
         self.minLength = None
         self.sensitivity = None
+        self.rolling_ball = None
+        self.CLAHE = None
+        
 
         # TITLE
         self.label, self.entry = self.new_param(master, "MYELIN QUANTIFICATION")        
@@ -37,6 +40,17 @@ class GUI:
         self.label3.grid(row=3, column=0, columnspan=1, sticky=W)
         self.entry3.grid(row=3, column=1, columnspan=1, sticky=W)        
         
+        # ROW 4:
+        self.label4, self.entry4 = self.new_param(master, "Rolling ball background sub size (px, default 0): ")
+        self.label4.grid(row=4, column=0, columnspan=1, sticky=W)
+        self.entry4.grid(row=4, column=1, columnspan=1, sticky=W)        
+        
+        # ROW 4:
+        self.label5, self.entry5 = self.new_param(master, "CLAHE contrast enhancement (yes or no ==> 0 or 1)")
+        self.label5.grid(row=5, column=0, columnspan=1, sticky=W)
+        self.entry5.grid(row=5, column=1, columnspan=1, sticky=W)       
+
+
                 
         self.guess_button = Button(master, text="Ok", command=self.close)
         #self.reset_button = Button(master, text="Reset", command=self.reset, state=DISABLED)       
@@ -75,6 +89,8 @@ class GUI:
                     self.scale = self.entry1.get()
                     self.minLength = self.entry2.get()
                     self.sensitivity = self.entry3.get()
+                    self.rolling_ball = self.entry4.get()
+                    self.CLAHE = self.entry5.get()
                    
                 else:
                     return False

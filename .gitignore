@@ -1,4 +1,6 @@
 CNN-UNet/Results/Demo-data/all_fibers_Composite-12_0.pkl
+CNN-UNet/Results/Demo-data*
+
 Heuristic_algorithm/200x*
 Heuristic_algorithm/Annick_Barron-Data*
 Heuristic_algorithm/Annick_*
@@ -9,12 +11,11 @@ Heuristic_algorithm/n2*
 Heuristic_algorithm/n3*
 
 Heuristic_algorithm/Human*
-Heuristic_algorithm/727*
+Heuristic_algorithm/stack - 727*
 
 Heuristic_algorithm/small*
 
 Heuristic_algorithm/HA*
-
-
+Heuristic_algorithm/Daryan*
 Heuristic_algorithm/Daryan*
 CNN-UNet/Results/Demo-data_output*

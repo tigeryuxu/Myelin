@@ -30,21 +30,23 @@ from skimage.filters import threshold_otsu
 """ Image Adjust """
 def im_adjust(red, sz=20):
     #Subtract background:
-    blur = cv2.GaussianBlur(red,(5,5), 1)
-    se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2*sz-1, 2*sz-1));   # get disk structuring element
-    background = cv2.morphologyEx(blur, cv2.MORPH_OPEN, se)
-    I2 = blur - background;
-    blur = I2;
-    
+    if sz > 0:   # DO NOTHING IF ROLLING BALL == 0 size
+        blur = cv2.GaussianBlur(red,(5,5), 1)
+        se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (sz, sz));   # get disk structuring element
+        background = cv2.morphologyEx(blur, cv2.MORPH_OPEN, se)
+        I2 = blur - background;
+        blur = I2;
+        red = blur;
+        
 
     """ Need to do CLAHE but not working...? """
     #clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     #cl1 = clahe.apply(blur)
     #from skimage import data, exposure, img_as_float
     #cl1 = exposure.equalize_adapthist(blur, kernel_size=None, clip_limit=0.01, nbins=256)
-    thresh = threshold_otsu(blur)
-    binary = blur > thresh
-    return binary
+    thresh = threshold_otsu(red)
+    binary = red > thresh
+    return binary, red
 
 """ Get rid of small pieces of O4 """
 def dilate_red(binary):
@@ -128,13 +130,13 @@ def DAPI_count(DAPI, background_sz):
 
 
 
-def pre_process(input_arr, im_num, DAPI_size, name='default', sav_dir=''):
+def pre_process(input_arr, im_num, DAPI_size, rolling_ball, name='default', sav_dir=''):
 
     input_arr = np.asarray(input_arr)
     red = input_arr[:, :, 0]
     DAPI = input_arr[:, :, 2]
     
-    binary = im_adjust(red)      # im adjust
+    binary, blur = im_adjust(red, rolling_ball)      # im adjust
     opening = dilate_red(binary) # dilate red, can make optional more lenient or not
     labels = DAPI_count(DAPI, background_sz=DAPI_size)  # count DAPI + do watershed
     
@@ -178,16 +180,16 @@ def pre_process(input_arr, im_num, DAPI_size, name='default', sav_dir=''):
     candidates = final_match_O4 > 0
     plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tif', (candidates))
         
-    return candidates, counter, counter_DAPI
+    return candidates, counter, counter_DAPI, blur
 
 
-def pre_process_QL(input_arr, im_num, DAPIsize, name='default', sav_dir=''):
+def pre_process_QL(input_arr, im_num, DAPIsize, rolling_ball, name='default', sav_dir=''):
 
     input_arr = np.asarray(input_arr)
     red = input_arr[:, :, 0]
     DAPI = input_arr[:, :, 2]
     
-    binary = im_adjust(red)      # im adjust
+    binary, blur = im_adjust(red, rolling_ball)      # im adjust
     opening = dilate_red_QL(binary) # dilate red, can make optional more lenient or not
     labels = DAPI_count(DAPI, background_sz=50)  # count DAPI + do watershed
     
@@ -232,4 +234,4 @@ def pre_process_QL(input_arr, im_num, DAPIsize, name='default', sav_dir=''):
     candidates = final_match_O4 > 0
     plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tif', (candidates))
         
-    return candidates, counter, counter_DAPI
+    return candidates, counter, counter_DAPI, blur
