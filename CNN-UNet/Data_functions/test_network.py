@@ -221,6 +221,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                         input_crop = np_zeros   # delete this to do rotations
                 
                 
+                input_crop_save = np.copy(input_crop)
                 
                 """ Normalize the image first """
                 input_crop = normalize_im(input_crop, mean_arr, std_arr)  
@@ -254,14 +255,14 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                     
                 
                 """ Plot for debug """ 
-                if debug:
-                    plt.figure('Out'); plt.clf; plt.subplot(224); show_norm(input_crop[:, :, 0:3]); plt.pause(0.05); 
-                    plt.subplot(221); 
-                    true_m = np.argmax((batch_y[0]).astype('uint8'), axis=-1); plt.imshow(true_m);       
-                    plt.title('Truth');
-                    plt.subplot(222); plt.imshow(DAPI_crop); plt.title('DAPI_mask');
-                    plt.subplot(223); plt.imshow(classification); plt.title('Output_seg');
-                    plt.pause(0.05); 
+#                if debug:
+#                    plt.figure('Out'); plt.clf; plt.subplot(224); show_norm(input_crop[:, :, 0:3]); plt.pause(0.05); 
+#                    plt.subplot(221); 
+#                    true_m = np.argmax((batch_y[0]).astype('uint8'), axis=-1); plt.imshow(true_m);       
+#                    plt.title('Truth');
+#                    plt.subplot(222); plt.imshow(DAPI_crop); plt.title('DAPI_mask');
+#                    plt.subplot(223); plt.imshow(classification); plt.title('Output_seg');
+#                    plt.pause(0.05); 
                     
                 """ Skeletonize and count number of fibers within the output ==> saved for "sticky-seperate" later """
                 copy_class = np.copy(classification)
@@ -282,6 +283,12 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                         overlap_coords = overlap_coords + add_coords
                         list_M_cells[cell_num].add_coords(overlap_coords)  
         
+                """ Plot output of individual segmentations and the input truth ==> for correcting later!!!"""
+                if np.count_nonzero(classification) > 0 and debug:          
+                    plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_input.tif', 
+                               np.asarray(input_crop_save, dtype = np.uint8))
+                    plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_truth.tif', (classification), cmap='binary_r')
+
                         
                 """ Create mask of all segmented cells, also save as table """
                 classification[classification > 0] = N + 1

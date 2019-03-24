@@ -21,7 +21,7 @@ import tkinter
 from tkinter import filedialog
 import os
     
-debug = 0
+debug = 1
 
 """ LOAD UP GUI """
 root = Tk()
