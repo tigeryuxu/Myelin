@@ -33,7 +33,7 @@ from skimage import data, exposure, img_as_float
 
 def run_analysis(s_path, sav_dir, input_path, checkpoint,
                  im_scale, minLength, minSingle, minLengthDuring, radius,
-                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball,
+                 len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball, resize,
                  debug):
     
     try:
@@ -88,8 +88,11 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             #size = 3788 # 4775 and 6157 for the newest one
             input_arr = readIm_counter(input_path,onlyfiles_mask, counter[i]) 
             size_whole = input_arr.size[0]
-            #size = int((size_whole * im_scale) / 0.227) # 4775 and 6157 for the newest one
-            size = int((size_whole)) # 4775 and 6157 for the newest one
+            
+            """ Resize the input to be on scale of 0.6904 um/px """
+            size = int(size_whole) # 4775 and 6157 for the newest one
+            if resize:
+                size = int((size * im_scale) / 0.6904) # 4775 and 6157 for the newest one
             input_arr = resize_adaptive(input_arr, size, method=Image.BICUBIC)
             size_whole = input_arr.size
             
@@ -406,7 +409,8 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             input_arr = []; 
             
         sess.close()
-    
+        tf.reset_default_graph()
+        
     except Exception as error:
         print("Error in analysis, check file order and input directory");
         tf.reset_default_graph()

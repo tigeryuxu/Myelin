@@ -21,7 +21,7 @@ import tkinter
 from tkinter import filedialog
 import os
     
-debug = 1
+debug = 0
 
 """ LOAD UP GUI """
 root = Tk()
@@ -33,23 +33,26 @@ min_microns = my_gui.minLength
 sensitivity = my_gui.sensitivity
 rolling_ball = my_gui.rolling_ball
 CLAHE = my_gui.CLAHE
+resize = my_gui.resize
 
 # if nothing entered, switch to default
-if im_scale == None or min_microns == None or sensitivity == None or rolling_ball == None:
+if im_scale == None or min_microns == None or sensitivity == None or rolling_ball == None or resize == None:
     im_scale = '0.69'
     min_microns = '12'
     sensitivity = '3'
     rolling_ball = '0'
     CLAHE = '0'
+    resize = '0'
     print("Nothing entered, switching to default")    
 print("Parameters saved: " + "\nScale: " + im_scale + " \nminLength: " + min_microns + "\nSensitivity: " + sensitivity + 
-      "\nRolling ball size: " + rolling_ball + "\nCLAHE: " + CLAHE)
+      "\nRolling ball size: " + rolling_ball + "\nCLAHE: " + CLAHE + "\nresuze: " + resize)
 
 im_scale = float(im_scale)
 min_microns = float(min_microns)
 sensitivity = float(sensitivity)
 rolling_ball = float(rolling_ball)
 CLAHE = float(CLAHE)
+resize = float(resize)
 
 #min_microns = 12
 #im_scale = 0.6904  #0.519, 0.6904, 0.35
@@ -81,7 +84,7 @@ jacc_test = 0
 """ Prompt user to select input and output directories """
 #""" Best so far is 980000 for rotated """
 try:
-    checkpoint = '301000'
+    checkpoint = '470000'
     root = tkinter.Tk()
     s_path = './Checkpoints/'
     sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
@@ -120,7 +123,7 @@ for i in range(len(list_folder)):
     try:
         UNet.run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
                      im_scale, minLength, minSingle, minLengthDuring, radius,
-                     len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball,
+                     len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball, resize,
                      debug)
 
         print("Analysis of image " + str(i + 1) + " successfully completed.")
