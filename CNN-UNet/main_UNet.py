@@ -45,7 +45,7 @@ if im_scale == None or min_microns == None or sensitivity == None or rolling_bal
     resize = '0'
     print("Nothing entered, switching to default")    
 print("Parameters saved: " + "\nScale: " + im_scale + " \nminLength: " + min_microns + "\nSensitivity: " + sensitivity + 
-      "\nRolling ball size: " + rolling_ball + "\nCLAHE: " + CLAHE + "\nresuze: " + resize)
+      "\nRolling ball size: " + rolling_ball + "\nCLAHE: " + CLAHE + "\nresize: " + resize)
 
 im_scale = float(im_scale)
 min_microns = float(min_microns)
@@ -59,7 +59,9 @@ resize = float(resize)
 minLength = min_microns / im_scale
 minSingle = (minLength * sensitivity) / im_scale
 minLengthDuring = 4/im_scale
+#radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
 radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
+
 
 len_x = 1024     # 1344, 1024
 width_x = 640   # 864, 640
@@ -84,7 +86,7 @@ jacc_test = 0
 """ Prompt user to select input and output directories """
 #""" Best so far is 980000 for rotated """
 try:
-    checkpoint = '470000'
+    checkpoint = '301000'
     root = tkinter.Tk()
     s_path = './Checkpoints/'
     sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
