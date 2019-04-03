@@ -9,6 +9,7 @@ dir = getDirectory("Choose a Directory");
 // ***ALSO MUST OPEN AN IMAGE OF THE CORRECT SIZE WHICH NAME MATCHES LINE #96
 
 list = getFileList(dir);
+list = Array.sort(list);
 count = 0;
 for (i=0; i<list.length; i++) {
      count++;
@@ -44,7 +45,7 @@ for (i = 0; i < list.length; i+=2) {
 	requires("1.33f");
 	//run("Blobs (25K)");
 	setThreshold(1, 255);
-	run("Analyze Particles...", "minimum=10 maximum=" + (1024 * 600) + " bins=20 show=Nothing clear record");
+	run("Analyze Particles...", "minimum=50 maximum=9999999 bins=20 show=Nothing clear record");
 	for (k=1; k<nResults; k++) {
 	    x = getResult('XStart', k);
 	    y = getResult('YStart', k);
@@ -66,7 +67,6 @@ for (i = 0; i < list.length; i+=2) {
 	selectWindow(list[i]);
 	roiManager("Show All");
 	
-
 	waitForUser("Wait");  // waits for user to add everything before continuing
 
 	selectWindow(list[i]);
@@ -75,17 +75,31 @@ for (i = 0; i < list.length; i+=2) {
 		print('blank');
 		print(roiManager("count"));
 		newImage("Untitled", "8-bit black", 640, 1024, 1);
+
+		tmpStr = substring(list[i], 0, lengthOf(list[i]) - 9);
+		sav_Name = tmpStr + "CORRECTED_neg_truth.tif";
+		saveAs("Tiff", dir + sav_Name);
+
 	}
 	else {
 		print('not blank');
+		//run("select all")
+		array1 = newArray("0");; 
+		for (t=0;t<roiManager("count");t++){ 
+		        array1 = Array.concat(array1,t); 
+		        Array.print(array1); 
+		} 
+		roiManager("select", array1); 
+		roiManager("Combine");
 		run("Create Mask");
 		//run("Invert");
 		run("Invert LUT");
 		run("RGB Color");
+	
+		tmpStr = substring(list[i], 0, lengthOf(list[i]) - 9);
+		sav_Name = tmpStr + "CORRECTED_pos_truth.tif";
+		saveAs("Tiff", dir + sav_Name);
 	}
-	tmpStr = substring(list[i], 0, lengthOf(list[i]) - 9);
-	sav_Name = tmpStr + "CORRECTED_truth.tif";
-	saveAs("Tiff", dir + sav_Name);
 
 	run("Close All");
 	call("java.lang.System.gc");    // clears memory leak
