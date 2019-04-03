@@ -51,17 +51,17 @@ def im_adjust(red, sz=20):
 """ Get rid of small pieces of O4 """
 def dilate_red(binary):
     binary = binary.astype(np.uint8)
-    sz = 20;
+    sz = 60;
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (sz, sz));   # get disk structuring element
     closing = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
     
-    sz = 25;  # gives 1092 cells, whereas sz = 20 ==> gives 1758 cells
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (sz, sz));   # get disk structuring element
-    opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
+#    sz = 60;  # gives 1092 cells, whereas sz = 20 ==> gives 1758 cells
+#    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (sz, sz));   # get disk structuring element
+#    opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
+#
+#    return opening
     
-    #plt.figure(); plt.imshow(Image.fromarray(opening * 255))
-    #plt.imsave('final_image' + str(im_num) + '.tif', (new_fibers * 255).astype(np.uint16))
-    return opening
+    return closing
 
 
 """ Get rid of small pieces of O4 """

@@ -18,6 +18,7 @@ class GUI:
         self.sensitivity = None
         self.rolling_ball = None
         self.CLAHE = None
+        self.resize = None
         
 
         # TITLE
@@ -46,10 +47,14 @@ class GUI:
         self.entry4.grid(row=4, column=1, columnspan=1, sticky=W)        
         
         # ROW 4:
-        self.label5, self.entry5 = self.new_param(master, "CLAHE contrast enhancement (yes or no ==> 0 or 1)")
+        self.label5, self.entry5 = self.new_param(master, "CLAHE contrast enhancement (yes or no ==> 0 or 1, default 0)")
         self.label5.grid(row=5, column=0, columnspan=1, sticky=W)
-        self.entry5.grid(row=5, column=1, columnspan=1, sticky=W)       
-
+        self.entry5.grid(row=5, column=1, columnspan=1, sticky=W) 
+        
+        # ROW 4:
+        self.label6, self.entry6 = self.new_param(master, "Resize image to 0.69 um/px (yes or no ==> 0 or 1, default 0)")
+        self.label6.grid(row=6, column=0, columnspan=1, sticky=W)
+        self.entry6.grid(row=6, column=1, columnspan=1, sticky=W)       
 
                 
         self.guess_button = Button(master, text="Ok", command=self.close)
@@ -91,6 +96,7 @@ class GUI:
                     self.sensitivity = self.entry3.get()
                     self.rolling_ball = self.entry4.get()
                     self.CLAHE = self.entry5.get()
+                    self.resize = self.entry6.get()
                    
                 else:
                     return False
