@@ -98,12 +98,6 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             
             
             """ DO CLAHE """
-#            if CLAHE == 1:
-#                input_arr = exposure.equalize_adapthist(np.asarray(input_arr, dtype='uint8'), kernel_size=None, clip_limit=0.01, nbins=256)
-#                input_arr = np.asarray(input_arr * 255, dtype='uint8')
-#                input_arr = Image.fromarray(input_arr)
-            
-        
             if CLAHE == 1:
                 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
                 input_arr = np.asarray(input_arr)
@@ -117,8 +111,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                 input_arr = Image.fromarray(input_arr)
                 
                 
-            
-            
+            """ Pre-process and identify candidate nuclei """
             DAPI_size = round(radius * radius * math.pi);  
             DAPI_tmp, total_matched_DAPI, total_DAPI, back_subbed = pre_process(input_arr, counter[i], DAPI_size, rolling_ball, name=onlyfiles_mask[counter[i]], sav_dir=sav_dir)
             if rolling_ball > 0:
@@ -375,14 +368,10 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                     for T in range(len(overlap_coords)):
                         final_counted[overlap_coords[T,0], overlap_coords[T,1]] = cell_num
         
-            """ Print text onto image """
-            filename_split = filename.split('.')[0]
-            output_name = sav_dir + 'all_fibers_image' + '_' + filename_split + '_' + str(i) + '.png'
-            add_text_to_image(final_counted, filename=output_name)             
-        
+
             """ Garbage collection """
             DAPI_arr = []; DAPI_im = []; binary_overlap = []; labelled = []; overlap_im = []; seg_im = [];
-            final_counted = []; sort_mask = []; tmp = []; binary_all_fibers = [];
+            sort_mask = []; tmp = []; binary_all_fibers = [];
             masked = []; no_overlap = [];
             DAPI_crop = []; added_seg = []; classification = []; copy_class = []; cropped_seg = []; input_crop = [];
             output = []; skel = []; truth_im = [];
@@ -404,6 +393,13 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             input_save[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1]),1] = new_fibers[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1])]
             plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tif', (input_save))
             # garbage collection
+            
+            """ Print text onto image """
+            filename_split = filename.split('.')[0]
+            output_name = sav_dir + 'all_fibers_image_' + filename_split + '_' + str(i) + '.png'
+            output_name_overlay = sav_dir + 'all_fibers_OVERLAY_' + filename_split + '_' + str(i) + '.png'
+            add_text_to_image(final_counted, input_save, filename=output_name, filename_overlay=output_name_overlay)             
+        
             
             copy_all_fibers = []; 
             input_arr = []; 

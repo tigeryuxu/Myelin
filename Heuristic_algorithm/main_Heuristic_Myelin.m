@@ -103,6 +103,10 @@ cd(cur_dir);
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
 human_OL = 'Y';
+if switch_sheaths == 1
+   human_OL = 'N';
+end
+
 if human_OL == 'Y'
     squareDist = 150;
     enhance_RED = 'Y'; % ==> set as 'Y' for other human OL trials!!!
@@ -496,6 +500,10 @@ while (moreTrials == 'Y')
                 if enhance_RED == 'Y'
                     tmpDAPI = adapthisteq(intensityValueDAPI);
                     O4_tmp = adapthisteq(O4_original);
+                elseif switch_sheaths == 1
+                    O4_tmp = O4_im_ridges_adapted;
+                    tmpDAPI = intensityValueDAPI;
+                    
                 else
                     tmpDAPI = adapthisteq(intensityValueDAPI);
                     O4_tmp = adapthisteq(O4_im_ridges_adapted);
@@ -505,7 +513,9 @@ while (moreTrials == 'Y')
                 %% Switch the sheaths for Annick's analysis
                 greenOrig = MBP_im;
                 if switch_sheaths == 1
-                    MBP_im = adapthisteq(MBP_im);
+                    %MBP_im = adapthisteq(MBP_im);
+                    
+                    MBP_im = MBP_im;
                     
                     %                     I = imgaussfilt(MBP_im, 2);
                     %
@@ -1174,7 +1184,7 @@ for fileNum = 1 : numfids
                 new_vv = cell(0);
                 for Y = 1:length(vv)
                     len = vv(Y).MajorAxisLength;
-                    if len > minLength / scale
+                    if len > minSingle / scale
                         new_vv{end + 1} = len;
                     end
                 end
@@ -1193,7 +1203,7 @@ for fileNum = 1 : numfids
                 
                 for Y = 1:length(vv)
                     len = vv{Y};
-                    if len > minLength / scale
+                    if len > minSingle / scale
                         allLengthFibersR = [allLengthFibersR len * scale];
                         fibers_cell = [fibers_cell len * scale];
                         log_length = log10(len * scale);
@@ -1233,12 +1243,12 @@ cd(cur_dir);
 cd(saveDirName);
 %csvwrite('output_props.csv', all_individual_trials);
 
-fid1 = fopen('output_sheaths.csv', 'w') ;
-fid2 = fopen('output_lengths.csv', 'w') ;
-fid3 = fopen('output_log.csv', 'w') ;
-fid4 = fopen('output_LPC.csv', 'w') ;
-fid5 = fopen('output_area_per_cell.csv', 'w');
-fid6 = fopen('output_props.csv', 'w');
+fid1 = fopen(strcat('output_sheaths_', saveDirName, '.csv'), 'w') ;
+fid2 = fopen(strcat('output_lengths_', saveDirName, '.csv'), 'w') ;
+fid3 = fopen(strcat('output_log_', saveDirName, '.csv'), 'w') ;
+fid4 = fopen(strcat('output_LPC_', saveDirName, '.csv'), 'w') ;
+fid5 = fopen(strcat('output_area_per_cell_', saveDirName, '.csv'), 'w');
+fid6 = fopen(strcat('output_props_', saveDirName, '.csv'), 'w');
 
 if length(batch_numFiles) < 2
     for idx = 1:length(all_individual_trials_sheaths)
@@ -1267,14 +1277,14 @@ if length(batch_numFiles) < 2
             all_individual_trials = 0;
         end
         
-        dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, idx), '-append') ;
-        dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, idx), '-append') ;
-        dlmwrite('output_log.csv', all_individual_trials_log(1, idx), '-append') ;
-        dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, idx), '-append') ;
-        dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, idx), '-append')
-        dlmwrite('output_props.csv', all_individual_trials(idx, :), '-append')
+        dlmwrite(strcat('output_sheaths_', saveDirName, '.csv'), all_individual_trials_sheaths(1, idx), '-append') ;
+        dlmwrite(strcat('output_lengths_', saveDirName, '.csv'), all_individual_trials_lengths(1, idx), '-append') ;
+        dlmwrite(strcat('output_log_', saveDirName, '.csv'), all_individual_trials_log(1, idx), '-append') ;
+        dlmwrite(strcat('output_LPC_', saveDirName,'.csv'), all_individual_trials_LPC(1, idx), '-append') ;
+        dlmwrite(strcat('output_area_per_cell_', saveDirName, '.csv'), all_individual_trials_area_per_cell(1, idx), '-append')
+        dlmwrite(strcat('output_props_', saveDirName, '.csv'), all_individual_trials(idx, :), '-append')
     end
-    
+ 
 else  % if BATCHED with user input
     total_counter = 0;
     for idx = 1:length(batch_numFiles)
@@ -1306,15 +1316,14 @@ else  % if BATCHED with user input
             all_individual_trials = 0;
         end
         
-        dlmwrite('output_sheaths.csv', all_individual_trials_sheaths(1, total_counter), '-append') ;
-        dlmwrite('output_lengths.csv', all_individual_trials_lengths(1, total_counter), '-append') ;
-        dlmwrite('output_log.csv', all_individual_trials_log(1, total_counter), '-append') ;
-        dlmwrite('output_LPC.csv', all_individual_trials_LPC(1, total_counter), '-append') ;
-        dlmwrite('output_area_per_cell.csv', all_individual_trials_area_per_cell(1, total_counter), '-append')
-        dlmwrite('output_props.csv', all_individual_trials, '-append')
+        dlmwrite(strcat('output_sheaths_', saveDirName, '.csv'), all_individual_trials_sheaths(1, total_counter), '-append') ;
+        dlmwrite(strcat('output_lengths_', saveDirName, '.csv'), all_individual_trials_lengths(1, total_counter), '-append') ;
+        dlmwrite(strcat('output_log_', saveDirName, '.csv'), all_individual_trials_log(1, total_counter), '-append') ;
+        dlmwrite(strcat('output_LPC_', saveDirName, '.csv'), all_individual_trials_LPC(1, total_counter), '-append') ;
+        dlmwrite(strcat('output_area_per_cell_', saveDirName, '.csv'), all_individual_trials_area_per_cell(1, total_counter), '-append')
+        dlmwrite(strcat('output_props_', saveDirName, '.csv'), all_individual_trials, '-append')
         %end
-        %cycle_files = cycle_files + 1;
-        
+        %cycle_files = cycle_files + 1;    
     end
 end
 

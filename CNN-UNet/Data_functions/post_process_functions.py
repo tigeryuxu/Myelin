@@ -20,6 +20,7 @@ import csv
 from PIL import Image
 from os import listdir
 import pickle as pickle
+import os
 
 from Data_functions.data_functions import *
 from Data_functions.plot_functions import *
@@ -139,27 +140,18 @@ def rerun_all():
 
         skeletonize_all_fibers(all_fibers, T + add, DAPI_tmp = np.zeros([8208,8208]), minLength=18, minLengthSingle=72)    
 
+
+
 """ Read and combine csv into single files containing lengths, numsheaths, ect...
-
-***NEED TO FIX ==> when row is empty, still must add empty slot!!!
-
- """
+"""
 def read_and_comb_csv_as_SINGLES(input_path):
     all_fibers = []
     all_numCells = []
     all_numShea = []
     all_numMFLC = []
     
-    #import tkinter
-    #from tkinter import filedialog
-    #root = tkinter.Tk()
-    #input_path = filedialog.askdirectory(parent=root, initialdir="D:/Tiger/AI stuff/RESULTS/",
-    #                                title='Please select input directory')
-    #input_path = input_path + '/'
-
     filenames = listdir(input_path)
     all_csv  = [filename for filename in filenames if filename.endswith(".csv") ]
-    #all_csv = read_file_names(input_path)
     first = 1;
     output_name = all_csv[0] 
     output_name = output_name.split('.')[0]
@@ -167,10 +159,10 @@ def read_and_comb_csv_as_SINGLES(input_path):
     directory = input_path + 'combined_CSVs/'
     if not os.path.exists(directory):
         os.makedirs(directory)
-    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w') as sheaths:
-        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w') as lengths:
-            with open(directory + 'Results_' + output_name + '_cells.csv', 'w') as cells:
-               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w') as mFLC:
+    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w',  newline='') as sheaths:
+        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w',  newline='') as lengths:
+            with open(directory + 'Results_' + output_name + '_cells.csv', 'w',  newline='') as cells:
+               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w',  newline='') as mFLC:
 
                     for T in range(len(all_csv)):
                         
@@ -181,11 +173,8 @@ def read_and_comb_csv_as_SINGLES(input_path):
                             counter = 0
                         
                             for row in spamreader:
-                                #print(', '.join(row))
-                                
                                 row = list(filter(lambda a: a != '[]', row))
-                                
-                                
+                            
                                 if counter % 2 != 0:
                                     counter = counter + 1
                                     continue
@@ -199,7 +188,6 @@ def read_and_comb_csv_as_SINGLES(input_path):
                                    row = ['-']
 
                                 if counter == 0:   all_fibers.append(row); wr = csv.writer(lengths, quoting=csv.QUOTE_ALL); wr.writerow(all_fibers[0]);
-
                                 elif counter == 2: 
                                     all_numCells.append(row[0]);   # append the Num Ensheathed 
                                 elif counter == 8:
@@ -209,18 +197,15 @@ def read_and_comb_csv_as_SINGLES(input_path):
                                     wr = csv.writer(cells, quoting=csv.QUOTE_ALL); 
                                     wr.writerow(all_numCells);
                                     all_numCells = []
-
+                                    
                                 elif counter == 4: all_numShea.append(row); wr = csv.writer(sheaths, quoting=csv.QUOTE_ALL); wr.writerow(all_numShea[0]);
-
                                 elif counter == 6: all_numMFLC.append(row); wr = csv.writer(mFLC, quoting=csv.QUOTE_ALL); wr.writerow(all_numMFLC[0]);
-
 
                                 all_fibers = []
                                 #all_numCells = []
                                 all_numShea = []
                                 all_numMFLC = []
 
-                                
                                 if counter == 10:
                                     break
                                 counter = counter + 1

@@ -86,7 +86,7 @@ jacc_test = 0
 """ Prompt user to select input and output directories """
 #""" Best so far is 980000 for rotated """
 try:
-    checkpoint = '301000'
+    checkpoint = '401000'
     root = tkinter.Tk()
     s_path = './Checkpoints/'
     sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
@@ -136,8 +136,8 @@ for i in range(len(list_folder)):
         #print(error)
         logging.error(traceback.format_exc())
         
-
-  
+    # combines all individual output csv files into single excel sheets under folder "combined CSVs" in the output folder
+    post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)
         
     
 

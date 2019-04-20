@@ -19,11 +19,15 @@ import random
 from skimage import measure
 
 """ ADDS TEXT TO IMAGE and saves the image """
-def add_text_to_image(all_fibers, filename='default.png', resolution=800):
+def add_text_to_image(all_fibers, overlay_im, filename='default.png', filename_overlay ='default.png', resolution=800):
     #fiber_img = Image.fromarray((all_fibers *255).astype(np.uint16)) # ORIGINAL, for 8GB CPU
     fiber_img = (all_fibers*255).astype(np.uint16) 
     plt.figure(80, figsize=(12,10)); plt.clf(); plt.imshow(fiber_img)
     plt.axis('off')
+    
+    plt.figure(81, figsize=(12,10)); plt.clf(); plt.imshow(overlay_im)
+    plt.axis('off')
+    
     # PRINT TEXT ONTO IMAGE
     binary_all_fibers = all_fibers > 0
     labelled = measure.label(binary_all_fibers)
@@ -43,11 +47,16 @@ def add_text_to_image(all_fibers, filename='default.png', resolution=800):
             #color = [random.randint(0,255)/256, random.randint(0,255)/256, random.randint(0,255)/256]
             #cell_num = new_num
         color = list_fibers[int(new_num)]
+        plt.figure(80)
         plt.text(overlap_coords[0][1], overlap_coords[0][0], str(int(new_num)), fontsize= 2, color=color)    
-    plt.savefig(filename, dpi = resolution)
+        plt.figure(81)
+        plt.text(overlap_coords[0][1], overlap_coords[0][0], str(int(new_num)), fontsize= 2, color=color)    
 
-"""
-    Scales the normalized images to be within [0, 1], thus allowing it to be displayed
+    plt.savefig(filename, dpi = resolution)
+    plt.savefig(filename_overlay, dpi = resolution)
+
+
+""" Scales the normalized images to be within [0, 1], thus allowing it to be displayed
 """
 def show_norm(im):
     m,M = im.min(),im.max()
