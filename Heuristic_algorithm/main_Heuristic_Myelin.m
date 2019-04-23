@@ -99,7 +99,7 @@ cd(cur_dir);
 %% FOR DARYAN: human_OL == N, enhance_DAPI == N, size == 1000, switch_sheaths on line 564 == 1
 
 
-
+find_internode = 1;  % change to 1 if want to use internode analysis!!!
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
 human_OL = 'Y';
@@ -235,6 +235,7 @@ while (moreTrials == 'Y')
     
     batch_numFiles = [batch_numFiles, numfids];
     %% Read in images
+    empty_file_idx_sub = 0;
     for fileNum = 1 : load_five: numfids
         
         cd(cur_dir);
@@ -242,11 +243,27 @@ while (moreTrials == 'Y')
         filename_raw = natfnames{fileNum};
         %% Decide if want to load individual channels or single image
         if load_five == 5
-            [DAPIimage,redImage,binImage,greenImage,wholeImage] = NewFileReaderV4(trialNames, fileNum, allChoices, foldername, cur_dir);
-            DAPIimage = rgb2gray(DAPIimage);
-            red = rgb2gray(redImage);
-            binImage = rgb2gray(binImage);
-            greenImage = rgb2gray(greenImage);
+            fileNum = fileNum - empty_file_idx_sub;
+            [DAPIimage,redImage,binImage,greenImage,wholeImage, im_size] = NewFileReaderV4(trialNames, fileNum, allChoices, foldername, cur_dir);
+            
+            num_empty = 0;
+            if ~isempty(DAPIimage)
+                if length(size(DAPIimage)) > 2 DAPIimage = rgb2gray(DAPIimage); else    DAPIimage = DAPIimage;                end
+            else  DAPIimage = zeros(im_size);  num_empty = num_empty + 1;  end
+            if ~isempty(redImage)
+                if length(size(redImage)) > 2 red = rgb2gray(redImage); else    red = redImage;                end
+            else  redImage = zeros(im_size);  num_empty = num_empty + 1;    end
+            if ~isempty(greenImage)
+                if length(size(greenImage)) > 2 red = rgb2gray(greenImage); else    greenImage = greenImage;                end
+            else  greenImage = zeros(im_size);   num_empty = num_empty + 1;   end
+            if ~isempty(binImage)
+                if length(size(binImage)) > 2 red = rgb2gray(binImage); else    binImage = binImage;                end
+            else  binImage = zeros(im_size);  num_empty = num_empty + 1;    end
+         
+            if ~isempty(wholeImage)  wholeImage = wholeImage;         
+            else  wholeImage = zeros(im_size);  num_empty = num_empty + 1;    end
+            
+            empty_file_idx_sub = empty_file_idx_sub + num_empty;
             
             cd(cur_dir);
             
@@ -531,8 +548,9 @@ while (moreTrials == 'Y')
                    MBP_im = imadjust(greenOrig); 
                 end
                 
-                wholeImage = cat(3, O4_tmp, MBP_im, tmpDAPI);
-                
+                if find_internode == 0   % only do this if NOT find_internodes
+                    wholeImage = cat(3, O4_tmp, MBP_im, tmpDAPI);
+                end                
                 
                 %% Switch the sheaths for Annick's analysis
                 if switch_sheaths == 1
@@ -599,6 +617,14 @@ while (moreTrials == 'Y')
                 end
                 
                 [all_lines, locFibers,allLengths, mask, fibers] = ridges2lines(fibers, siz, hor_factor, minLength, dil_lines);
+                
+                
+                %% TIGER - can insert internode analysis here
+                if find_internode == 1
+                    [all_internodes, one_node, two_nodes] = find_internodes(greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
+                    
+                    continue;
+                end
                 
                 locFibers =  locFibers(~cellfun('isempty',locFibers));   % delete from the list if not a line
                 allLengths = allLengths(~cellfun('isempty', allLengths));   % delete from the list if not a line

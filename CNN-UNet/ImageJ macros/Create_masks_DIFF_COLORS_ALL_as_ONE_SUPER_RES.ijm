@@ -95,7 +95,8 @@ for (i = 0; i < list.length; i++) {   // augment by 5
 
 	//selectWindow("uFNet-04_2b-7d-Orthogonal Projection-01-Scene-01-uFNet-04_1-Max-09_c1+2.tif");
 	//selectWindow("Media Test-03-Extended Depth of Focus-03_s01_Cy3.tif");
-	selectWindow("HA753-Aug-23-96-wells-Extended Depth of Focus-05_s52_combined.tif");
+
+	selectWindow("190322F_uFNtn-01_1-04-Extended Depth of Focus-01_s21_combined.tif");
 	
 	call("java.lang.System.gc");    // clears memory leak
  	call("java.lang.System.gc"); 
