@@ -1,7 +1,15 @@
-
-function [DAPIimage,redImage,binImage,greenImage,wholeImage]= NewFileReaderV4(trialNames, fileNum, allChoices, foldername, cur_dir)
+function [DAPIimage,redImage,binImage,greenImage,wholeImage, im_size]= NewFileReaderV4(trialNames, fileNum, allChoices, foldername, cur_dir)
 
 cd(foldername); % switch to folder
+
+elim_none = cell(0);
+for i = 1:length(allChoices)
+    if ~strcmp(allChoices{i}, 'None')
+        elim_none{end + 1} = allChoices{i};
+    end
+end
+allChoices = elim_none;
+
 
 [rallchoices,callchoices]=size(allChoices);
 
@@ -28,21 +36,56 @@ for mmm=1:callchoices
             if mm==1
                 filename = natfnames(fileNum + mmm-1);
                 DAPIimage = imread(filename{1,1});
+                im_size = size(DAPIimage);
             elseif mm==2
                 filename = natfnames(fileNum + mmm-1);
                 redImage = imread(filename{1,1});
+                im_size = size(redImage);
             elseif mm==3
                 filename = natfnames(fileNum + mmm-1);
                 binImage = imread(filename{1,1});
+                im_size = size(binImage);
             elseif mm==4
                 filename = natfnames(fileNum + mmm-1);
                 greenImage = imread(filename{1,1});
+                im_size = size(greenImage);
             elseif mm==5
                 filename = natfnames(fileNum + mmm-1);
                 wholeImage = imread(filename{1,1});
+                im_size = size(wholeImage);
             end
+            %         elseif filetype == 'None'   % if filetype == 'None'
+            %             if mmm==1
+            %                 DAPIimage = [];
+            %             elseif mmm==2
+            %                 redImage = [];
+            %             elseif mmm==3
+            %                 binImage = [];
+            %             elseif mmm==4
+            %                 greenImage = [];
+            %             elseif mmm==5
+            %                 wholeImage = [];
+            %             end
         end
     end
 end
+
+if exist('redImage') == 0
+    redImage = [];
+end
+if  exist('greenImage') == 0
+    greenImage = [];
+end
+if  exist('DAPIimage') == 0
+    DAPIimage = [];
+end
+if  exist('wholeImage') == 0
+    wholeImage = [];
+end
+if  exist('binImage') == 0
+    binImage = [];
+end
+
+
 end
 
