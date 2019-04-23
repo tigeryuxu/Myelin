@@ -1242,6 +1242,8 @@ cd(cur_dir);
 % SAVE CSV FOR ALL INDIVIDUAL TRIALS
 cd(saveDirName);
 %csvwrite('output_props.csv', all_individual_trials);
+split_name = strsplit(saveDirName, '\');
+saveDirName = split_name{end};
 
 fid1 = fopen(strcat('output_sheaths_', saveDirName, '.csv'), 'w') ;
 fid2 = fopen(strcat('output_lengths_', saveDirName, '.csv'), 'w') ;

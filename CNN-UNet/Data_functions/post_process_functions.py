@@ -159,10 +159,10 @@ def read_and_comb_csv_as_SINGLES(input_path):
     directory = input_path + 'combined_CSVs/'
     if not os.path.exists(directory):
         os.makedirs(directory)
-    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w',  newline='') as sheaths:
-        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w',  newline='') as lengths:
-            with open(directory + 'Results_' + output_name + '_cells.csv', 'w',  newline='') as cells:
-               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w',  newline='') as mFLC:
+    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w+',  newline='') as sheaths:
+        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w+',  newline='') as lengths:
+            with open(directory + 'Results_' + output_name + '_cells.csv', 'w+',  newline='') as cells:
+               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w+',  newline='') as mFLC:
 
                     for T in range(len(all_csv)):
                         
