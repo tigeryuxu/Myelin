@@ -22,3 +22,35 @@ Heuristic_algorithm/Daryan*
 
 CNN-UNet/Results/Demo-data_output*
 CNN-UNet/Test
+CNN-UNet/Checkpoints/Trained with heuristic/loss_global_val.pkl
+CNN-UNet/Checkpoints/Trained with heuristic/loss_global.pkl
+CNN-UNet/Checkpoints/Trained with heuristic/jaccard_val.pkl
+CNN-UNet/Checkpoints/Trained with heuristic/jaccard.pkl
+CNN-UNet/Checkpoints/Trained with heuristic/check_785000.meta
+CNN-UNet/Checkpoints/Trained with heuristic/check_785000.index
+CNN-UNet/Checkpoints/Trained with heuristic/check_785000.data-00000-of-00001
+CNN-UNet/Checkpoints/Trained with heuristic/check_301000.meta
+CNN-UNet/Checkpoints/Trained with heuristic/check_301000.index
+CNN-UNet/Checkpoints/Trained with heuristic/check_301000.data-00000-of-00001
+CNN-UNet/Checkpoints/loss_global_val.pkl
+CNN-UNet/Checkpoints/loss_global.pkl
+CNN-UNet/Checkpoints/jaccard_val.pkl
+CNN-UNet/Checkpoints/jaccard.pkl
+CNN-UNet/Checkpoints/check_577000.meta
+CNN-UNet/Checkpoints/check_577000.index
+CNN-UNet/Checkpoints/check_577000.data-00000-of-00001
+CNN-UNet/Checkpoints/check_470000.meta
+CNN-UNet/Checkpoints/check_470000.index
+CNN-UNet/Checkpoints/check_470000.data-00000-of-00001
+CNN-UNet/Checkpoints/check_452000.meta
+CNN-UNet/Checkpoints/check_452000.index
+CNN-UNet/Checkpoints/check_452000.data-00000-of-00001
+CNN-UNet/Checkpoints/check_359000.meta
+CNN-UNet/Checkpoints/check_359000.index
+CNN-UNet/Checkpoints/check_359000.data-00000-of-00001
+CNN-UNet/Checkpoints/check_350000.meta
+CNN-UNet/Checkpoints/check_350000.index
+CNN-UNet/Checkpoints/check_350000.data-00000-of-00001
+CNN-UNet/Checkpoints/check_470000.meta
+CNN-UNet/Checkpoints/check_470000.index
+CNN-UNet/Checkpoints/check_470000.data-00000-of-00001
