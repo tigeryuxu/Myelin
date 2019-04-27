@@ -84,7 +84,7 @@ while (calibrate)
         ,combineRG ,verbose, calibrate, match_words, bool_load_five, adapt_his, divide_im, hor_factor, switch_sheaths};
     
     if calibrate
-        sensitivity = calib(diameterFiber, minLength, name, fillHoles, DAPIsize, calibrate, mag, DAPImetric, scale, sensitivity, sigma, foldername, cur_dir);
+        sensitivity =  calib(sigma, foldername, cur_dir);
         defaultans{10} = num2str(sensitivity);
     end
 end
@@ -99,7 +99,7 @@ cd(cur_dir);
 %% FOR DARYAN: human_OL == N, enhance_DAPI == N, size == 1000, switch_sheaths on line 564 == 1
 
 
-find_internode = 1;  % change to 1 if want to use internode analysis!!!
+find_internode = 0;  % change to 1 if want to use internode analysis!!!
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
 human_OL = 'Y';
