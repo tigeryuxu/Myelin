@@ -68,13 +68,6 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             loaded = pickle.load(f)
             std_arr = loaded[0]
       
-        # Read in file names
-        onlyfiles_mask = [ f for f in listdir(input_path) if isfile(join(input_path,f))]   
-        natsort_key1 = natsort_keygen(key = lambda y: y.lower())      # natural sorting order
-        onlyfiles_mask.sort(key = natsort_key1)
-        
-        counter = list(range(len(onlyfiles_mask)))  # create a counter, so can randomize it
-    
         batch_x = []; batch_y = [];
         for i in range(len(onlyfiles_mask)):  
             total_counter = 0

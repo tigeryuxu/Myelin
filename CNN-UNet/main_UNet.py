@@ -10,7 +10,7 @@ cur_dir = getcwd()
 #path.append(cur_dir + "\\Data_functions") #Yes, i'm on windows
 
 #from Data_functions import *
-import Data_functions.test_network as UNet
+import Data_functions.test_network_UNet as UNet
 import Data_functions.post_process_functions as post_process
 from GUI import *
 

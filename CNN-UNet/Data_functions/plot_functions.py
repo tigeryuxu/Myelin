@@ -52,7 +52,7 @@ def add_text_to_image(all_fibers, overlay_im, filename='default.png', filename_o
         plt.figure(81)
         plt.text(overlap_coords[0][1], overlap_coords[0][0], str(int(new_num)), fontsize= 2, color=color)    
 
-    plt.savefig(filename, dpi = resolution)
+    #plt.savefig(filename, dpi = resolution)
     plt.savefig(filename_overlay, dpi = resolution)
 
 
