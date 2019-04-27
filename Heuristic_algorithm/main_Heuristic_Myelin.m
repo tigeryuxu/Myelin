@@ -755,7 +755,7 @@ while (moreTrials == 'Y')
                 %% For Annick's analysis, do another watershed first - 19/19/01
                 % 06/03/2019 - moved below for loop into Annick's analysis
                 % as well
-                %%if switch_sheaths == 1
+                if switch_sheaths == 1 || Combine_RG == 1
                     for N = 1:length({s.objDAPI})
                         if s(N).Bool_W == 1
                             fibers_cell = [];
@@ -842,9 +842,7 @@ while (moreTrials == 'Y')
                     imshow(tmp_CBs);
                     
                     
-                    %% SOMEHOW CORRELATE NOW WITH MBP???
-                    %% DO YOU WANT ORIGINAL OR ENHANCED MBP???
-                    
+                    %% CORRELATE NOW WITH MBP
                     bw_MBP = imbinarize(greenOrig);
                     bw_MBP(~cores_CB) = 0;
                     
@@ -888,7 +886,7 @@ while (moreTrials == 'Y')
                     
                     s(1).AreaOverall = area_per_cell;
                     
-                %%end
+                end
                 
                 %% Print images of results
                 filename_raw = erase(filename_raw, '.tif');
