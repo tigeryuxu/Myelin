@@ -749,144 +749,37 @@ while (moreTrials == 'Y')
                 s(1).AreaOverall = nnz(bw_green); % gets area
                 s(1).numO4 = sumO4;
                 
-                
-                %% UPDATED FOR WIDTH/AREA ect...
-                
-                %% For Annick's analysis, do another watershed first - 19/19/01
-                % 06/03/2019 - moved below for loop into Annick's analysis
-                % as well
-                if switch_sheaths == 1 || Combine_RG == 1
-                    for N = 1:length({s.objDAPI})
-                        if s(N).Bool_W == 1
-                            fibers_cell = [];
-                            s(N).OtherStats = cell(0);
-                            for Y = 1:length(s(N).Fibers)
-                                tmp_ridges = imbinarize(bw_final_fibers);
-                                tmp_fibers = zeros(size(bw_final_fibers));
-                                tmp_fibers(s(N).Fibers{Y}) = 1;
-                                tmp_fibers = imdilate(tmp_fibers, strel('disk', 4));
-                                tmp_ridges(tmp_fibers == 0) = 0;
-                                stats = regionprops(tmp_ridges,MBP_im,'MeanIntensity', 'Area', 'Perimeter', 'MinorAxisLength', 'PixelValues');
-                                if length(stats) > 1
-                                    [val, idx] = max([stats(:).Area]);
-                                    s(N).OtherStats{end + 1} = stats(idx);
-                                else
-                                    s(N).OtherStats{end + 1} = stats;
-                                end
+                %% ALSO GET the intensity, width ect... within all the sheaths
+                for N = 1:length({s.objDAPI})
+                    if s(N).Bool_W == 1
+                        fibers_cell = [];
+                        s(N).OtherStats = cell(0);
+                        for Y = 1:length(s(N).Fibers)
+                            tmp_ridges = imbinarize(bw_final_fibers);
+                            tmp_fibers = zeros(size(bw_final_fibers));
+                            tmp_fibers(s(N).Fibers{Y}) = 1;
+                            tmp_fibers = imdilate(tmp_fibers, strel('disk', 4));
+                            tmp_ridges(tmp_fibers == 0) = 0;
+                            stats = regionprops(tmp_ridges,MBP_im,'MeanIntensity', 'Area', 'Perimeter', 'MinorAxisLength', 'PixelValues');
+                            if length(stats) > 1
+                                [val, idx] = max([stats(:).Area]);
+                                s(N).OtherStats{end + 1} = stats(idx);
+                            else
+                                s(N).OtherStats{end + 1} = stats;
                             end
                         end
                     end
-                    
-               
-                    % First find cores of ENSHEATHED cells to use for "imposemin"
-                    tmp_CBs = zeros(size(bw_final_fibers));
-                    for cell_num = 1:length(s(:, 1))
-                        if s(cell_num).Bool_W
-                            CB_area = s(cell_num).CB;
-                            tmp_CBs(CB_area) = 1;
-                        end
-                    end
-                    
-                    %O4_adapt = adapthisteq(O4_original);
-                    if switch_sheaths == 0
-                        O4_adapt = O4_original;
-                    end
-                    [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance);
-                    
-                    bw = ~bwareaopen(~combined_im, 10);  % clean
-                    D = -bwdist(~bw);  % EDT
-                    D2 = imimposemin(D, tmp_CBs);
-                    
-                    Ld2 = watershed(D2);
-                    bw3 = bw;
-                    bw3(Ld2 == 0) = 0;
-                    bw = bw3;
-                    
-                    figure(120); title('CB watershed');
-                    [B,L] = bwboundaries(bw, 'noholes');
-                    imshow(bw);
-                    imshow(label2rgb(L, @jet, [.5 .5 .5]));
-                    hold on;
-                    
-                    % Colocalize with CBs and only keep the remainder
-                    obj_CBs = bwconncomp(bw);
-                    cb_CB_idx  = obj_CBs.PixelIdxList;
-                    
-                    cores_CB = zeros(size(bw));
-                    idx_new = cell(0);
-                    for Y = 1:length(cb_CB_idx)
-                        cur_CB = cb_CB_idx{Y};
-                        if isempty(cur_CB)   %% SPEED UP CODE BY REDUCING REDUNDANCY
-                            continue;
-                        end
-                        for T = 1:length({s.CB})
-                            if s(T).Bool_W == 1
-                                CB_obj = s(T).CB;
-                                same = ismember(CB_obj, cur_CB);
-                                if ~isempty(find(same, 1))
-                                    overlap_idx = find(same);
-                                    overlap = CB_obj(overlap_idx);
-                                    cores_CB(cur_CB) = T;
-                                    break;
-                                end
-                            end
-                        end
-                    end
-                    figure(121); title('CB watershed ensheathed');
-                    %[B,L] = bwboundaries(cores_CB, 'noholes');
-                    %imshow(cores_CB);
-                    imshow(label2rgb(cores_CB, @lines, [.5 .5 .5]));
-                    hold on;
-                    
-                    figure(122); title('Ensheathed Cores');
-                    imshow(tmp_CBs);
-                    
-                    
-                    %% CORRELATE NOW WITH MBP
-                    bw_MBP = imbinarize(greenOrig);
-                    bw_MBP(~cores_CB) = 0;
-                    
-                    obj_MBP = bwconncomp(bw_MBP);
-                    cb_MBP_idx  = obj_MBP.PixelIdxList;
-                    
-                    obj_CB_E = bwconncomp(cores_CB);
-                    cb_CB_E_idx = obj_CB_E.PixelIdxList;
-                    
-                    cores_MBP = zeros(size(bw));
-                    idx_new = cell(0);
-                    for Y = 1:length(cb_MBP_idx)
-                        cur_MBP = cb_MBP_idx{Y};
-                        if isempty(cur_MBP)   %% SPEED UP CODE BY REDUCING REDUNDANCY
-                            continue;
-                        end
-                        for T = 1:length(cb_CB_E_idx)
-                            MBP_obj = cb_CB_E_idx{T};
-                            same = ismember(MBP_obj, cur_MBP);
-                            if ~isempty(find(same, 1))
-                                overlap_idx = find(same);
-                                overlap = MBP_obj(overlap_idx);
-                                cores_MBP(cur_MBP) = T;
-                                break;
-                            end
-                            
-                        end
-                    end
-                    
-                    figure(123); title('MBP of ensheathed');
-                    imshow(label2rgb(cores_MBP, @lines, [.5 .5 .5]));
-                    hold on;
-                    
-                    %% NOW LOOP THROUGH AND COUNT HOW MUCH MBP PER CELL!!! THEN SAVE the results!!!
-                    cell_numbers = unique(cores_MBP);
-                    area_per_cell = [];
-                    for T = 2:length(cell_numbers)
-                        a = length(cores_MBP(cores_MBP == T));   % gets the area
-                        area_per_cell = [area_per_cell, a];    % ***AREA might be ZERO ==> b/c not ADAPTHISTEQ
-                    end
-                    
-                    s(1).AreaOverall = area_per_cell;
-                    
                 end
+            
+            %% For Annick's analysis and to find area of MBP when combine_RG == 1
+            if switch_sheaths == 1 || Combine_RG == 1
+                get_ensheathed_only = 1
+                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, zeros(size(O4_adapt)));
+                get_ensheathed_only = 0
+                subtract_old_MBP = cores_MBP;
+                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, cores_MBP, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP);
+                
+            end
                 
                 %% Print images of results
                 filename_raw = erase(filename_raw, '.tif');
@@ -938,7 +831,7 @@ while (moreTrials == 'Y')
                 print(filename,'-dpng')
                 hold off;
                 
-                %if switch_sheaths
+                if switch_sheaths || Combine_RG
                     figure(121);
                     filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '10) CB watershed ensheathed') ;
                     print(filename,'-dpng')
@@ -954,7 +847,17 @@ while (moreTrials == 'Y')
                     print(filename,'-dpng')
                     hold off;
                     
-                %end
+                    figure(124);
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '13) Non-ensheathed MBP cores') ;
+                    print(filename,'-dpng')
+                    hold off;
+                    
+                    figure(125);
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '14) MBP per non-ensheathed cell') ;
+                    print(filename,'-dpng')
+                    hold off;
+                    
+                end
                 
                 
                 
@@ -1133,6 +1036,7 @@ all_individual_trials_lengths = cell(0);
 all_individual_trials_log = cell(0);
 all_individual_trials_LPC = cell(0);
 all_individual_trials_area_per_cell = cell(0);
+all_individual_trials_area_per_cell_non_ensheathed = cell(0);
 
 batch_sort = 0;
 batch_counter = 0;
@@ -1153,6 +1057,7 @@ for fileNum = 1 : numfids
     allMeanLPC = [];
     allLog = [];
     all_area_per_cell = [];
+    all_area_per_cell_non_ensheathed = [];
     num_O4_individual = 0;
     num_sheaths_individual = 0;
     
@@ -1181,6 +1086,7 @@ for fileNum = 1 : numfids
         % Count allNumSheaths and allLengths  ***using LENGTH OF SKELETON
         
         all_area_per_cell = s(1).AreaOverall;
+        all_area_per_cell_non_ensheathed = s(2).AreaOverall;
         for N = 1:length({s.objDAPI})
             
             if isfield(s, 'O4_bool') && s(N).O4_bool
@@ -1259,6 +1165,7 @@ for fileNum = 1 : numfids
     all_individual_trials_log{end + 1} =  allLog;
     all_individual_trials_LPC{end + 1} = allMeanLPC;
     all_individual_trials_area_per_cell{end + 1} = all_area_per_cell;
+    all_individual_trials_area_per_cell_non_ensheathed{end + 1} = all_area_per_cell_non_ensheathed;
 end
 
 cd(cur_dir);
@@ -1275,6 +1182,8 @@ fid3 = fopen(strcat('output_log_', saveDirName, '.csv'), 'w') ;
 fid4 = fopen(strcat('output_LPC_', saveDirName, '.csv'), 'w') ;
 fid5 = fopen(strcat('output_area_per_cell_', saveDirName, '.csv'), 'w');
 fid6 = fopen(strcat('output_props_', saveDirName, '.csv'), 'w');
+fid7 = fopen(strcat('output_area_per_cell_non-ensheathed', saveDirName, '.csv'), 'w');
+
 
 if length(batch_numFiles) < 2
     for idx = 1:length(all_individual_trials_sheaths)
@@ -1303,11 +1212,20 @@ if length(batch_numFiles) < 2
             all_individual_trials = 0;
         end
         
+        if isempty(all_individual_trials_area_per_cell{1, idx})
+            all_individual_trials_area_per_cell{1, idx} = 0;
+        end
+        
+        if isempty(all_individual_trials_area_per_cell{1, idx})
+            all_individual_trials_area_per_cell_non_ensheathed{1, idx} = 0;
+        end
+        
         dlmwrite(strcat('output_sheaths_', saveDirName, '.csv'), all_individual_trials_sheaths(1, idx), '-append') ;
         dlmwrite(strcat('output_lengths_', saveDirName, '.csv'), all_individual_trials_lengths(1, idx), '-append') ;
         dlmwrite(strcat('output_log_', saveDirName, '.csv'), all_individual_trials_log(1, idx), '-append') ;
         dlmwrite(strcat('output_LPC_', saveDirName,'.csv'), all_individual_trials_LPC(1, idx), '-append') ;
         dlmwrite(strcat('output_area_per_cell_', saveDirName, '.csv'), all_individual_trials_area_per_cell(1, idx), '-append')
+        dlmwrite(strcat('output_area_per_cell_non_ensheathed', saveDirName, '.csv'), all_individual_trials_area_per_cell_non_ensheathed(1, idx), '-append')
         dlmwrite(strcat('output_props_', saveDirName, '.csv'), all_individual_trials(idx, :), '-append')
     end
  
@@ -1341,12 +1259,17 @@ else  % if BATCHED with user input
         if isempty(all_individual_trials)
             all_individual_trials = 0;
         end
-        
+ 
+        if isempty(all_individual_trials_area_per_cell_non_ensheathed{1, total_counter})
+            all_individual_trials_area_per_cell_non_ensheathed{1, total_counter} = 0;
+        end
+       
         dlmwrite(strcat('output_sheaths_', saveDirName, '.csv'), all_individual_trials_sheaths(1, total_counter), '-append') ;
         dlmwrite(strcat('output_lengths_', saveDirName, '.csv'), all_individual_trials_lengths(1, total_counter), '-append') ;
         dlmwrite(strcat('output_log_', saveDirName, '.csv'), all_individual_trials_log(1, total_counter), '-append') ;
         dlmwrite(strcat('output_LPC_', saveDirName, '.csv'), all_individual_trials_LPC(1, total_counter), '-append') ;
         dlmwrite(strcat('output_area_per_cell_', saveDirName, '.csv'), all_individual_trials_area_per_cell(1, total_counter), '-append')
+        dlmwrite(strcat('output_area_per_cell_non_ensheathed', saveDirName, '.csv'), all_individual_trials_area_per_cell_non_ensheathed(1, total_counter), '-append')
         dlmwrite(strcat('output_props_', saveDirName, '.csv'), all_individual_trials, '-append')
         %end
         %cycle_files = cycle_files + 1;    
@@ -1359,6 +1282,7 @@ fclose(fid3);
 fclose(fid4);
 fclose(fid5);
 fclose(fid6);
+fclose(fid7);
 
 %% Make csv files for data analysis
 name_csv = 'Result_names.csv';
