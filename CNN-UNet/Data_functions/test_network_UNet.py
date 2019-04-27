@@ -376,7 +376,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             """ Skeletonize and output
             """
             copy_all_fibers = np.copy(all_fibers)
-            new_fibers = skeletonize_all_fibers(copy_all_fibers, i, DAPI_tmp=np.zeros([size_whole[0],size_whole[1]]), minLength=minLength,
+            new_fibers, no_dil_fibers, new_list = skeletonize_all_fibers(copy_all_fibers, i, DAPI_tmp=np.zeros([size_whole[0],size_whole[1]]), minLength=minLength,
                                                  total_DAPI=total_DAPI, total_matched_DAPI=total_matched_DAPI,
                                                  minLengthSingle=minSingle, s_path=sav_dir, name=filename_split, jacc_test=jacc_test)
                 
