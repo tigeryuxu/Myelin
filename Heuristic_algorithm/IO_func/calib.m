@@ -1,4 +1,4 @@
-function [sensitivity] =  calib(diameterFiber, minLength, name, fillHoles, DAPIsize, calibrate, mag, DAPImetric, scale, sensitivity, sigma, foldername, cur_dir)
+function [sensitivity] =  calib(sigma, foldername, cur_dir)
 
 %Calibrates the sensitivity level as well as other attributes for the O4 file
 

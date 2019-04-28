@@ -30,16 +30,16 @@ from Data_functions.UNet import *
 """ defines a cell object for saving output """
 class Cell:
     def __init__(self, num):
-        self.num = num
+        self.num = num        
         self.fibers = []    # creates a new empty list for each cell
         self.coords = np.zeros([1, 2], dtype=int)
 
-    def add_fiber(self, fibers):
+    def add_fiber(self, fibers):   # where "fibers" is a single value length
         self.fibers.append(fibers)
-
 
     def add_coords(self, new_coords):
         self.coords = np.append(self.coords, new_coords, axis=0)
+        
 
 """ Instead of getting minimum intensity:
         1) loop through all of the masked overlapping regions
@@ -159,10 +159,10 @@ def read_and_comb_csv_as_SINGLES(input_path):
     directory = input_path + 'combined_CSVs/'
     if not os.path.exists(directory):
         os.makedirs(directory)
-    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w',  newline='') as sheaths:
-        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w',  newline='') as lengths:
-            with open(directory + 'Results_' + output_name + '_cells.csv', 'w',  newline='') as cells:
-               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w',  newline='') as mFLC:
+    with open(directory + 'Results_' + output_name + '_num_sheaths.csv', 'w+',  newline='') as sheaths:
+        with open(directory + 'Results_' +  output_name + '_lengths.csv', 'w+',  newline='') as lengths:
+            with open(directory + 'Results_' + output_name + '_cells.csv', 'w+',  newline='') as cells:
+               with open(directory + 'Results_' + output_name + '_mSLC.csv', 'w+',  newline='') as mFLC:
 
                     for T in range(len(all_csv)):
                         
@@ -517,7 +517,7 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
         for_jaccard_testing(new_fibers, all_fibers, minLength, DAPI_tmp, im_num, N, s_path=s_path)
 
     
-    return dil_final
+    return dil_final, new_fibers, new_list
     
     
     

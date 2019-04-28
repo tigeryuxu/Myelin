@@ -5,11 +5,11 @@ function allChoices = choosedialog2()
 
 % BCOR == 
 
-pop1s ={'whole';'DAPI';'Red Channel';'Fibers';'Green Field';};
-pop2s = {'Fibers';'Red Channel'; 'DAPI';'Green Field';'whole'};
-pop3s = {'Red Channel';'DAPI';'Fibers';'Green Field';'whole'};
-pop4s = {'DAPI';'Green Field';'Red Channel';'Fibers';'whole'};
-pop5s = {'Green Field';'DAPI';'Red Channel';'Fibers';'whole'};
+pop1s ={'whole';'DAPI';'Red Channel';'Fibers';'Green Field'; 'None';};
+pop2s = {'Fibers';'Red Channel'; 'DAPI';'Green Field';'whole'; 'None'};
+pop3s = {'Red Channel';'DAPI';'Fibers';'Green Field';'whole'; 'None'};
+pop4s = {'DAPI';'Green Field';'Red Channel';'Fibers';'whole'; 'None'};
+pop5s = {'Green Field';'DAPI';'Red Channel';'Fibers';'whole'; 'None'};
 
 allChoices = [pop1s(1), pop2s(1), pop3s(1), pop4s(1), pop5s(1)];
 

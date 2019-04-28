@@ -24,14 +24,18 @@ for (i = 0; i < list.length; i+=5) {
 	path = dir + list[i + 1];  // BRIGHTFIELD
 	print(path);
 	open(path);
+	run("8-bit");
 	//selectWindow("path");
 	path = dir + list[i + 2]; // Cy3
 	print(path);
 	open(path);
+	run("8-bit");
 
 	path = dir + list[i + 3]; // DAPI
 	print(path);
 	open(path);
+
+	run("8-bit");
 	
 	//run("Split Channels");
 	//selectWindow(list[i] + " (blue)");

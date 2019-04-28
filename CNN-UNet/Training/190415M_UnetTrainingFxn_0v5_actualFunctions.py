@@ -38,7 +38,7 @@ def changeScale(im,kind,amount):
     from math import floor
     if scale1 == 1:
         imScaled = rescale(im,scale2,anti_aliasing=True,multichannel=True)
-    if scale1 ==2: 
+    if scale1 == 2: 
         imScaled = rescale(im,scale2/randint(1,floor(scale2*10))/10, anti_aliasing=True,multichannel=True)
     return imScaled
 
