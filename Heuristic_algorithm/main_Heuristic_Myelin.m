@@ -98,8 +98,9 @@ cd(cur_dir);
 
 %% FOR DARYAN: human_OL == N, enhance_DAPI == N, size == 1000, switch_sheaths on line 564 == 1
 
+% scale of LIF internodes == 0.3611
 
-find_internode = 0;  % change to 1 if want to use internode analysis!!!
+find_internode = 1;  % change to 1 if want to use internode analysis!!!
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
 human_OL = 'Y';
@@ -215,6 +216,8 @@ while (moreTrials == 'Y')
     nameTmp = strcat('allAnalysis', erase(name, '*'), '.txt');   % Output file
     
     fileID = fopen(nameTmp,'w');
+    fid_internodes = fopen(strcat('internodes', saveDirName, '.csv'), 'w') ;
+
     cd(cur_dir);
     
     cd(foldername);   % switch directories
@@ -309,7 +312,6 @@ while (moreTrials == 'Y')
             % (4) Red
             redImage = imread(filename_raw);
             %O4_im = im2double(rgb2gray(redImage));
-            
         end
         
         
@@ -351,6 +353,28 @@ while (moreTrials == 'Y')
         DAPIimage = im2double(DAPIimage);
         %intensityValueDAPI = im2double(rgb2gray(DAPIimage));
         
+        if find_internode == 1
+            %% Subtract background:
+            min_MBP_intensity = 20;
+             I = imgaussfilt(redImage(:, :, 1), 0.5);                          
+            background = imopen(I,strel('disk',30));
+            I2 = I - background;
+            I = I2;
+            I(I < min_MBP_intensity) =  0;
+            redImage(:, :, 1) = I;
+              
+            % for green channel
+            I = imgaussfilt(redImage(:, :, 2), 0.5);
+            background = imopen(I,strel('disk',20));
+            I2 = I - background;
+            I = I2;
+            
+            %% SUBTRACTS OUT ANY INTENSITY BELOW 80 in GREEN CHANNEL (for internodes)
+            min_internodes_intensity = 60;
+            I(I < min_internodes_intensity) = 0;
+            redImage(:, :, 2) = I;
+                        
+        end
         
         greenImage = redImage(:, :, 2);
         greenImage = im2double(greenImage);
@@ -359,7 +383,9 @@ while (moreTrials == 'Y')
         %filename = natfnames{fileNum + 1};
         redImage = redImage(:, :, 1);
         redImage = im2double(redImage);
-        
+                    im_size = size(redImage);
+                    
+                    
         
         if enhance_RED == 'Y'
             %[all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
@@ -550,6 +576,8 @@ while (moreTrials == 'Y')
                 
                 if find_internode == 0   % only do this if NOT find_internodes
                     wholeImage = cat(3, O4_tmp, MBP_im, tmpDAPI);
+                else
+                    wholeImage = cat(3, O4_tmp, adapthisteq(greenImage), DAPIimage);
                 end                
                 
                 %% Switch the sheaths for Annick's analysis
@@ -598,7 +626,7 @@ while (moreTrials == 'Y')
                 %
                 %% (6) Clean fibers by subtracting out CB
                 %% 19/01/24 - Tiger added: don't sub cell bodies for Annick
-                if switch_sheaths == 0
+                if switch_sheaths == 0 && find_internode == 0
                     fibers = imbinarize(fibers - cb);
                     if mag == 'Y'
                         fibers = imopen(fibers, strel('disk', 2));   % to get rid of straggling thin strands
@@ -621,8 +649,81 @@ while (moreTrials == 'Y')
                 
                 %% TIGER - can insert internode analysis here
                 if find_internode == 1
-                    [all_internodes, one_node, two_nodes] = find_internodes(greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
+                    %internode_size = 50;  % BACKGROUND SUBTRACTION SIZE
+                    internode_size = 5;
+                    DAPIsize = 5;
+                    dil_lines = 'N';
+                    enhance_DAPI = 'Y';
+                   [all_internodes, all_caspr_coloc, one_node, one_node_caspr, two_nodes, two_nodes_caspr, bw_internd] = find_internodes(greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
+
+                   %% Calculate nodal distances
+                   largest_distance = 5 % pixels
+                   [all_nodal_dist] = get_nodal_distances(all_caspr_coloc, largest_distance);
+                   [one_caspr_nodal_dist] = get_nodal_distances(one_node_caspr, largest_distance);
+                   [two_caspr_nodal_dist] = get_nodal_distances(two_nodes_caspr, largest_distance);
+                   %% Get actual undilated size of nodes from original MBP image                   
+                   bw_green = imbinarize(greenImage);
+                   figure(300); imshow(bw_green);
+                   tmp = bw_green;
+                   bw_green(all_caspr_coloc < 0) = 0; all_caspr_coloc = bw_green; bw_green = tmp;
+                   bw_green(one_node_caspr < 0) = 0; one_node_caspr = bw_green; bw_green = tmp;
+                   bw_green(two_nodes_caspr < 0) = 0; two_nodes_caspr = bw_green; bw_green = tmp;
+                   
+                   % turn these into bwdist ==> to get nodal length!
+                   cd(saveDirName);
+                    [B,L] = bwboundaries(all_internodes, 'noholes');
+                    vv = regionprops(L, 'MajorAxisLength');
+                    L = ({vv(:).MajorAxisLength})
+                    if isempty(L)   L = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
                     
+                    [B,L] = bwboundaries(all_caspr_coloc, 'noholes');
+                    vv = regionprops(L, 'MajorAxisLength');
+                    L = ({vv(:).MajorAxisLength})
+                    if isempty(L)   L = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;   
+                   
+                    if isempty(all_nodal_dist)  all_nodal_dist = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), all_nodal_dist, '-append') ;          
+                    
+                    [B,L] = bwboundaries(one_node, 'noholes');
+                    vv = regionprops(L, 'MajorAxisLength');
+                    L = ({vv(:).MajorAxisLength})
+                    if isempty(L)   L = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    
+                    [B,L] = bwboundaries(one_node_caspr, 'noholes');
+                    vv = regionprops(L, 'MajorAxisLength');
+                    L = ({vv(:).MajorAxisLength})
+                    if isempty(L)   L = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    
+                    if isempty(one_caspr_nodal_dist)  one_caspr_nodal_dist = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), one_caspr_nodal_dist, '-append') ;          
+                    
+                    
+                    [B,L] = bwboundaries(two_nodes, 'noholes');
+                    vv = regionprops(L, 'MajorAxisLength');
+                    L = ({vv(:).MajorAxisLength})
+                    if isempty(L)   L = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    
+                    [B,L] = bwboundaries(two_nodes_caspr, 'noholes');
+                    vv = regionprops(L, 'MajorAxisLength');
+                    L = ({vv(:).MajorAxisLength})
+                    if isempty(L)   L = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    
+                    if isempty(two_caspr_nodal_dist)  two_caspr_nodal_dist = 0;  end
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), two_caspr_nodal_dist, '-append') ;          
+                    
+                    
+                    figure(5);
+                    set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
+                    filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_All channels.png');
+                    print(filename,'-dpng')
+                    hold off;
+                    cd(cur_dir);
                     continue;
                 end
                 
@@ -1283,6 +1384,7 @@ fclose(fid4);
 fclose(fid5);
 fclose(fid6);
 fclose(fid7);
+fclose(fid_internodes);
 
 %% Make csv files for data analysis
 name_csv = 'Result_names.csv';
