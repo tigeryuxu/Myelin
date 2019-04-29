@@ -1,32 +1,31 @@
-function [red_3D, green_3D, blue_3D] = load_3D(filename_raw)
-iptsetpref('VolumeViewerUseHardware',false);   % HAVE TO USE THIS b/c problem with openGL currently
-%iptsetpref('VolumeViewerUseHardware',true)
-
+ %mex eig3volume.c
+ 
+%fname = 'my_file_with_lots_of_images.tif';
 info = imfinfo(filename_raw);
 num_images = numel(info);
 im_size = [info(1).Height, info(1).Width];
 gray_scale_size = im_size(1:2);
 green_3D = zeros([gray_scale_size, num_images]);
 red_3D = zeros([gray_scale_size, num_images]);
-blue_3D = zeros([gray_scale_size, num_images]);
 for k = 1:num_images
     A = imread(filename_raw, k, 'Info', info);
     % ... Do something with image A ...
-    figure(888); imshow(A);
+    figure(1); imshow(A);
     red = A(:, :, 1);
     green = A(:, :, 2);
     
     red_3D(:, :, k) = im2double(red);
     green_3D(:, :, k) = im2double(green);
-    blue_3D(:, :, k) = im2double(green);
 end
 
+iptsetpref('VolumeViewerUseHardware',false);   % HAVE TO USE THIS b/c problem with openGL currently
 %volumeViewer(red_3D);
 figure(400); volshow(red_3D,  'BackgroundColor', [0,0,0]);
 figure(401); volshow(green_3D,  'BackgroundColor', [0,0,0]);
 
 
-%% Image adjust
+
+%bw = imbinarize(red_3D, 30);
 red_3D = imgaussfilt3(red_3D,0.5);
 bw = binarize_3D_otsu(red_3D);
 figure(); volshow(bw, 'BackgroundColor', [0,0,0]);
@@ -41,7 +40,6 @@ figure(); volshow(bw, 'BackgroundColor', [0,0,0]);
 
 
 %% Try out ridge-filter in 3D
-mex eig3volume.c
 sigma = 2;
 %[hxx,hxy, hyy] = Hessian3D(red_3D, sigma);
 %[Lambda1, Lambda2, Ix, Iy] = eig3volume(hxx, hxy, hyy);
@@ -68,6 +66,7 @@ end
 figure(); volshow(labelled, 'BackgroundColor', [0,0,0]);
 
 
+iptsetpref('VolumeViewerUseHardware',true)
 
 
 

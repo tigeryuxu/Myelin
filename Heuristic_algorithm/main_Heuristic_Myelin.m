@@ -100,7 +100,7 @@ cd(cur_dir);
 
 % scale of LIF internodes == 0.3611
 
-find_internode = 1;  % change to 1 if want to use internode analysis!!!
+find_internode = 0;  % change to 1 if want to use internode analysis!!!
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
 human_OL = 'Y';
