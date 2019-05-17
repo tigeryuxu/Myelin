@@ -1,5 +1,6 @@
 CNN-UNet/Results/Demo-data/all_fibers_Composite-12_0.pkl
 CNN-UNet/Results/Demo-data*
+CNN-UNet/Checkpoints/New*
 
 Heuristic_algorithm/200x*
 Heuristic_algorithm/Annick_Barron-Data*
@@ -23,12 +24,17 @@ Heuristic_algorithm/Daryan*
 Heuristic_algorithm/AB*
 Heuristic_algorithm/Internode*
 
+Heuristic_algorithm/16 wpg*
+Heuristic_algorithm/1905*
+Heuristic_algorithm/2019*
+Heuristic_algorithm/All control*
 
 
 Heuristic_algorithm/3mo*
 Heuristic_algorithm/Max*
 Heuristic_algorithm/internodes*
 Heuristic_algorithm/Test nodes*
+Heuristic_algorithm/Skeletonize*
 
 CNN-UNet/Results/Demo-data_output*
 CNN-UNet/Test

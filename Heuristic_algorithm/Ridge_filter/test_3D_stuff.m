@@ -61,7 +61,6 @@ labelled = zeros(size(bw));
 for i = 1:length(cc(1).PixelIdxList)
     cur_idx = cc(1).PixelIdxList;
    labelled(cur_idx{i}) = i; 
-   
 end
 figure(); volshow(labelled, 'BackgroundColor', [0,0,0]);
 

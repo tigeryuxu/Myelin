@@ -89,6 +89,13 @@ try:
     checkpoint = '401000'
     root = tkinter.Tk()
     s_path = './Checkpoints/'
+    
+    s_path = './Checkpoints/New-normalized-1024x1024/'; checkpoint = '594000'; width_x = 1024;
+    #s_path = './Checkpoints/New-non-norm-1024x1024/'; checkpoint = '570000'; width_x = 1024; #must also comment out line 216!!!
+    
+    
+    
+    
     sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
                                             title='Please select saving directory')
     sav_dir = sav_dir + '/'

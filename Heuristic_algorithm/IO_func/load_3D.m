@@ -26,47 +26,6 @@ figure(400); volshow(red_3D,  'BackgroundColor', [0,0,0]);
 figure(401); volshow(green_3D,  'BackgroundColor', [0,0,0]);
 
 
-%% Image adjust
-red_3D = imgaussfilt3(red_3D,0.5);
-bw = binarize_3D_otsu(red_3D);
-figure(); volshow(bw, 'BackgroundColor', [0,0,0]);
-
-
-green_3D(green_3D < 70/255) = 0;
-figure(); volshow(green_3D);
-green_3D = imgaussfilt3(green_3D,0.5);
-bw = binarize_3D_otsu(green_3D);
-figure(); volshow(bw, 'BackgroundColor', [0,0,0]);
-
-
-
-%% Try out ridge-filter in 3D
-mex eig3volume.c
-sigma = 2;
-%[hxx,hxy, hyy] = Hessian3D(red_3D, sigma);
-%[Lambda1, Lambda2, Ix, Iy] = eig3volume(hxx, hxy, hyy);
-
-[Dxx, Dyy, Dzz, Dxy, Dxz, Dyz] = Hessian3D(red_3D,1);
-[Lambda1,Lambda2,Lambda3,Vx,Vy,Vz]=eig3volume(Dxx,Dxy,Dxz,Dyy,Dyz,Dzz);
-
-sensitivity = 0;
-lineThresh = thresh_Lambda(Lambda3);
-lineThresh = lineThresh + lineThresh * sensitivity;
-bw = binarize_3D_lambda(Lambda3, lineThresh);
-figure(); volshow(bw, 'BackgroundColor', [0,0,0]);
-
-fig_num = 10;
-vol_to_show_stack(bw, num_images, fig_num);
-
-cc = bwconncomp(bw);
-labelled = zeros(size(bw));
-for i = 1:length(cc(1).PixelIdxList)
-    cur_idx = cc(1).PixelIdxList;
-   labelled(cur_idx{i}) = i; 
-   
-end
-figure(); volshow(labelled, 'BackgroundColor', [0,0,0]);
-
 
 
 

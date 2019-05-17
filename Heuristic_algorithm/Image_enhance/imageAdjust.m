@@ -1,4 +1,4 @@
-function [modImage, bw] = imageAdjust(im, fillHoles, enhance)
+function [modImage, bw] = imageAdjust(im, fillHoles, enhance, back_sub_size)
 
 %% Finds threshold to take out most of the noise
 I = im;
@@ -7,10 +7,12 @@ I = im;
 %% Subtract background:
 I = imgaussfilt(I, 2);
 if enhance == 'Y'
-    background = imopen(I,strel('disk',150));
+    background = imopen(I,strel('disk',back_sub_size));
     I2 = I - background;
     I = I2;
-    %I = adapthisteq(I);
+    %if back_sub_size < 50   % do for Annick Baron's data
+        %I = adapthisteq(I);
+    %end
 end
 
 % if enhance == 'Y'    
