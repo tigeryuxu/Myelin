@@ -90,7 +90,7 @@ try:
     root = tkinter.Tk()
     s_path = './Checkpoints/'
     
-    s_path = './Checkpoints/New-normalized-1024x1024/'; checkpoint = '594000'; width_x = 1024;
+    #s_path = './Checkpoints/New-normalized-1024x1024/'; checkpoint = '594000'; width_x = 1024;
     #s_path = './Checkpoints/New-non-norm-1024x1024/'; checkpoint = '570000'; width_x = 1024; #must also comment out line 216!!!
     
     
