@@ -64,13 +64,19 @@
   * Save anywhere on your computer
   
 
+### **GPU compatability:**
+
+  If you wish to run the UNet using GPU acceleration (highly recommended), please follow the instructions at: [https://www.tensorflow.org/install/gpu]. Mac and Windows installation details are both highlighted here. (Note that implementing GPU compatability may take quite some time as we have not been able to identify an online guide that offers step-by-step details. We hope to upload our own guide soon). In the meantime, the UNet also runs on CPUs so please verify the demo on your CPU before implementing the GPU compatability.
+
+
+
 ## Usage:
   ### 1.	Data format
    *  Please ensure all images are “.tiff” format
    *	Channels are NOT separated
    *  The stained sheaths (either MBP or O4) are in the **RED** channel.
    *  Cell nuclei are in the **BLUE** channel
-   *	All files to be analyzed are located in a SINGLE folder (see "Demo-data" folder for example)
+   *	All files to be analyzed are located in a SINGLE folder (see "Demo-data" folder, for example)
 
   ### 2.	Run main file
   1. (a) For Anaconda (Windows):
@@ -89,14 +95,13 @@
    *  First thing that appears prompts you to enter some parameters for the analysis:
        1. Scale = scale of image in um/px
        2. min Length = minimum length threshold for sheaths (default 12 um)
-       3. Senstivity = length factor for cells that are single or doubly ensheathed (2 == lowest, 4 == highest sensitivity)
+       3. Senstivity = length factor for cells that are single or doubly ensheathed (2 == higher sensitivity, 4 == lower sensitivity)
    *	Then navigate to and select the directory you wish to save the output
    *	Then navigate to and select the directory that contains the ".tiff" images to be analyzed
 
   ### 3. Understanding the output/results:
   Under the directory you selected to save all files, you should find:
-  * all_fibers_image_name-of-file.pkl   --- contains sheaths identified in original matrix form
-  * all_fibers_image_name-of-file.png   --- sheaths identified with cell labels as PNG
+  * all_fibers_OVERLAY_name-of-file.png   --- sheaths identified with cell numberings overlaid on image
   * candidates0_name-of-file.tif        --- candidates selected for analysis
   * final_image_name-of-file.tif        --- sheaths overlaid ontop of original input image
   * masked_out_dil_name-of-file.csv     --- Output data corresponding to EACH INDIVIDUAL input image
@@ -108,7 +113,7 @@
        5. number of candidate cells analyzed
        6. number of total cell nuclei identified
   
-  * A folder named "combined_CSVs" which contains: the raw data from EACH INDIVIDUAL input image is then combined in the files "Result_masked_out....csv". There should be 4 combined files, each corresponding to a specific parameter from the raw data (cells, lengths, mSLC, num_sheaths). Within each of these excel sheets, each row contains the raw data from the original INDIVIDUAL input image .csvs.
+  * A folder named "combined_CSVs" which contains: the COMBINED raw data from EACH INDIVIDUAL input image (the individual "masked_out_dil_...csv"s) into single CSV files "Result_masked_out....csv". There should be 4 combined files, each corresponding to a specific parameter from the raw data (cells, lengths, mSLC, num_sheaths). Within each of these excel sheets, each row contains the raw data from the original INDIVIDUAL input image .csvs. (i.e. each row corresponds to the data from each raw image in the order that they were analyzed).
   
   For examples of these files, check under "Results/Demo-data-output/"
     
