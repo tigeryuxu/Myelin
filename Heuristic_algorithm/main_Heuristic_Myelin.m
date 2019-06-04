@@ -101,6 +101,9 @@ cd(cur_dir);
 % scale of LIF internodes == 0.3611
 
 find_internode = 0;  % change to 1 if want to use internode analysis!!!
+if find_internode == 1
+   minLength = 0; 
+end
 vol_bool = 1;
 back_sub_size = 150;
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
@@ -111,7 +114,9 @@ if switch_sheaths == 1
    human_OL = 'N';
    enhance_RED = 'Y';
    back_sub_size = 80;
-   set_thresh = 0/255;  % pixel uint8 value for permanent thresh to get rid of background
+   set_thresh = 30/255;  % pixel uint8 value for permanent thresh to get rid of background
+        % used 30???
+        % set to zero if manually set thresholds!!!
 end
 
 if human_OL == 'Y'
@@ -641,7 +646,7 @@ while (moreTrials == 'Y')
                 %% (7) NEW LINE ANALYSIS (transforms ridges to lines)
                 % Horizontal lines are more dim
                 dil_lines = 'Y';
-                if scale > 0.3
+                if scale > 0.4
                     dil_lines = 'N';
                 end
                 

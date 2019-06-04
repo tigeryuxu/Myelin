@@ -81,8 +81,8 @@ clean_v = imbinarize(clean_v);
 
 % Option to make lines thicker at the end
 if dilate == 'Y'
-    clean_v = imdilate(clean_v, ones(5, 5));
-    clean_v = imerode(clean_v, ones(10, 1));
+    clean_v = imdilate(clean_v, strel('disk', 2));
+    %clean_v = imerode(clean_v, ones(10, 1));
 end
 %[B,L] = bwboundaries(clean_v, 'noholes');
 vv = regionprops(clean_v, 'PixelIdxList', 'MajorAxisLength');

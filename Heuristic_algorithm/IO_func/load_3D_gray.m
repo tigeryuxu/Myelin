@@ -1,4 +1,4 @@
-function [red_3D, green_3D, blue_3D] = load_3D(filename_raw, natfnames)
+function [red_3D, green_3D, blue_3D] = load_3D_gray(filename_raw, natfnames)
 iptsetpref('VolumeViewerUseHardware',false);   % HAVE TO USE THIS b/c problem with openGL currently
 %iptsetpref('VolumeViewerUseHardware',true)
 
@@ -11,19 +11,20 @@ red_3D = zeros([gray_scale_size, num_images]);
 blue_3D = zeros([gray_scale_size, num_images]);
 for k = 1:num_images
     A = imread(filename_raw, k, 'Info', info);
+    A = A/255;
     % ... Do something with image A ...
     figure(888); imshow(A);
     red = A(:, :, 1);
-    green = A(:, :, 2);
+    %green = A(:, :, 2);
     
     red_3D(:, :, k) = im2double(red);
-    green_3D(:, :, k) = im2double(green);
-    blue_3D(:, :, k) = im2double(green);
+    %green_3D(:, :, k) = im2double(green);
+    %blue_3D(:, :, k) = im2double(green);
 end
 
 %volumeViewer(red_3D);
 figure(400); volshow(red_3D,  'BackgroundColor', [0,0,0]);
-figure(401); volshow(green_3D,  'BackgroundColor', [0,0,0]);
+%figure(401); volshow(green_3D,  'BackgroundColor', [0,0,0]);
 
 
 

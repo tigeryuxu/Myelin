@@ -146,7 +146,7 @@ for i in range(len(list_folder)):
         logging.error(traceback.format_exc())
         
     # combines all individual output csv files into single excel sheets under folder "combined CSVs" in the output folder
-    post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)
+#    post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)
         
     
 

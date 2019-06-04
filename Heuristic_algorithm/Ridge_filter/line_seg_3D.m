@@ -1,4 +1,4 @@
-function [fibers, fibers_idx, Lambda2R] = line_seg_3D(O4_im, nanoF_im, sigma, siz, sensitivity)
+function [fibers, fibers_idx, Lambda2R] = line_seg_3D(O4_im, sigma, sensitivity)
 
 % (1) Pre-processes image by eroding ==> gets rid of "aligned" fibers
 % (2) Calls ridge_filt to extract lines
@@ -22,6 +22,9 @@ function [fibers, fibers_idx, Lambda2R] = line_seg_3D(O4_im, nanoF_im, sigma, si
 %O4_im = imerode(O4_im, strel('disk', 2));   % erode small lines
 [hessLinesR, Lambda2R]= ridge_filt_3D(O4_im, sigma, sensitivity);
 
+
+figure(900); volshow(fibers, 'BackgroundColor', [0,0,0]);
+
 %% Colocalize to find areas of Red intersect:
 % [cBin, rBin] = find(nanoF_im < 1);
 % binInd = [rBin, cBin];
@@ -34,7 +37,7 @@ function [fibers, fibers_idx, Lambda2R] = line_seg_3D(O4_im, nanoF_im, sigma, si
 % end
 
 %% Save
-fibers = tmpLines;
+fibers = hessLinesR;
 obj = bwconncomp(fibers);
 fibers_idx = obj.PixelIdxList;
 

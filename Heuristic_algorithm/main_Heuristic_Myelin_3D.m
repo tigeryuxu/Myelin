@@ -246,7 +246,7 @@ while (moreTrials == 'Y')
         filename_raw = natfnames{fileNum};
         %% Decide if want to load individual channels or single image
         cd(foldername);
-        [redImage, greenImage, DAPIimage] = load_3D(filename_raw);
+        [redImage, greenImage, DAPIimage] = load_3D_gray(filename_raw);
         
         %% Subtract background for internode data
         if find_internode == 1
@@ -451,7 +451,7 @@ while (moreTrials == 'Y')
         if adapt_his
             O4_im_ridges_adapted = histeq(O4_im_ridges_adapted);
         end
-        [fibers, fibers_idx, Lambda2R] = line_seg(O4_im_ridges_adapted, zeros(size(O4_im)), sigma, siz, sensitivity);
+        [fibers, fibers_idx, Lambda2R] = line_seg_3D(O4_im_ridges_adapted, sigma, sensitivity);
         figure(900); volshow(fibers, 'BackgroundColor', [0,0,0]);
 
         %% (6) Clean fibers by subtracting out CB
