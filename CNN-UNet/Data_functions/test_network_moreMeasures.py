@@ -115,7 +115,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             DAPI_size = round(radius * radius * math.pi);  
             DAPI_tmp, total_matched_DAPI, total_DAPI, back_subbed = pre_process(input_arr, counter[i], DAPI_size, rolling_ball, name=onlyfiles_mask[counter[i]], sav_dir=sav_dir)
             if rolling_ball > 0:
-                plt.imsave(sav_dir + 'background_subbed' + '_' + filename_split + '_' + str(i) + '.tif', (Image.fromarray(np.asarray(back_subbed, dtype=np.uint8))))
+                plt.imsave(sav_dir + 'background_subbed' + '_' + filename_split + '_' + str(i) + '.tiff’, (Image.fromarray(np.asarray(back_subbed, dtype=np.uint8))))
                 
             
             labelled = measure.label(DAPI_tmp)
@@ -281,9 +281,9 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         
                 """ Plot output of individual segmentations and the input truth ==> for correcting later!!!"""
                 if np.count_nonzero(classification) > 0 and debug:          
-                    plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_input.tif', 
+                    plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_input.tiff’, 
                                np.asarray(input_crop_save, dtype = np.uint8))
-                    plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_truth.tif', (classification), cmap='binary_r')
+                    plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_truth.tiff’, (classification), cmap='binary_r')
         
                         
                 """ Create mask of all segmented cells, also save as table """
@@ -394,8 +394,8 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                         
                         
                 input_save[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1]),1] = new_fibers[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1])]
-                plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tif', (input_save))
-                plt.imsave(sav_dir + 'new_fibers' + '_' + filename_split + '_' + str(i) + '.tif', (new_fibers))
+                plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tiff’, (input_save))
+                plt.imsave(sav_dir + 'new_fibers' + '_' + filename_split + '_' + str(i) + '.tiff’, (new_fibers))
                 
                 # garbage collection
                 

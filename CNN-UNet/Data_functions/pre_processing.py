@@ -178,7 +178,7 @@ def pre_process(input_arr, im_num, DAPI_size, rolling_ball, name='default', sav_
              
     """ Saving """
     candidates = final_match_O4 > 0
-    plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tif', (candidates))
+    plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tiff’, (candidates))
         
     return candidates, counter, counter_DAPI, blur
 
@@ -232,6 +232,6 @@ def pre_process_QL(input_arr, im_num, DAPIsize, rolling_ball, name='default', sa
              
     """ Saving """
     candidates = final_match_O4 > 0
-    plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tif', (candidates))
+    plt.imsave(sav_dir + 'candidates' + str(im_num) + '_' + name + '.tiff’, (candidates))
         
     return candidates, counter, counter_DAPI, blur

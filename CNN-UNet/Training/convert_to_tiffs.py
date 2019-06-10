@@ -92,7 +92,7 @@ for i in range(len(onlyfiles_mask)):
     if slice_num == 3 and input_im[:, :, 1].any():
         nanofibers = input_im[:, :, 1]
         nanofibers = Image.fromarray(input_im[:, :, 1].astype('uint8'))
-        nanofibers.save(sav_dir + 'myelin_' + filename + '_' + "%07d" % (uncleaned,) + pos + '_NANOFIBERS.tif')
+        nanofibers.save(sav_dir + 'myelin_' + filename + '_' + "%07d" % (uncleaned,) + pos + '_NANOFIBERS.tiff’)
         
         input_im[:, :, 1] = input_im[:, :, 3]
         input_im = input_im[:, :, 0:3]
@@ -101,8 +101,8 @@ for i in range(len(onlyfiles_mask)):
     input_im = Image.fromarray(input_im.astype('uint8'))
     truth_im = Image.fromarray((truth_im[:,:,1] * 255).astype('uint8'))
     
-    input_im.save(sav_dir + 'myelin_' + filename + '_' + "%07d" % (uncleaned,) + pos + '_input.tif')
-    truth_im.save(sav_dir + 'myelin_' + filename + '_'  + "%07d" % (uncleaned,) + pos + '_truth.tif')
+    input_im.save(sav_dir + 'myelin_' + filename + '_' + "%07d" % (uncleaned,) + pos + '_input.tiff’)
+    truth_im.save(sav_dir + 'myelin_' + filename + '_'  + "%07d" % (uncleaned,) + pos + '_truth.tiff’)
     
     uncleaned = uncleaned + 1
     
