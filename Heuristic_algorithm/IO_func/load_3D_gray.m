@@ -11,7 +11,7 @@ red_3D = zeros([gray_scale_size, num_images]);
 blue_3D = zeros([gray_scale_size, num_images]);
 for k = 1:num_images
     A = imread(filename_raw, k, 'Info', info);
-    A = A/255;
+    A = A;
     % ... Do something with image A ...
     figure(888); imshow(A);
     red = A(:, :, 1);

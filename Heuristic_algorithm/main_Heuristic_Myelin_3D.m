@@ -246,7 +246,7 @@ while (moreTrials == 'Y')
         filename_raw = natfnames{fileNum};
         %% Decide if want to load individual channels or single image
         cd(foldername);
-        [redImage, greenImage, DAPIimage] = load_3D_gray(filename_raw);
+        [redImage, greenImage, DAPIimage] = load_3D(filename_raw);
         
         %% Subtract background for internode data
         if find_internode == 1
@@ -266,7 +266,7 @@ while (moreTrials == 'Y')
             
             %% SUBTRACTS OUT ANY INTENSITY BELOW 80 in GREEN CHANNEL (for internodes)
             % used 60 for first run
-            min_internodes_intensity = 30/255;
+            min_internodes_intensity = 60/255;
             I(I < min_internodes_intensity) = 0;
             greenImage = I;
             

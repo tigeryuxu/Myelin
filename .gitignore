@@ -39,6 +39,9 @@ Heuristic_algorithm/rOPC*
 Heuristic_algorithm/y*
 Heuristic_algorithm/really*
 
+Heuristic_algorithm/rat*
+
+
 CNN-UNet/Results/Demo-data_output*
 CNN-UNet/Test
 CNN-UNet/Checkpoints/Trained with heuristic/loss_global_val.pkl

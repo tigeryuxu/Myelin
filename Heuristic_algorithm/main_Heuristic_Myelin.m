@@ -1398,7 +1398,7 @@ fclose(fid4);
 fclose(fid5);
 fclose(fid6);
 fclose(fid7);
-fclose(fid_internodes);
+fclose(find_internodes);
 
 %% Make csv files for data analysis
 name_csv = 'Result_names.csv';

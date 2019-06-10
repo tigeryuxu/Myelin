@@ -23,7 +23,7 @@ function [fibers, fibers_idx, Lambda2R] = line_seg_3D(O4_im, sigma, sensitivity)
 [hessLinesR, Lambda2R]= ridge_filt_3D(O4_im, sigma, sensitivity);
 
 
-figure(900); volshow(fibers, 'BackgroundColor', [0,0,0]);
+
 
 %% Colocalize to find areas of Red intersect:
 % [cBin, rBin] = find(nanoF_im < 1);
@@ -40,6 +40,6 @@ figure(900); volshow(fibers, 'BackgroundColor', [0,0,0]);
 fibers = hessLinesR;
 obj = bwconncomp(fibers);
 fibers_idx = obj.PixelIdxList;
-
+figure(900); volshow(fibers, 'BackgroundColor', [0,0,0]);
 
 end
