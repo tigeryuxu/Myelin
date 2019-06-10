@@ -56,9 +56,10 @@ from Data_functions.UNet import *
 """ defines a cell object for saving output """
 class Cell:
     def __init__(self, num):
-        self.num = num        
-        self.fibers = []    # creates a new empty list for each cell
-        self.xCent = []
+        self.num = num   
+        
+        self.fibers = []   # list of lengths
+        self.xCent = []     # list of x coordinates of centroids
         self.yCent = []
         
         self.intS = []
@@ -66,7 +67,19 @@ class Cell:
         self.minS = []
         self.maxS = []
         
-        # add attributes for E(xtra) and S(oma) measures
+        self.intE = []
+        self.varE = []
+        self.minE = []
+        self.maxE = []
+        
+        self.intB = []  # body measures are int not lists (obvi only 1 body per cell)
+        self.varB = []
+        self.minB = []
+        self.maxB = []
+        
+        self.centB = [] # tuple with x and y coord (ultimately makes more sense than separating as I did for sheaths)
+        self.areaB = []
+        self.circB = []
         
         self.coords = np.zeros([1, 2], dtype=int)
 
@@ -94,11 +107,42 @@ class Cell:
     def add_maxS(self, max):  # sheath-channel intensity
         self.maxS.append(max)        
 
-   # def add_intE(self, intE):  # extra-channel intensity 
-   #     self.intE.append(intE)        
+
+    def add_intE(self, intE):  # extra-channel intensity in sheaths
+        self.intE.append(intE)
+        
+    def add_varE(self, var): 
+        self.varE.append(var)      
+        
+    def add_minE(self, min):  
+        self.minE.append(min)
+        
+    def add_maxE(self, max):
+        self.maxE.append(max)        
+
    
-   # def add_intB(self, intB):  # sheath-channel intensity in cell body
-   #     self.intB.append(intB)      
+    def add_intB(self, intB):  # sheath-channel intensity in cell body
+        self.intB.append(intB)
+        
+    def add_varS(self, var):  
+        self.varS.append(var)      
+        
+    def add_minS(self, min): 
+        self.minS.append(min)
+        
+    def add_maxS(self, max): 
+        self.maxS.append(max)        
+
+    def add_centB(self, centB): # soma centroid
+        self.centB.append(centB)
+        
+    def add_areaB(self, area): # soma area
+        self.areaB.append(area)
+        
+    def add_circB(self, circ): # soma circularity
+        self.circB.append(circ)
+        
+        
    
    
 """ Instead of getting minimum intensity:
@@ -445,7 +489,8 @@ def fiber_to_list(masked, all_fibers, input_arr, list_cells, minLength):
     labelled = measure.label(binary_all_fibers)
     cc_overlap = measure.regionprops(labelled, intensity_image=all_fibers)
     
-    imSheath = np.array(input_arr)[:,:,0] 
+    imSheath = np.array(input_arr)[:,:,0] # MBP-only channel
+   # imExtra = 
  
     final_counted = np.zeros(masked.shape)
     for M in range(len(cc_overlap)):
@@ -466,16 +511,24 @@ def fiber_to_list(masked, all_fibers, input_arr, list_cells, minLength):
             list_cells[cell_num].add_xCent(xCent)
             list_cells[cell_num].add_yCent(yCent)    
             sheaths = []
+            # extras = []
             for T in range(len(overlap_coords)):        
                 final_counted[overlap_coords[T,0], overlap_coords[T,1]] = cell_num #tiger added this for something don't touch
                 c = overlap_coords[T]
                 sheaths.append(imSheath[c[0],c[1]])
+                # extras.append(imExtra[c[0],c[1]])
             sheath_arr = np.array(sheaths)  
+            #extra_arr = np.array(extras)
 
             list_cells[cell_num].add_intS(int(sheath_arr.mean()))
             list_cells[cell_num].add_varS(float(sheath_arr.var()))
             list_cells[cell_num].add_maxS(float(sheath_arr.max()))
             list_cells[cell_num].add_minS(float(sheath_arr.min()))
+            
+            #list_cells[cell_num].add_intE(int(extra_arr.mean()))
+            #list_cells[cell_num].add_varE(float(extra_arr.var()))
+            #list_cells[cell_num].add_maxE(float(extra_arr.max()))
+            #list_cells[cell_num].add_minE(float(extra_arr.min()))
             
             
     return list_cells, final_counted
@@ -681,21 +734,26 @@ def skeletonize_all_fibers(all_fibers, input_arr, i, DAPI_tmp, minLength, minLen
       
 def perSheath_output_df(list_cells):
 
-    # make dataframe where column headings are cell attributes
-    #global cell
     cell = Cell(0)
-    
-    headings = [a for a in vars(cell)]
+    headings = [a for a in vars(cell)] # get list of cell attributes to use as headings
     headings.remove('coords')   # only used for overlap removal, no need now
- 
     
-    df = pd.DataFrame(columns=headings)
+    df = pd.DataFrame(columns=headings) # make the DF
     
     row = 0     # row counter - increase when adding fiber rows
     for i in range(len(list_cells)):
         cell = list_cells[i]
         df.loc[row,'num'] = cell.num
-        # add soma parameters here
+        
+        #  df.loc[row,'intB'] = cell.intB[j]
+        #  df.loc[row,'varB'] = cell.varB[j]
+        #  df.loc[row,'minB'] = cell.minB[j]
+        #  df.loc[row,'maxB'] = cell.maxB[j]
+        
+        #  df.loc[row,'centB'] = cell.centB[j]
+        #  df.loc[row,'areaB'] = cell.areaB[j]
+        #  df.loc[row,'circB'] = cell.circB[j]   
+
         if len(cell.fibers) > 0:   # if cell has fibers then make a new row for each
             for j in range(len(cell.fibers)):
                 df.loc[row,'num'] = cell.num
@@ -706,8 +764,12 @@ def perSheath_output_df(list_cells):
                 df.loc[row,'varS'] = cell.varS[j]
                 df.loc[row,'minS'] = cell.minS[j]
                 df.loc[row,'maxS'] = cell.maxS[j]
+                
+              #  df.loc[row,'intE'] = cell.intE[j]
+              #  df.loc[row,'varE'] = cell.varE[j]
+              #  df.loc[row,'minE'] = cell.minE[j]
+              #  df.loc[row,'maxE'] = cell.maxE[j]
      
-     #          add green channel parameters here
                 row = row+1
         else: 
             df.loc[row,'fibers'] = 0
@@ -716,62 +778,16 @@ def perSheath_output_df(list_cells):
         
     return dfSheath
 
-
-    # input the dfSheath (entry for each sheath + empty for cells with no sheaths)
-    # to-do: 
-        # add minLength threshold stuff here
-     # cell parameters to calculate:
-    """
-    - cell parameters to calculate:
-        - intensity (S)
-            - mean S int
-            - norm S int (mean-min/max-min per sheath)
-            - S var
-        - lengths
-            - max sheath length
-            - mode and/or median sheath length (interpolated?)
-            - mean sheath length
-            - Ysum sheath length
-        - numbers
-            - nsheaths
-            - n Ysum sheaths
-        - sheath distributions
-            - convex hull centroids
-            - convex hull sheath tips
-            - feret X 
-            - feret Y
-    - future
-        - intensity (E [other channels]) - same as S
-        - ratiometrics
-            - S int / E int
-            - S norm / E norm
-            - covariance
-        - soma measurements
-        - intra-cell densities
-            - avg sheath distance from soma
-            - skew (soma centroid relative to total center of mass)
-            - same but for convex area instead of center mass (area not intensity)
-        - inter-cell densities
-            - avg sheath distance from soma
-            - avg soma distance from ensheathing somas
-            - avg soma distance from O4 somas
-            - avg soma distance from O4- somas
-            - avg from all somas
-            - avg distance from other sheaths
-            - soma well coordinates
-    - steps
-        - make dataframe with headings
-        - get # cells from num column
-        - iterate through every row of dfSheaths - if fibres = 0 just log an empty cell (will still use soma measures in the future)
-        
-    """
         
 from scipy.spatial import ConvexHull
+import numpy as np
 
 def perCell_output_df(dfSheath):
+    df = []
+    ySumThresh = 3  # max number of pixels 2 sheath's x values can be apart to be summed in ySum measures
+                    # this should be an arg in the function in the future
     
-# we will fill in this list one at a time
-    headings = ['meanSInt','normSInt','varSInt','meanLength','modeLength','medianLength','meanYSumLength','nSheaths','nYSumSheaths','convexCent','convexTips','feretX','feretY']
+    headings = ['meanSInt','normSInt','varSInt','meanLength','maxLength','nSheaths','convexCent','convexTips','feretX','feretY']
     df = pd.DataFrame(columns=headings)
     
     nCells = dfSheath.num.max()
@@ -780,70 +796,109 @@ def perCell_output_df(dfSheath):
         # if length  = 1 then ignore
         sheaths = dfSheath[dfSheath['num'].isin({i})] # get all rows where num = the cell 
         # add soma measures
-        if len(sheaths) == 1:
-            if sheaths.fibers[0] == 0:
-                # make blank entry
-                print(i+ " is blank")
-            else:
-                # single sheath cell
-                print(i+ " has empty cell")
-        else:
+        if len(sheaths) == 1 and np.sum(sheaths.fibers) == 0:
+            meanSint = np.NaN
+            normSint = np.NaN
+            varSint = np.NaN
+            meanLength = np.NaN
+            maxLength = np.NaN
+            nSheaths = np.NaN
+            centHull = np.NaN
+            tipHull = np.NaN
+            xRange = np.NaN
+            yRange = np.NaN
+            # make blank entry
+            #print(i+ " is blank")
+        else:   # need to validate that this works for single-sheath cells
             meanSint = sheaths.intS.mean()          #intensity variables
-            normSarray = normSarray = (sheaths.intS - sheaths.minS)/(sheaths.maxS - sheaths.minS)
+            normSarray = (sheaths.intS - sheaths.minS)/(sheaths.maxS - sheaths.minS)
             normSint = normSarray.mean()
             varSint = sheaths.varS.mean()
-            maxSint = sheaths.maxS.max()
             
             meanLength = sheaths.fibers.mean()
             maxLength = sheaths.fibers.max()
             nSheaths = sheaths.fibers.count()
             # some sort of interpolated mode and/or median length??
             
-            #y-sum... (mean, max, n, mode/median) - iteratively sheaths all sheaths.xCent for any matches
+            # y-sum... (mean, max, n, mode/median) - iteratively search all sheaths.xCent for any matches
                 # make new array of summed matches, and new array of original sheaths minus summed matches
                 # need a tolerance term...
             
-            cents = numpy.stack([sheaths.xCent,sheaths.yCent],axis=1)   # reconstruct array of centroid points
-            centHull = ConvexHull(cents).volume # note - script made for 3D, so .volume gives area, .area gives perimiter (chiaaante)
-            xRange = (sheaths.xCent.max()-sheaths.xCent-min())
+            if len(sheaths.fibers) > 2:
+                cents = np.stack([sheaths.xCent,sheaths.yCent],axis=1)   # reconstruct array of centroid points
+                centHull = ConvexHull(cents).volume # note - script made for 3D, so .volume gives area, .area gives perimiter (chiaaante)
+                xRange = (sheaths.xCent.max()-sheaths.xCent.min())
+                
+                tipsTop = np.stack((cents[:,0],(cents[:,1]-(sheaths.fibers/2)))) # estimate top and bottom coords of sheaths from centroids and lengths
+                tipsBot = np.stack((cents[:,0],(cents[:,1]+(sheaths.fibers/2))))
+                tips = np.concatenate((tipsTop,tipsBot),axis=1).transpose()  # verbose method to just recombine it all into a list of sheath tip points
+                tipHull = ConvexHull(tips).volume
+                yRange = (tipsTop.min()-tipsBot.max())
+            else:
+                centHull = np.NaN
+                tipHull = np.NaN
+                xRange = np.NaN
+                yRange = np.NaN
+
+        df.loc[i,'meanSInt'] = meanSint
+        df.loc[i,'normSInt'] = normSint
+        df.loc[i,'varSInt'] = varSint
+        df.loc[i,'meanLength'] = meanLength
+        df.loc[i,'maxLength'] = maxLength
+        df.loc[i,'nSheaths'] = nSheaths
+        df.loc[i,'convexCent'] = centHull
+        df.loc[i,'convexTips'] = tipHull
+        df.loc[i,'feretX'] = xRange
+        df.loc[i,'feretY'] = yRange
             
-            tipsTop = numpy.stack((cents[:,0],(cents[:,1]-(sheaths.fibers/2)))) # estimate top and bottom coords of sheaths from centroids and lengths
-            tipsBot = numpy.stack((cents[:,0],(cents[:,1]+(sheaths.fibers/2))))
-            tips = numpy.concatenate((tipsTop,tipsBot),axis=1).transpose()  # verbose method to just recombine it all into a list of sheath tip points
-            tipHull = ConvexHull(tips).volume
-            yRange = (tipsTop.min()-tipsBot.max())
-            
-            
-            
-            
-            
-            
-            
-            
+    dfCell = df.copy()
         
-        
+    return dfCell
+
+
+import glob
+import pandas as pd
+
+
+def sheathCsv_to_plateCellDf(dirInput, dirOutput):
+
+    dirInput = "C:\\Users\\darya\\OneDrive - McGill University\\UNet\\190429M_UNet-01\\190519U_moreMeasures_analysis\\plate1_inputs\\"
+
+    fileUnblind = glob.glob(dirInput+ "*unblinder.csv")
+    dfUnblind = pd.read_csv(fileUnblind[0]) # glob makes list of files, so need to call first element even though there's only 1 element
     
-        
-        
+    dfPlate = []
     
-    row = 0     # row counter - increase when adding fiber rows
-    for i in range(nCells):
-        cell = list_cells[i]
-        df.loc[row,'num'] = cell.num
-        # add soma parameters here
-        if len(cell.fibers) > 0:   # if cell has fibers then make a new row for each
-            for j in range(len(cell.fibers)):
-                df.loc[row,'num'] = cell.num
-                df.loc[row,'fibers'] = cell.fibers[j]
-                df.loc[row,'xCent'] = cell.xCent[j]
-                df.loc[row,'yCent'] = cell.yCent[j]
-                df.loc[row,'intS'] = cell.intS[j]
-                df.loc[row,'varS'] = cell.varS[j]
-                df.loc[row,'minS'] = cell.minS[j]
-                df.loc[row,'maxS'] = cell.maxS[j]
-     
-     #          add green channel parameters here
-                row = row+1
-        else: row = row+1
+    fileList = glob.glob(dirInput+"sheath*.csv")
+    if len(dfUnblind) != len(fileList): print("Warning - uneven # of csv's and unblinder rows")
+
+    for i in range(len(fileList)):
+        dfSheath = pd.read_csv(fileList[i]).drop(labels="Unnamed: 0",axis=1)    # import dataframe (drop first column of 0's)
+        dfCell = perCell_output_df(dfSheath)
         
-    return df
+        indexUnblind = pd.DataFrame([dfUnblind.iloc[0].transpose()]*len(dfCell))
+        dfCell.index = pd.MultiIndex.from_frame(indexUnblind)
+        
+        
+        print("well " +str(i+1)+ " of " +str(len(fileList)))
+        
+        if (i == 0):   # if this is the first well, create a new big pooled dataframe now
+            dfPlate = dfCell.copy()
+        else:                   # if its not the first well and the big dataframe is made, just concatenate this well
+            dfPlate = pd.concat([dfPlate,dfCell])
+    
+    
+    # save big dfPlate
+        
+        
+        #dfCell.set_index('num',inplace=True)    # sets cell # to be row index - can use this to align unblinder
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
