@@ -510,27 +510,27 @@ for input_path in list_folder:
     
     print("Saving input images")
     input_im_stack_m_tiffs = convert_matrix_to_multipage_tiff(save_input_im_stack)
-    imsave(sav_dir + "1) " +  filename_split + '_z' + '_input_stack.tiff’, input_im_stack_m_tiffs)
+    imsave(sav_dir + "1) " +  filename_split + '_z' + '_input_stack.tiff', input_im_stack_m_tiffs)
     
     print("Saving post-processed slice threshed images")
     all_seg_m_tiffs = convert_matrix_to_multipage_tiff(all_seg)
-    imsave(sav_dir + "2) " + filename_split + '_z' + '_ORIGINAL_post-processed.tiff’, all_seg_m_tiffs)
+    imsave(sav_dir + "2) " + filename_split + '_z' + '_ORIGINAL_post-processed.tiff', all_seg_m_tiffs)
     all_blebs_m_tiffs = convert_matrix_to_multipage_tiff(all_blebs)
-    imsave(sav_dir + "3) " + filename_split + '_z' + '_BLEBS_post-processed.tiff’, all_blebs_m_tiffs)
+    imsave(sav_dir + "3) " + filename_split + '_z' + '_BLEBS_post-processed.tiff', all_blebs_m_tiffs)
     all_eliminated_m_tiffs = convert_matrix_to_multipage_tiff(all_eliminated)
-    imsave(sav_dir + "4) " + filename_split + '_z' + '_ELIM_post-processed.tiff’, all_eliminated_m_tiffs)
+    imsave(sav_dir + "4) " + filename_split + '_z' + '_ELIM_post-processed.tiff', all_eliminated_m_tiffs)
     
     
     print("Saving post-processed intensity threshed images")
     all_blebs_THRESH_m_tiffs = convert_matrix_to_multipage_tiff(all_blebs_THRESH)
-    imsave(sav_dir + "5) " + filename_split + '_z' + '_THRESH_and_SLICED_post-processed.tiff’, all_blebs_THRESH_m_tiffs)
+    imsave(sav_dir + "5) " + filename_split + '_z' + '_THRESH_and_SLICED_post-processed.tiff', all_blebs_THRESH_m_tiffs)
     
     
     print("Saving post-processed distance thresheded images")
     final_bleb_m_tiffs = convert_matrix_to_multipage_tiff(final_bleb_matrix)
-    imsave(sav_dir + "6) " + filename_split + '_z' + '_DISTANCE_THRESHED_post-processed.tiff’, final_bleb_m_tiffs)
+    imsave(sav_dir + "6) " + filename_split + '_z' + '_DISTANCE_THRESHED_post-processed.tiff', final_bleb_m_tiffs)
     elim_matrix_m_tiffs = convert_matrix_to_multipage_tiff(elim_matrix)
-    imsave(sav_dir + "7) " + filename_split + '_z' + '_DISTANCE_THRESHED_elimed_post-processed.tiff’, elim_matrix_m_tiffs)
+    imsave(sav_dir + "7) " + filename_split + '_z' + '_DISTANCE_THRESHED_elimed_post-processed.tiff', elim_matrix_m_tiffs)
     
     
         
