@@ -2,6 +2,9 @@
 """
 Created on Tue Jul 31 10:11:38 2018
 @author: Neuroimmunology Unit
+
+- DIFFERENCES FROM MAIN BRANCH
+    - importing test_network_moreMeasures and post_process_functions_moreMeasures instead of originals
 """
 
 #from sys import path
@@ -10,8 +13,8 @@ cur_dir = getcwd()
 #path.append(cur_dir + "\\Data_functions") #Yes, i'm on windows
 
 #from Data_functions import *
-import Data_functions.test_network_UNet as UNet
-import Data_functions.post_process_functions as post_process
+import Data_functions.test_network_moreMeasures as UNet
+import Data_functions.post_process_functions_moreMeasures as post_process
 from GUI import *
 
 import logging
@@ -90,11 +93,10 @@ try:
     root = tkinter.Tk()
     s_path = './Checkpoints/'
     
-    #s_path = './Checkpoints/New-normalized-1024x1024/'; checkpoint = '594000'; width_x = 1024;
+
+    s_path = './Checkpoints/New-normalized-1024x1024/'; checkpoint = '594000'; width_x = 1024;
     #s_path = './Checkpoints/New-non-norm-1024x1024/'; checkpoint = '570000'; width_x = 1024; #must also comment out line 216!!!
-    
-    
-    
+
     
     sav_dir = filedialog.askdirectory(parent=root, initialdir=cur_dir,
                                             title='Please select saving directory')
@@ -144,7 +146,7 @@ for i in range(len(list_folder)):
         logging.error(traceback.format_exc())
         
     # combines all individual output csv files into single excel sheets under folder "combined CSVs" in the output folder
-    post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)
+#    post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)
         
     
 

@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
 """
-Created on Tue Jan  2 12:29:40 2018
+Created on Sat Apr 27 19:13:50 2019
 
-@author: Tiger
+@author: darya
 """
+
+#from os import chdir
+#chdir(cur_dir)
+#CLAHE = 0       # didn't have this variable from running main_Unet for some reason
 
 import tensorflow as tf
 from matplotlib import *
@@ -11,7 +16,7 @@ from PIL import Image
 from os import listdir
 from os.path import isfile, join
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from natsort import natsort_keygen, ns
 from skimage import measure
@@ -22,21 +27,23 @@ from skimage.filters import threshold_mean
 
 from Data_functions.plot_functions import *
 from Data_functions.data_functions import *
-from Data_functions.post_process_functions import *
+#from Data_functions.post_process_functions import *
 from Data_functions.UNet import *
 from random import randint
 from Data_functions.pre_processing import *
 
-from skimage import data, exposure, img_as_float
+from Data_functions.post_process_functions_moreMeasures import *
 
+from skimage import data, exposure, img_as_float
 
 
 def run_analysis(s_path, sav_dir, input_path, checkpoint,
                  im_scale, minLength, minSingle, minLengthDuring, radius,
                  len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball, resize,
                  debug):
-    
     try:
+
+        tf.reset_default_graph()    # necessary?
         
         # Variable Declaration
         x = tf.placeholder('float32', shape=[None, len_x, width_x, channels], name='InputImage')
@@ -67,7 +74,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         with open('./Data_functions/std_arr.pkl', 'rb') as f:  # Python 3: open(..., 'rb')
             loaded = pickle.load(f)
             std_arr = loaded[0]
-      
+          
         batch_x = []; batch_y = [];
         for i in range(len(onlyfiles_mask)):  
             total_counter = 0
@@ -76,7 +83,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                 continue
             
             filename_split = filename.split('.')[0]
-
+        
             """ Load image """
             #size = 3788 # 4775 and 6157 for the newest one
             input_arr = readIm_counter(input_path,onlyfiles_mask, counter[i]) 
@@ -109,7 +116,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             DAPI_tmp, total_matched_DAPI, total_DAPI, back_subbed = pre_process(input_arr, counter[i], DAPI_size, rolling_ball, name=onlyfiles_mask[counter[i]], sav_dir=sav_dir)
             if rolling_ball > 0:
                 plt.imsave(sav_dir + 'background_subbed' + '_' + filename_split + '_' + str(i) + '.tiff', (Image.fromarray(np.asarray(back_subbed, dtype=np.uint8))))
-
+                
             
             labelled = measure.label(DAPI_tmp)
             cc = measure.regionprops(labelled)
@@ -194,7 +201,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
         
                 """ FOR ROTATING THE IMAGE OR ADDING BLACK LINES TO THE SIDES """
                 deg_rotated = randint(0, 360)      
-    
+        
                 if rotate:
                     # ROTATE the input_im
                     width_x = 1024
@@ -244,14 +251,14 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                     
                 
                 """ Plot for debug """ 
-#                if debug:
-#                    plt.figure('Out'); plt.clf; plt.subplot(224); show_norm(input_crop[:, :, 0:3]); plt.pause(0.05); 
-#                    plt.subplot(221); 
-#                    true_m = np.argmax((batch_y[0]).astype('uint8'), axis=-1); plt.imshow(true_m);       
-#                    plt.title('Truth');
-#                    plt.subplot(222); plt.imshow(DAPI_crop); plt.title('DAPI_mask');
-#                    plt.subplot(223); plt.imshow(classification); plt.title('Output_seg');
-#                    plt.pause(0.05); 
+        #                if debug:
+        #                    plt.figure('Out'); plt.clf; plt.subplot(224); show_norm(input_crop[:, :, 0:3]); plt.pause(0.05); 
+        #                    plt.subplot(221); 
+        #                    true_m = np.argmax((batch_y[0]).astype('uint8'), axis=-1); plt.imshow(true_m);       
+        #                    plt.title('Truth');
+        #                    plt.subplot(222); plt.imshow(DAPI_crop); plt.title('DAPI_mask');
+        #                    plt.subplot(223); plt.imshow(classification); plt.title('Output_seg');
+        #                    plt.pause(0.05); 
                     
                 """ Skeletonize and count number of fibers within the output ==> saved for "sticky-seperate" later """
                 copy_class = np.copy(classification)
@@ -277,7 +284,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                     plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_input.tiff', 
                                np.asarray(input_crop_save, dtype = np.uint8))
                     plt.imsave(sav_dir + filename_split + '_' + str(i) + '-cell_number-' + str(N) + '_UNet-Seg_truth.tiff', (classification), cmap='binary_r')
-
+        
                         
                 """ Create mask of all segmented cells, also save as table """
                 classification[classification > 0] = N + 1
@@ -361,7 +368,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                     for T in range(len(overlap_coords)):
                         final_counted[overlap_coords[T,0], overlap_coords[T,1]] = cell_num
         
-
+        
             """ Garbage collection """
             DAPI_arr = []; DAPI_im = []; binary_overlap = []; labelled = []; overlap_im = []; seg_im = [];
             sort_mask = []; tmp = []; binary_all_fibers = [];
@@ -370,30 +377,35 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             output = []; skel = []; truth_im = [];
         
             """ SAVING """
-            #with open(sav_dir + 'all_fibers' + '_' + filename_split + '_' + str(i) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+            with open(sav_dir + 'all_fibers' + '_' + filename_split + '_' + str(i) + '.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
             #   pickle.dump([all_fibers], f) 
             
-            """ Skeletonize and output
-            """
-            copy_all_fibers = np.copy(all_fibers)
-            new_fibers, no_dil_fibers, new_list = skeletonize_all_fibers(copy_all_fibers, i, DAPI_tmp=np.zeros([size_whole[0],size_whole[1]]), minLength=minLength,
-                                                 total_DAPI=total_DAPI, total_matched_DAPI=total_matched_DAPI,
-                                                 minLengthSingle=minSingle, s_path=sav_dir, name=filename_split, jacc_test=jacc_test)
+                """ Skeletonize and output """
+                copy_all_fibers = np.copy(all_fibers)
+                new_fibers, no_dil_fibers, new_list, list_cells = skeletonize_all_fibers(copy_all_fibers, input_arr, i, DAPI_tmp=np.zeros([size_whole[0],size_whole[1]]), minLength=minLength, minLengthSingle=minSingle, total_DAPI=total_DAPI, total_matched_DAPI=total_matched_DAPI, s_path=sav_dir, name=filename_split, jacc_test=jacc_test)
                 
-            input_save = np.copy(np.asarray(input_arr))
+                input_save = np.copy(np.asarray(input_arr))
+                # new_fibers[new_fibers > 0] = 255
+                    
+                    
+                # moreMeasurements dataframe save
+                df = perSheath_output_df(list_cells)
+                df.to_csv(sav_dir+ 'sheathMeasurements' + '_' + filename_split + '_' + str(i) + '.csv')
+                        
+                        
+                input_save[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1]),1] = new_fibers[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1])]
+                plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tiff', (input_save))
+                plt.imsave(sav_dir + 'new_fibers' + '_' + filename_split + '_' + str(i) + '.tiff', (new_fibers))
+                
+                # garbage collection
+                
+                """ Print text onto image """
+                filename_split = filename.split('.')[0]
+                output_name = sav_dir + 'all_fibers_image_' + filename_split + '_' + str(i) + '.png'
+                output_name_overlay = sav_dir + 'all_fibers_OVERLAY_' + filename_split + '_' + str(i) + '.png'
+                add_text_to_image(final_counted, input_save, filename=output_name, filename_overlay=output_name_overlay)             
             
-            new_fibers[new_fibers > 0] = 255
-            input_save[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1]),1] = new_fibers[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1])]
-            plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tiff', (input_save))
-            # garbage collection
-            
-            """ Print text onto image """
-            filename_split = filename.split('.')[0]
-            output_name = sav_dir + 'all_fibers_image_' + filename_split + '_' + str(i) + '.png'
-            output_name_overlay = sav_dir + 'all_fibers_OVERLAY_' + filename_split + '_' + str(i) + '.png'
-            add_text_to_image(final_counted, input_save, filename=output_name, filename_overlay=output_name_overlay)             
-        
-            
+                
             copy_all_fibers = []; 
             input_arr = []; 
             

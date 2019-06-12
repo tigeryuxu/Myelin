@@ -100,12 +100,23 @@ cd(cur_dir);
 
 % scale of LIF internodes == 0.3611
 
-find_internode = 1;  % change to 1 if want to use internode analysis!!!
+find_internode = 0;  % change to 1 if want to use internode analysis!!!
+if find_internode == 1
+   minLength = 0; 
+end
+vol_bool = 1;
+back_sub_size = 150;
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
 human_OL = 'Y';
+set_thresh = 0/255;
 if switch_sheaths == 1
    human_OL = 'N';
+   enhance_RED = 'Y';
+   back_sub_size = 80;
+   set_thresh = 30/255;  % pixel uint8 value for permanent thresh to get rid of background
+        % used 30???
+        % set to zero if manually set thresholds!!!
 end
 
 if human_OL == 'Y'
@@ -158,24 +169,6 @@ batch_skip = 'Y';   % SHOULD BE ADDED TO GUI
 batch_run = 'Y';
 batch_num = 0;
 batch = cell(1);   % intialize empty
-
-% Clem:
-%batch = {'Clem1-', 'Clem2-', 'Ctr'};
-%save_params = {'', '', '0.454', '10', '4', '0.9', '35', '25', '0', '0', '0', '0', '0'};
-%save_params = {'', '', '0.227', '20', '8', '0.9', '12', '8', '0', '0', '0', '0', '0'};
-
-%%
-%batch = {'*Olig2_WT', '*Olig2_KO'};
-%batch = {'*KOSkap2_20x', '*WT_20x'};
-%batch = {''};
-
-%batch = {'*C1', '*C2', '*C3', '*RR1', '*RR2', '*RR3'};
-
-%batch = {'n1_KO', 'n1_WT', 'n2_KO', 'n2_WT', 'n3_20xzoom_MBP_KO',  'n3_20xzoom_MBP_WT', 'n4_20x_zoom_KO', 'n4_20x_zoom_WT'};
-
-%batch = {'n1_20x_KO', 'n1_20x_WT', 'n2_KOSkap2_20x', 'n2_WT_20x', 'n3_20x_snap_MBP_CD140_WT_', 'n3_20x_snap_MBP_CD140_KO_',  'n3_snap_20x_MBP_Olig2_KO_', 'n3_snap_20x_MBP_Olig2_WT_',   'n4_20x_MBP_KO', 'n4_20x_MBP_WT', 'n5_KO', 'n5_WT'};
-
-%batch = {'12 wpg', '16 wpg'};
 
 %% Run Analysis
 batch_numFiles = [];
@@ -254,13 +247,13 @@ while (moreTrials == 'Y')
                 if length(size(DAPIimage)) > 2 DAPIimage = rgb2gray(DAPIimage); else    DAPIimage = DAPIimage;                end
             else  DAPIimage = zeros(im_size);  num_empty = num_empty + 1;  end
             if ~isempty(redImage)
-                if length(size(redImage)) > 2 red = rgb2gray(redImage); else    red = redImage;                end
+                if length(size(redImage)) > 2 redImage = rgb2gray(redImage); else    red = redImage;                end
             else  redImage = zeros(im_size);  num_empty = num_empty + 1;    end
             if ~isempty(greenImage)
-                if length(size(greenImage)) > 2 red = rgb2gray(greenImage); else    greenImage = greenImage;                end
+                if length(size(greenImage)) > 2 greenImage = rgb2gray(greenImage); else    greenImage = greenImage;                end
             else  greenImage = zeros(im_size);   num_empty = num_empty + 1;   end
             if ~isempty(binImage)
-                if length(size(binImage)) > 2 red = rgb2gray(binImage); else    binImage = binImage;                end
+                if length(size(binImage)) > 2 binImage = rgb2gray(binImage); else    binImage = binImage;                end
             else  binImage = zeros(im_size);  num_empty = num_empty + 1;    end
          
             if ~isempty(wholeImage)  wholeImage = wholeImage;         
@@ -280,12 +273,12 @@ while (moreTrials == 'Y')
                 if mag == 'Y'
                     se = strel('disk', 30);    % maybe make the same size as the fibers???
                 else
-                    %se = strel('disk', 8);
-                    se = strel('disk', 1);
+                    se = strel('disk', 8);
+                    %se = strel('disk', 1);
                 end
                 I = nanoF_im;
                 J = imsubtract(imadd(I,imtophat(I,se)),imbothat(I,se));    % top-hat AND bottom-hat
-                %J = imerode(J, strel('disk', 6));
+                J = imerode(J, strel('disk', 6));
                 J = imerode(J, strel('disk', 2));
                 nanoF_im = J;
                 phaseThres = graythresh(nanoF_im);
@@ -295,7 +288,7 @@ while (moreTrials == 'Y')
                 nanoF_im = false(siz);
             end
             
-            redImage = cat(3, red, greenImage, DAPIimage);
+            redImage = cat(3, redImage, greenImage, DAPIimage);
             
             red = redImage(:, :, 1);
             if enhance_RED == 'Y'
@@ -353,12 +346,14 @@ while (moreTrials == 'Y')
         DAPIimage = im2double(DAPIimage);
         %intensityValueDAPI = im2double(rgb2gray(DAPIimage));
         
+        
+        %% Subtract background:
         if find_internode == 1
-            %% Subtract background:
+            
             min_MBP_intensity = 20;
              I = imgaussfilt(redImage(:, :, 1), 0.5);                          
             background = imopen(I,strel('disk',30));
-            I2 = I - background;
+            I2 = imsubtract(I, background);
             I = I2;
             I(I < min_MBP_intensity) =  0;
             redImage(:, :, 1) = I;
@@ -366,7 +361,7 @@ while (moreTrials == 'Y')
             % for green channel
             I = imgaussfilt(redImage(:, :, 2), 0.5);
             background = imopen(I,strel('disk',20));
-            I2 = I - background;
+            I2 = imsubtract(I, background);
             I = I2;
             
             %% SUBTRACTS OUT ANY INTENSITY BELOW 80 in GREEN CHANNEL (for internodes)
@@ -383,14 +378,19 @@ while (moreTrials == 'Y')
         %filename = natfnames{fileNum + 1};
         redImage = redImage(:, :, 1);
         redImage = im2double(redImage);
-                    im_size = size(redImage);
+        im_size = size(redImage);
                     
-                    
-        
         if enhance_RED == 'Y'
             %[all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
-            redImage = imadjust(redImage);
             
+            if switch_sheaths
+                redImage(redImage < 5/255) = 0;
+                red_original = redImage;
+                redImage = adapthisteq(redImage);
+            else
+                redImage = imadjust(redImage);
+                red_original = redImage;
+            end
             %% TIGER - 08/03/2019 - ONLY ENHANCE GREEN IMAGE IF IT ISN'T CLOSE TO BEING EMPTY
             % check by binarizing green image, then counting nonzero
             % if overall # positive pixels > 1%, do the adjustment
@@ -447,10 +447,12 @@ while (moreTrials == 'Y')
                 %   O4_original = adapthisteq(O4_original);
                 %end
                 
-                [O4_im, originalRed] = imageAdjust(O4_original, fillHoles, enhance);   % image adjust
+                [O4_im, originalRed] = imageAdjust(O4_original, fillHoles, enhance, back_sub_size);   % image adjust
                 
-                if enhance_RED == 'Y'
+                if enhance_RED == 'Y' && switch_sheaths == 0
                     O4_im = imclose(O4_im, strel('disk', 10));
+                elseif enhance_RED == 'Y' && switch_sheaths == 1
+                   O4_im = imclose(O4_im, strel('disk', 5)); 
                 end
                 
                 
@@ -458,7 +460,7 @@ while (moreTrials == 'Y')
                 %% 2018-12-14: Can remove the weird membrane between sheaths
                 if remove_nets == 'Y'
                     tmp_im = O4_original;
-                    background = imopen(O4_original,strel('disk',10));
+                    background = imopen(O4_original,strel('disk',back_sub_size));
                     I2 = O4_original - background;
                     I = I2;
                     O4_im_ridges_adapted = tmp_im;
@@ -575,7 +577,7 @@ while (moreTrials == 'Y')
                 end
                 
                 if find_internode == 0   % only do this if NOT find_internodes
-                    wholeImage = cat(3, O4_tmp, MBP_im, tmpDAPI);
+                    wholeImage = cat(3, red_original, MBP_im, tmpDAPI);
                 else
                     wholeImage = cat(3, O4_tmp, adapthisteq(greenImage), DAPIimage);
                 end                
@@ -584,6 +586,14 @@ while (moreTrials == 'Y')
                 if switch_sheaths == 1
                     %O4_im_ridges_adapted = MBP_im;
                     O4_im_ridges_adapted = greenOrig;
+                    tmp_im = O4_im_ridges_adapted;
+                    background = imopen(O4_im_ridges_adapted,strel('disk',back_sub_size));
+                    I2 = O4_im_ridges_adapted - background;
+                    I = I2;
+                    O4_im_ridges_adapted = I;
+                    O4_im_ridges_adapted(O4_im_ridges_adapted < set_thresh) = 0;
+                    %I = adapthisteq(I);
+                    MBP_im = O4_im_ridges_adapted;
                 end
                 
                 figure(5); imshow(wholeImage); title('Output Image'); hold on;
@@ -636,7 +646,7 @@ while (moreTrials == 'Y')
                 %% (7) NEW LINE ANALYSIS (transforms ridges to lines)
                 % Horizontal lines are more dim
                 dil_lines = 'Y';
-                if scale > 0.3
+                if scale > 0.4
                     dil_lines = 'N';
                 end
                 
@@ -740,8 +750,9 @@ while (moreTrials == 'Y')
                 
                 if switch_sheaths == 1
                     
-                    O4_adapt = adapthisteq(O4_original);
-                    [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance);
+                    %% TIGER - not sure whether or not to adjust threshold for annick's analysis...
+                    O4_adapt = adapthisteq(O4_original);             
+                    [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance, back_sub_size);
                     
                     
                     %% Alternative is to have this less filled in image (more holes)
@@ -846,7 +857,7 @@ while (moreTrials == 'Y')
                 % normalize later to # of cells)
                 % (b) want the area of MBP colocalized with identified
                 % sheaths ==> use Julia's algo
-                [bw_green, originalGreen] = imageAdjust(MBP_im, fillHoles, enhance);   % image adjust
+                [bw_green, originalGreen] = imageAdjust(MBP_im, fillHoles, enhance, back_sub_size);   % image adjust
                 s(1).AreaOverall = nnz(bw_green); % gets area
                 s(1).numO4 = sumO4;
                 
@@ -873,12 +884,15 @@ while (moreTrials == 'Y')
                 end
             
             %% For Annick's analysis and to find area of MBP when combine_RG == 1
-            if switch_sheaths == 1 || Combine_RG == 1
+            if switch_sheaths == 1 || combineRG == 1
                 get_ensheathed_only = 1
-                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, zeros(size(O4_adapt)));
+                O4_original(O4_original < set_thresh) = 0;
+                O4_adapt = adapthisteq(O4_original); 
+                greenOrig = MBP_im;
+                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, zeros(size(O4_adapt)), back_sub_size);
                 get_ensheathed_only = 0
                 subtract_old_MBP = cores_MBP;
-                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, cores_MBP, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP);
+                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, cores_MBP, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP, back_sub_size);
                 
             end
                 
@@ -932,7 +946,7 @@ while (moreTrials == 'Y')
                 print(filename,'-dpng')
                 hold off;
                 
-                if switch_sheaths || Combine_RG
+                if switch_sheaths || combineRG
                     figure(121);
                     filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '10) CB watershed ensheathed') ;
                     print(filename,'-dpng')
@@ -1384,7 +1398,7 @@ fclose(fid4);
 fclose(fid5);
 fclose(fid6);
 fclose(fid7);
-fclose(fid_internodes);
+fclose(find_internodes);
 
 %% Make csv files for data analysis
 name_csv = 'Result_names.csv';

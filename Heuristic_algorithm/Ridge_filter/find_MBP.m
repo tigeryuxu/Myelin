@@ -1,4 +1,4 @@
-function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP)
+function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP, back_sub_size)
 
     % First find cores of ENSHEATHED cells to use for "imposemin"
     if get_ensheathed_only == 1
@@ -15,6 +15,8 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
             if s(cell_num).Bool_W == 0 && s(cell_num).O4_bool == 1
                 CB_area = s(cell_num).CB;
                 tmp_CBs(CB_area) = 1;
+                core_area = s(cell_num).Core;
+                tmp_CBs(core_area) = 1;
             end
         end
     end
@@ -23,7 +25,7 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     if switch_sheaths == 0
         O4_adapt = O4_original;
     end
-    [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance);
+    [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance, back_sub_size);
 
     bw = ~bwareaopen(~combined_im, 10);  % clean
     D = -bwdist(~bw);  % EDT
@@ -95,9 +97,13 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     obj_MBP = bwconncomp(bw_MBP);
     cb_MBP_idx  = obj_MBP.PixelIdxList;
 
-    obj_CB_E = bwconncomp(cores_CB);
-    cb_CB_E_idx = obj_CB_E.PixelIdxList;
+    %% SWITCH TO REGIONPROPS b/c can handle diff numerically coded areas
+    obj_CB_E = regionprops(cores_CB, 'PixelIdxList');
+    cb_CB_E_idx = obj_CB_E;
+    %obj_CB_E = bwconncomp(cores_CB);
+    %cb_CB_E_idx = obj_CB_E.PixelIdxList;
 
+    
     cores_MBP = zeros(size(bw));
     idx_new = cell(0);
     for Y = 1:length(cb_MBP_idx)
@@ -106,7 +112,7 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
             continue;
         end
         for T = 1:length(cb_CB_E_idx)
-            MBP_obj = cb_CB_E_idx{T};
+            MBP_obj = cb_CB_E_idx(T).PixelIdxList;
             same = ismember(MBP_obj, cur_MBP);
             if ~isempty(find(same, 1))
                 overlap_idx = find(same);
@@ -139,7 +145,7 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     cell_numbers = unique(cores_MBP);
     area_per_cell = [];
     for T = 2:length(cell_numbers)
-        a = length(cores_MBP(cores_MBP == T - 1));   % gets the area
+        a = length(cores_MBP(cores_MBP == cell_numbers(T)));   % gets the area
         area_per_cell = [area_per_cell, a];    % ***AREA might be ZERO ==> b/c not ADAPTHISTEQ
     end
 

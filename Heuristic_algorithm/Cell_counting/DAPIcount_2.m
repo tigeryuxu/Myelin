@@ -27,12 +27,12 @@ I = intensityValueDAPI;
 %% Subtract background:
 if enhance == 'Y'
     background = imopen(I,strel('disk',DAPI_bb_size));
-    I2 = I - background;
+    I2 = imsubtract(I, background);
     I = I2;
     I = adapthisteq(I);
 else
     background = imopen(I,strel('disk',DAPI_bb_size));
-    I2 = I - background;
+    I2 =  imsubtract(I, background);
     I = I2;
 end
 
