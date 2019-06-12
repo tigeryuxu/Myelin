@@ -28,6 +28,14 @@ Heuristic_algorithm/Max*
 Heuristic_algorithm/internodes*
 Heuristic_algorithm/Test nodes*
 
+
+Heuristic_algorithm/2019*
+Heuristic_algorithm/AB*
+Heuristic_algorithm/All*
+Heuristic_algorithm/*.xlsx
+Heuristic_algorithm/*.avi
+
+
 CNN-UNet/Results/Demo-data_output*
 CNN-UNet/Test
 CNN-UNet/Checkpoints/Trained with heuristic/loss_global_val.pkl
