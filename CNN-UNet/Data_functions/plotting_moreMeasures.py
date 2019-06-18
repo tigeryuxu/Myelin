@@ -328,3 +328,20 @@ plt.show()
 
 
 fig.savefig("time_params.png",dpi=500)
+
+
+    """ STATISTICS AND SINGLE-PARAMETER GRAPHS
+    - normality test
+    - 2-way anova (ie comparing prep with plate)
+    - 1-way anova (ie for coatings, timecourse)
+    - violin plots between specific treatments colour coded
+    """
+    
+    
+    
+    """ MULTIVARIATE ANALYSIS AND PLOTTING
+    - principle component analysis
+    - cluster analysis
+    - PCA plots
+    - plot treatments across primary component (or first 2 via heatmap)
+    """

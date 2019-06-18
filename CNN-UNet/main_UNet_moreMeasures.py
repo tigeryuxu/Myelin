@@ -3,7 +3,7 @@
 Created on Tue Jul 31 10:11:38 2018
 @author: Neuroimmunology Unit
 
-- DIFFERENCES FROM MAIN BRANCH
+- ONLY DIFFERENCES FROM MAIN BRANCH
     - importing test_network_moreMeasures and post_process_functions_moreMeasures instead of originals
 """
 
