@@ -153,7 +153,7 @@ def perCell_output_df(dfSheath):
         # if length  = 1 then ignore
         sheaths = dfSheath[dfSheath['num'].isin({i})] # get all rows where num = the cell 
         # add soma measures
-        if len(sheaths) == 1 and np.sum(sheaths.fibers) == 0:
+        if len(sheaths) == 1 and np.sum(sheaths.fibers) == 0: #unsheathed cells
             meanSint = np.NaN
             normSint = np.NaN
             varSint = np.NaN
@@ -166,7 +166,20 @@ def perCell_output_df(dfSheath):
             yRange = np.NaN
             # make blank entry
             #print(i+ " is blank")
-        else:   # need to validate that this works for single-sheath cells
+
+        elif len(sheaths) == 1: #single-sheath cells
+            meanSint = sheaths.intS.max()
+            normSint = np.NaN
+            varSint = np.NaN
+            meanLength = sheaths.fibers.max()
+            maxLength = sheaths.fibers.max()
+            nSheaths = sheaths.fibers.count()
+            centHull = np.NaN
+            tipHull = np.NaN
+            xRange = np.NaN
+            yRange = np.NaN
+
+        else:   #multi-sheath cells
             meanSint = sheaths.intS.mean()          #intensity variables
             normSarray = (sheaths.intS - sheaths.minS)/(sheaths.maxS - sheaths.minS)
             normSint = normSarray.mean()
@@ -180,22 +193,21 @@ def perCell_output_df(dfSheath):
             # y-sum... (mean, max, n, mode/median) - iteratively search all sheaths.xCent for any matches
                 # make new array of summed matches, and new array of original sheaths minus summed matches
                 # need a tolerance term...
-            
-            if len(sheaths.fibers) > 2:
-                cents = np.stack([sheaths.xCent,sheaths.yCent],axis=1)   # reconstruct array of centroid points
-                centHull = ConvexHull(cents).volume # note - script made for 3D, so .volume gives area, .area gives perimiter (chiaaante)
-                xRange = (sheaths.xCent.max()-sheaths.xCent.min())
-                
-                tipsTop = np.stack((cents[:,0],(cents[:,1]-(sheaths.fibers/2)))) # estimate top and bottom coords of sheaths from centroids and lengths
-                tipsBot = np.stack((cents[:,0],(cents[:,1]+(sheaths.fibers/2))))
-                tips = np.concatenate((tipsTop,tipsBot),axis=1).transpose()  # verbose method to just recombine it all into a list of sheath tip points
-                tipHull = ConvexHull(tips).volume
-                yRange = (tipsTop.min()-tipsBot.max())
-            else:
-                centHull = np.NaN
-                tipHull = np.NaN
-                xRange = np.NaN
-                yRange = np.NaN
+
+            cents = np.stack([sheaths.xCent, sheaths.yCent], axis=1)  # reconstruct array of centroid points
+            centHull = ConvexHull(
+                cents).volume  # note - script made for 3D, so .volume gives area, .area gives perimiter (chiaaante)
+            # note - ConvexHull causes Segfault on OSX (see https://github.com/scipy/scipy/issues/9751)
+
+            xRange = (sheaths.xCent.max() - sheaths.xCent.min())
+
+            tipsTop = np.stack((cents[:, 0], (cents[:, 1] - (
+                        sheaths.fibers / 2))))  # estimate top and bottom coords of sheaths from centroids and lengths
+            tipsBot = np.stack((cents[:, 0], (cents[:, 1] + (sheaths.fibers / 2))))
+            tips = np.concatenate((tipsTop, tipsBot),
+                                  axis=1).transpose()  # verbose method to just recombine it all into a list of sheath tip points
+            tipHull = ConvexHull(tips).volume
+            yRange = (tipsTop.min() - tipsBot.max())
 
         df.loc[i,'meanSInt'] = meanSint
         df.loc[i,'normSInt'] = normSint
