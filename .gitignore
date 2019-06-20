@@ -84,3 +84,5 @@ CNN-UNet/Checkpoints/check_350000.data-00000-of-00001
 CNN-UNet/Checkpoints/check_470000.meta
 CNN-UNet/Checkpoints/check_470000.index
 CNN-UNet/Checkpoints/check_470000.data-00000-of-00001
+
+*.DS_Store
