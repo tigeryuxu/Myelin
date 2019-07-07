@@ -9,6 +9,9 @@ NaVimage = greenImage;
 %% Identify internodes
 [mat, internd, bw_internd]= DAPIcount_3D(NaVimage, DAPIsize, DAPImetric, enhance_DAPI, internode_size);
 
+if bw_internd == 1   % IF ONLY HAVE A SINGLE VALUE (means blank) ==> set to blank
+    bw_internd = zeros(size(bw_internd));
+end
 %diff = imfuse(bw_internd, NaVimage);
 
 %% fuse internodes and fibers image
@@ -30,7 +33,7 @@ for i = 1:length(intnd_idx)
     sub_mask(intnd_idx{i}) = 0;
 end
 %figure(10); imshow(sub_mask, []); title('Subtracted nodes');
-figure(10); volshow(sub_mask, 'BackgroundColor', [0,0,0]);title('Subtracted nodes');
+figure(10); volshow(im2double(sub_mask), 'BackgroundColor', [0,0,0]);title('Subtracted nodes');
 
 % Then find endpoints and dilate them out
 sub_mask = logical(sub_mask);

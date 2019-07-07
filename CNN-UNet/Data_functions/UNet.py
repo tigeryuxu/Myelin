@@ -264,3 +264,57 @@ def create_network_SMALL(x, y_b, training):
     logits = L11
     
     return y, y_b, L1, L2, L3, L4, L5, L6, L7, L8, L9,L9_conv, L10, L11, logits, softMaxed
+
+
+
+
+""" Smaller network architecture """
+def create_network_3D(x, y_b, training):
+    # Building Convolutional layers
+    siz_f = 5 # or try 5 x 5
+    #training = True
+
+    L1 = tf.layers.conv3d(inputs=x, filters=10, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                          activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='Conv1_3D')
+    L2 = tf.layers.conv3d(inputs=L1, filters=20, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                          activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='Conv2_3D')
+    L3 = tf.layers.conv3d(inputs=L2, filters=30, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same',
+                          activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='Conv3_3D')
+    L4 = tf.layers.conv3d(inputs=L3, filters=40, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                          activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='Conv4_3D')
+    L5 = tf.layers.conv3d(inputs=L4, filters=50, kernel_size=[siz_f, siz_f, siz_f], strides=[1, 2, 2], padding='same', 
+                          activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='Conv5_3D')
+
+    # up 1
+    L6 = tf.layers.conv2d_transpose(inputs=L5, filters=50, kernel_size=[siz_f, siz_f, siz_f], strides=[1, 2, 2], padding='same', 
+                                    activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='DeConv1_3D')
+    L6_conv = tf.concat([L6, L4], axis=3)  # add earlier layers, then convolve together
+    
+    L7 = tf.layers.conv2d_transpose(inputs=L6_conv, filters=40, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                                    activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='DeConv2_3D')
+    L7_conv = tf.concat([L7, L3], axis=3)
+
+    L8 = tf.layers.conv2d_transpose(inputs=L7_conv, filters=30, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                                    activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='DeConv3_3D')
+    L8_conv = tf.concat([L8, L2], axis=3)
+     
+    L9 = tf.layers.conv2d_transpose(inputs=L8_conv, filters=20, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                                    activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='DeConv4_3D')
+    L9_conv = tf.concat([L9, L1], axis=3)
+
+    L10 = tf.layers.conv2d_transpose(inputs=L9_conv, filters=10, kernel_size=[siz_f, siz_f, siz_f], strides=[2, 2, 2], padding='same', 
+                                     activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(), name='DeConv5_3D')
+    L10_conv = tf.concat([L10, x], axis=3)
+          
+    # 1 x 1 convolution (NO upsampling) 
+    L11 = tf.layers.conv2d(inputs=L10_conv, filters=2, kernel_size=[siz_f, siz_f, siz_f], strides=[1, 1, 1], padding='same', activation=None, 
+                           kernel_initializer=tf.contrib.layers.xavier_initializer(), name='Conv1x1_D')
+   
+    softMaxed = tf.nn.softmax(L11, name='Softmaxed')   # for the output, but NOT the logits
+
+    # Set outputs 
+    y = softMaxed
+    logits = L11
+    
+    return y, y_b, L1, L2, L3, L4, L5, L6, L7, L8, L9,L9_conv, L10, L11, logits, softMaxed
+

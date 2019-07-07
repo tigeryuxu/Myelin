@@ -59,6 +59,7 @@ seg_skel = binarize_3D_otsu(imsubtract(skel, branchPB));
  elim_small_segs = zeros(siz);
  for i = 1:length(stats.VoxelIdxList)
      cur_seg = stats.VoxelIdxList(i);
+    
      if length(cur_seg{1}) > 5
          elim_small_segs(cur_seg{1}) = 1;
      end

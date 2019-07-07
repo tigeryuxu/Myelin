@@ -221,7 +221,7 @@ while (moreTrials == 'Y')
     cd(cur_dir);
     
     cd(foldername);   % switch directories
-    nameCat = strcat(name, '*tif');
+    nameCat = strcat(name, '*tif*');
     fnames = dir(nameCat);
     
     namecell=cell(1);
@@ -250,7 +250,7 @@ while (moreTrials == 'Y')
         
         %% Subtract background for internode data
         if find_internode == 1
-            min_MBP_intensity = 20/255;
+            min_MBP_intensity = 10/255;
             I = imgaussfilt3(redImage, 0.5);
             background = imopen(I,strel('disk',30));
             I2 = imsubtract(I, background);
@@ -505,6 +505,7 @@ while (moreTrials == 'Y')
             % turn these into bwdist ==> to get nodal length!
             cd(cur_dir);
             cd(saveDirName);
+            save_internode_data_3D(mask, saveDirName)
             save_internode_data_3D(all_internodes, saveDirName)
             save_internode_data_3D(all_caspr_coloc, saveDirName)
             save_internode_data_3D(one_node, saveDirName)
@@ -525,6 +526,9 @@ while (moreTrials == 'Y')
             
             %figure(5);
             %set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
+            filename_save = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_(0) RAW_linear_objects.tif');
+            save_3D_combine(mask, zeros(size(all_internodes)), zeros(size(all_internodes)), filename_save, im_size)
+            
             filename_save = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_(4) All-raw-internodes.tif');
             save_3D_combine(all_internodes, all_caspr_coloc, zeros(size(all_internodes)), filename_save, im_size)
             
