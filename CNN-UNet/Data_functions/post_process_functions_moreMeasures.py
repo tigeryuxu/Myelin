@@ -410,7 +410,14 @@ def width_separate(masked, all_fibers, width_thresh, minLength):
     
     return combined
 
+"""
+    SKEL ONE - called after UNet finds sheaths, cleans up segmentation and skeletonizes
+    - input:
+        - all_fibers - binarized direct output of UNet (np array image, I think?)
+        - minLength - scalar, length threshold under which sheaths are ignored
+    - output - cleaned up skeletonized np array image
 
+"""
 
 def skel_one(all_fibers, minLength):
     image = all_fibers
