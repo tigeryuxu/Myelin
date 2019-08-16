@@ -75,12 +75,22 @@ for fileNum = 1 : 4: numfids
     
     %internode_size = 50;  % BACKGROUND SUBTRACTION SIZE
     im_size = size(mask);
-    internode_size = 5;
-    DAPIsize = 5;
+    internode_size = 0;
+    DAPIsize = 0;
     dil_lines = 'N';
     enhance_DAPI = 'Y';
     fileNum_sav = 0;
+    
+    %% CAN COMMENT OUT NEXT 2 LINES
+    %[s_overall, together, only_branched_fibers, final_no_sub_fibers] = line_traversal_3D(mask, im_size, minLength, dil_lines);
+    %mask = final_no_sub_fibers;
+    
+    
     [all_internodes, all_caspr_coloc, one_node, one_node_caspr, two_nodes, two_nodes_caspr, bw_internd] = find_internodes_3D(greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
+    %[all_internodes_b, all_caspr_coloc_b, one_node_b, one_node_caspr_b, two_nodes_b, two_nodes_caspr_b, bw_internd_b] = find_internodes_3D_branched(s_overall, greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
+    all_internodes_b = 0,    all_caspr_coloc_b = 0,    one_node_b = 0;
+    one_node_caspr_b = 0,     two_nodes_b = 0,    two_nodes_caspr_b = 0;
+    bw_internd_b = 0;
     
     %% Calculate nodal distances - VERY SLOW CURRENTLY
     largest_distance = 5 % pixels
@@ -101,11 +111,25 @@ for fileNum = 1 : 4: numfids
     cd(saveDirName);
     save_internode_data_3D(mask, saveDirName)
     save_internode_data_3D(all_internodes, saveDirName)
+    save_internode_data_3D(all_internodes_b, saveDirName)
+
     save_internode_data_3D(all_caspr_coloc, saveDirName)
+    save_internode_data_3D(all_caspr_coloc_b, saveDirName)
+
     save_internode_data_3D(one_node, saveDirName)
+    save_internode_data_3D(one_node_b, saveDirName)
+
     save_internode_data_3D(one_node_caspr, saveDirName)
+    save_internode_data_3D(one_node_caspr_b, saveDirName)
+
     save_internode_data_3D(two_nodes, saveDirName)
+    save_internode_data_3D(two_nodes_b, saveDirName)
+
     save_internode_data_3D(two_nodes_caspr, saveDirName)
+    save_internode_data_3D(two_nodes_caspr_b, saveDirName)
+    
+    L = ['-'];
+    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append');
     
     %% Comment out nodal distances for now b/c algorithm too slow in 3D
     %if isempty(all_nodal_dist)  all_nodal_dist = 0;  end
@@ -120,16 +144,23 @@ for fileNum = 1 : 4: numfids
     
     %figure(5);
     %set(gcf, 'InvertHardCopy', 'off');   % prevents white printed things from turning black
+    
+    all_internodes = imadd(im2double(all_internodes), all_internodes_b);
     filename_save = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_(0) RAW_linear_objects.tif');
     save_3D_combine(mask, zeros(size(all_internodes)), zeros(size(all_internodes)), filename_save, im_size)
     
+    all_caspr_coloc = imadd(all_caspr_coloc, all_caspr_coloc_b);
     filename_save = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_(4) All-raw-internodes.tif');
     save_3D_combine(all_internodes, all_caspr_coloc, zeros(size(all_internodes)), filename_save, im_size)
     
+    one_node = imadd(one_node, one_node_b);
+    one_node_caspr = imadd(one_node_caspr, one_node_caspr_b);
     filename_save = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_(3) one-node-coloc-internodes.tif');
     save_3D_combine(one_node, one_node_caspr, zeros(size(all_internodes)), filename_save, im_size)
     
     
+    two_nodes = imadd(two_nodes, two_nodes_b);
+    two_nodes_caspr = imadd(two_nodes_caspr, two_nodes_caspr_b);
     filename_save = strcat('Result', erase(name, '*'), num2str(fileNum_sav), '_', filename_raw, '_', '_(2) two-node-coloc-internodes.tif');
     save_3D_combine(two_nodes, two_nodes_caspr, zeros(size(all_internodes)), filename_save, im_size)
     
@@ -140,9 +171,7 @@ for fileNum = 1 : 4: numfids
     %print(filename,'-dpng')
     %hold off;
     cd(cur_dir);
-    close all;
-    continue;
-    
+    close all;    
     
 end
 

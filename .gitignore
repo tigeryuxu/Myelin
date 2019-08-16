@@ -55,6 +55,8 @@ Heuristic_algorithm/All*
 Heuristic_algorithm/*.xlsx
 Heuristic_algorithm/*.avi
 
+Heuristic_algorithm/Extra*
+Heuristic_algorithm/output*
 
 CNN-UNet/Results/Demo-data_output*
 CNN-UNet/Test
@@ -92,3 +94,11 @@ CNN-UNet/Checkpoints/check_470000.index
 CNN-UNet/Checkpoints/check_470000.data-00000-of-00001
 
 *.DS_Store
+Heuristic_algorithm/SCCs_Max project_Result_4/_1.mat
+Heuristic_algorithm/SCCs_Max project_Result_4/___Parameters used___.mat
+Heuristic_algorithm/SCCs_Max project_Result_4/allAnalysis.txt
+Heuristic_algorithm/SCCs_Max project_Result_4/internodesSCCs_Max project_Result_4.csv
+Heuristic_algorithm/SCCs_Max project_Result_4/Result1_r02c06f01p01-ch1sk1fk1fl1_combined_MAX_PROJECT.tif__All channels.png
+Heuristic_algorithm/SCCs_Max project_Result_4/Result1_r02c06f01p01-ch1sk1fk1fl1_combined_MAX_PROJECT.tif__Double nodes.png
+Heuristic_algorithm/SCCs_Max project_Result_4/Result1_r02c06f01p01-ch1sk1fk1fl1_combined_MAX_PROJECT.tif__Raw nodes and fibers.png
+Heuristic_algorithm/SCCs_Max project_Result_4/Result1_r02c06f01p01-ch1sk1fk1fl1_combined_MAX_PROJECT.tif__Single node.png

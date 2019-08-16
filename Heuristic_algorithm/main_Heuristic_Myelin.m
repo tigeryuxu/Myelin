@@ -115,7 +115,11 @@ if switch_sheaths == 1
    enhance_RED = 'Y';
    back_sub_size = 80;
    set_thresh = 30/255;  % pixel uint8 value for permanent thresh to get rid of background
-        % used 30???
+   set_thresh = 0/255;  % pixel uint8 value for permanent thresh to get rid of background
+
+   %set_thresh = 10/255;  %% TIGER ADDED BAD
+
+   % used 30???
         % set to zero if manually set thresholds!!!
 end
 
@@ -384,7 +388,7 @@ while (moreTrials == 'Y')
             %[all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
             
             if switch_sheaths
-                redImage(redImage < 5/255) = 0;
+                redImage(redImage < 10/255) = 0;   %% TIGER ADDED BAD
                 red_original = redImage;
                 redImage = adapthisteq(redImage);
             else
@@ -421,6 +425,7 @@ while (moreTrials == 'Y')
             fileNum_sav = (fileNum);
         end
         
+        
         %% LOOP
         counter = 0;
         for Q = 1:length(all_DAPI_im_split(:, 1))
@@ -452,7 +457,10 @@ while (moreTrials == 'Y')
                 if enhance_RED == 'Y' && switch_sheaths == 0
                     O4_im = imclose(O4_im, strel('disk', 10));
                 elseif enhance_RED == 'Y' && switch_sheaths == 1
-                   O4_im = imclose(O4_im, strel('disk', 5)); 
+                   O4_im = imclose(O4_im, strel('disk', 3)); 
+                   
+                   % 3 for worst
+                   % 10 for non dense  %% TIGER ADDED BAD
                 end
                 
                 

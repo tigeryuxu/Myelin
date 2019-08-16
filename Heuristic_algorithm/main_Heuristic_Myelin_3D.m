@@ -247,7 +247,7 @@ while (moreTrials == 'Y')
         %% Decide if want to load individual channels or single image
         cd(foldername);
         [redImage, greenImage, DAPIimage] = load_3D(filename_raw);
-        
+         
         %% Subtract background for internode data
         if find_internode == 1
             min_MBP_intensity = 10/255;
@@ -506,12 +506,15 @@ while (moreTrials == 'Y')
             cd(cur_dir);
             cd(saveDirName);
             save_internode_data_3D(mask, saveDirName)
-            save_internode_data_3D(all_internodes, saveDirName)
             save_internode_data_3D(all_caspr_coloc, saveDirName)
             save_internode_data_3D(one_node, saveDirName)
             save_internode_data_3D(one_node_caspr, saveDirName)
             save_internode_data_3D(two_nodes, saveDirName)
             save_internode_data_3D(two_nodes_caspr, saveDirName)
+            
+            L = ['-'];
+            dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append');
+            
             
             %% Comment out nodal distances for now b/c algorithm too slow in 3D
             %if isempty(all_nodal_dist)  all_nodal_dist = 0;  end
