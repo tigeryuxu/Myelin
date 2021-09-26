@@ -10,7 +10,7 @@ function [] = save_internode_data_3D(im, saveDirName)
         end
 
         if ~isempty(vv)
-            %L = vv.PrincipalAxisLength(:, 1);   L = L';
+            L = vv.PrincipalAxisLength(:, 1);   L = L';
             if isempty(L)   L = 0;  end
             dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append');
 

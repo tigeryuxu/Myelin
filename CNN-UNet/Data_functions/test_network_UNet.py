@@ -8,10 +8,11 @@ import tensorflow as tf
 from matplotlib import *
 import numpy as np
 from PIL import Image
+from PIL import Image, ImageOps
 from os import listdir
 from os.path import isfile, join
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from natsort import natsort_keygen, ns
 from skimage import measure
@@ -89,19 +90,29 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             input_arr = resize_adaptive(input_arr, size, method=Image.BICUBIC)
             size_whole = input_arr.size
             
+
+            """ Pad if array becomes too small after resizing! to be at LEAST 1024 px on each side """
+            min_input_size = 1024
+            delta_w = min_input_size - input_arr.size[0]
+            delta_h = min_input_size - input_arr.size[1]
+            padding = (delta_w//2, delta_h//2, delta_w-(delta_w//2), delta_h-(delta_h//2))
+            input_arr = ImageOps.expand(input_arr, padding)
+               
             
             """ DO CLAHE """
             if CLAHE == 1:
                 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
                 input_arr = np.asarray(input_arr)
                 red = clahe.apply(np.asarray(input_arr[:,:,0], dtype=np.uint8))
-                input_arr.setflags(write=1)
-                input_arr[:,:,0] = red
+                
+                tmp = np.zeros(np.shape(input_arr))
+                #input_arr.setflags(write=1)
+                tmp[:,:,0] = red
                 
                 DAPI = clahe.apply(np.asarray(input_arr[:,:,2], dtype=np.uint8))
-                input_arr[:,:,2] = DAPI
+                tmp[:,:,2] = DAPI
                 
-                input_arr = Image.fromarray(input_arr)
+                input_arr = Image.fromarray(np.asarray(tmp, dtype=np.uint8))
                 
                 
             """ Pre-process and identify candidate nuclei """
@@ -259,18 +270,40 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                 labelled = measure.label(skel)
                 cc_overlap = measure.regionprops(labelled)  
             
+               
+                cleaned_classify = np.zeros(np.shape(classification))
                 for T in range(len(cc_overlap)):
                     length = cc_overlap[T]['MajorAxisLength']
                     angle = cc_overlap[T]['Orientation']
                     overlap_coords = cc_overlap[T]['coords']
                     
-                    if length > minLengthDuring and (angle > +0.785398 or angle < -0.785398):
+                    
+                    # if N == 133 or N == 251:
+                    #       print('stop')
+                    
+                    
+                    
+                    #if length > minLengthDuring and (angle > +0.785398 or angle < -0.785398):   ### OLD orientation
+                         
+                    if length > minLengthDuring and (angle <= +0.52 and angle >= -0.349):
+                         
                         cell_num = N
                         list_M_cells[cell_num].add_fiber(length)       
                                         
                         add_coords = [int(coords[0]), int(coords[2])]
                         overlap_coords = overlap_coords + add_coords
                         list_M_cells[cell_num].add_coords(overlap_coords)  
+                        
+                        ### IF NOTHING GETS ADDED, then must clean the classification to also be null???
+                        cleaned_classify[cc_overlap[T]['coords'][:, 0], cc_overlap[T]['coords'][:, 1]] = 1
+                        
+                        
+                       
+                    
+                        
+                classification = cleaned_classify
+                        
+                        
         
                 """ Plot output of individual segmentations and the input truth ==> for correcting later!!!"""
                 if np.count_nonzero(classification) > 0 and debug:          
@@ -346,8 +379,13 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                 length = cc_overlap[Q]['MajorAxisLength']
                 angle = cc_overlap[Q]['Orientation']
                 overlap_coords = cc_overlap[Q]['coords']
-                if length > minLength and (angle > +0.785398 or angle < -0.785398):
-                    #print(angle)
+                #if length > minLength and (angle > +0.785398 or angle < -0.785398):
+                     
+                #print(angle)
+                #if length > minLength and (angle > +0.785398 or angle < -0.785398):   ### OLD ANGLE
+                     
+                if length > minLength and (angle <= +0.52 and angle >= -0.349):
+                    print(angle)
                     cell_num = cc_overlap[Q]['MinIntensity']
                     cell_num = int(cell_num) 
                     
@@ -399,6 +437,8 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             
         sess.close()
         tf.reset_default_graph()
+        
+        return final_counted, new_fibers
         
     except Exception as error:
         print("Error in analysis, check file order and input directory");

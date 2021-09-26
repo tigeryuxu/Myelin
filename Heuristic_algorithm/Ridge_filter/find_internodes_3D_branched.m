@@ -21,7 +21,7 @@ NaVimage = greenImage;
 %% Identify internodes
 %[mat, internd, bw_internd]= DAPIcount_3D(NaVimage, DAPIsize, DAPImetric, enhance_DAPI, internode_size);
 
-bw_CASPR = NaVimage;
+bw_CASPR = NaVimage; 
 
 if bw_CASPR == 1   % IF ONLY HAVE A SINGLE VALUE (means blank) ==> set to blank
     bw_CASPR = zeros(size(bw_CASPR));

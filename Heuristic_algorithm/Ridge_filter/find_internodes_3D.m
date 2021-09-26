@@ -81,6 +81,23 @@ all_caspr_coloc = new_CASPR;
 a_mask = mask_MBP;
 
 
+%% Eliminate round/short sheaths
+cc = bwconncomp(all_internodes);
+vv = regionprops3(cc, 'PrincipalAxisLength', 'VoxelIdxList');
+
+elim_short_intern = zeros(size(all_internodes));
+for T = 1:length(vv.VoxelIdxList)
+    
+    if length(vv.VoxelIdxList{T}) > 100 && vv.PrincipalAxisLength(T,1) > 20
+        elim_short_intern(vv.VoxelIdxList{T}) = 1;
+    end
+end
+all_internodes = elim_short_intern;
+
+
+
+
+
 %% (2) Only keep fibers that coloc with 1 internode
 one_node_MBP = a_mask;
 

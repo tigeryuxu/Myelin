@@ -7,7 +7,7 @@ Created on Tue Jan 30 22:53:34 2018
 
 import tensorflow as tf
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 from matplotlib import *
 import numpy as np
 import scipy

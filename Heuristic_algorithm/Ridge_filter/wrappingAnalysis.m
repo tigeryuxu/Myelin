@@ -72,8 +72,8 @@ if ~isempty(ordered)  % if there are some cells at least
         % THIS PREVENTS OVER-COUNTING in NUM-SHEATHS
         tmp = fibers_sub_cb;
         tmp(curCB) = 1;
-%          figure(21); imshow(tmp); title('added Blob');
-%          text(centerCore(:, 1) - 20, centerCore(:, 2) + 65, '*',  'color','r' ,'Fontsize',50);
+%           figure(21); imshow(tmp); title('added Blob');
+%           text(centerCore(:, 1) - 20, centerCore(:, 2) + 65, '*',  'color','r' ,'Fontsize',50);
           
         % Make into object after adding CB to "fibers_sub_cb"
         % Then loop through to find this CB + fibers object

@@ -17,9 +17,11 @@ from GUI import *
 import logging
 import traceback
 
+
 import tkinter
 from tkinter import filedialog
 import os
+import matplotlib.pyplot as plt
     
 debug = 0
 
@@ -54,14 +56,25 @@ rolling_ball = float(rolling_ball)
 CLAHE = float(CLAHE)
 resize = float(resize)
 
-#min_microns = 12
-#im_scale = 0.6904  #0.519, 0.6904, 0.35
-minLength = min_microns / im_scale
-minSingle = (minLength * sensitivity) / im_scale
-minLengthDuring = 4/im_scale
-#radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
-radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
 
+
+### ONLY SCALE THINGS IF do NOT resize the image:
+if not resize:
+     #min_microns = 12
+     #im_scale = 0.6904  #0.519, 0.6904, 0.35
+     minLength = min_microns / im_scale
+     minSingle = (minLength * sensitivity) / im_scale
+     minLengthDuring = 4/im_scale
+     #radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
+     radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
+else:
+     minLength = min_microns / 0.69
+     minSingle = (minLength * sensitivity) / 0.69
+     minLengthDuring = 4/0.69
+     #radius = 1.5/im_scale  # um   ==> can switch to 2 um (any lower causes error in dilation)
+     radius = 1.5/0.69  # um   ==> can switch to 2 um (any lower causes error in dilation)
+
+     
 
 len_x = 1024     # 1344, 1024
 width_x = 640   # 864, 640
@@ -86,7 +99,7 @@ jacc_test = 0
 """ Prompt user to select input and output directories """
 #""" Best so far is 980000 for rotated """
 try:
-    checkpoint = '401000'
+    checkpoint = '301000'
     root = tkinter.Tk()
     s_path = './Checkpoints/'
     
@@ -130,7 +143,7 @@ for i in range(len(list_folder)):
     input_path = list_folder[i]
     
     try:
-        UNet.run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
+        final_counted, new_fibers = UNet.run_analysis(s_path, sav_dir_folder, input_path, checkpoint,
                      im_scale, minLength, minSingle, minLengthDuring, radius,
                      len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball, resize,
                      debug)

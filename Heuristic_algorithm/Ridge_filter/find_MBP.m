@@ -1,4 +1,4 @@
-function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP, back_sub_size)
+function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP, back_sub_size, min_size_MBP)
 
     % First find cores of ENSHEATHED cells to use for "imposemin"
     if get_ensheathed_only == 1
@@ -27,6 +27,17 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     end
     [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance, back_sub_size);
 
+    
+    %% TIGER ADDED - 10/27/2019 - add the MBP and STEM images together to get better MBP coloc later
+    bw_MBP = imbinarize(greenOrig);
+    save_bw_MBP = bw_MBP;
+    combined = imadd(bw_MBP, combined_im);
+    combined = imclose(combined, strel('disk', 2));
+    bw_MBP = combined;
+    combined_im = combined;
+    %bw_MBP = save_bw_MBP;
+    
+    
     bw = ~bwareaopen(~combined_im, 10);  % clean
     D = -bwdist(~bw);  % EDT
     D2 = imimposemin(D, tmp_CBs);
@@ -91,9 +102,9 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
 
 
     %% CORRELATE NOW WITH MBP
-    bw_MBP = imbinarize(greenOrig);
-    bw_MBP(~cores_CB) = 0;
-
+    %bw_MBP(~cores_CB) = 0;   %% TIGER COMMENTED OUT - 10/27/2019
+    bw_MBP(cores_CB == 0) = 0;  % SPLIT UP bw_MBP so not identifying enormous patches
+    
     obj_MBP = bwconncomp(bw_MBP);
     cb_MBP_idx  = obj_MBP.PixelIdxList;
 
@@ -108,7 +119,8 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     idx_new = cell(0);
     for Y = 1:length(cb_MBP_idx)
         cur_MBP = cb_MBP_idx{Y};
-        if isempty(cur_MBP)   %% SPEED UP CODE BY REDUCING REDUNDANCY
+        if isempty(cur_MBP) || length(cur_MBP) < min_size_MBP   %% SPEED UP CODE BY REDUCING REDUNDANCY
+                                        %% ^DELETES ANYTHING TOO SMALL
             continue;
         end
         for T = 1:length(cb_CB_E_idx)
@@ -124,6 +136,11 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
         end
     end
     
+    %% TIGER added - 10/27/2019 - mask out a temporarily saved MBP image to only get MBP above certain threshold
+    cores_MBP(save_bw_MBP == 0) = 0;
+    
+    %cores_MBP = save_bw_MBP;
+    
     if get_ensheathed_only
         figure(123);
     else
@@ -133,6 +150,16 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     %% IF get only the NON-ensheathed cores, subtract out the original MBP image
     if get_ensheathed_only == 0
         cores_MBP(imbinarize(subtract_old_MBP)) = 0;
+    end
+    
+    %% TIGER ADDED - 10/27/2019 - skip if too small, clean before plotting
+    cell_numbers = unique(cores_MBP);
+    for T = 2:length(cell_numbers)
+        a = length(cores_MBP(cores_MBP == cell_numbers(T)));   % gets the area
+        if a < min_size_MBP  %% TIGER ADDED - 10/27/2019 - skip if too small
+            cores_MBP(cores_MBP == cell_numbers(T)) = 0;
+            continue;
+        end
     end
     
     title('MBP of ensheathed');
@@ -146,6 +173,9 @@ function [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP
     area_per_cell = [];
     for T = 2:length(cell_numbers)
         a = length(cores_MBP(cores_MBP == cell_numbers(T)));   % gets the area
+        if a < min_size_MBP  %% TIGER ADDED - 10/27/2019 - skip if too small
+            continue;
+        end
         area_per_cell = [area_per_cell, a];    % ***AREA might be ZERO ==> b/c not ADAPTHISTEQ
     end
 

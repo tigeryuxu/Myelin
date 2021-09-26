@@ -12,7 +12,7 @@ import pylab as mpl
 import numpy as np
 import time
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from PIL import Image
 import random

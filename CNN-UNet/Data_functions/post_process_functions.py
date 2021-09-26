@@ -9,7 +9,7 @@ from skimage.morphology import skeletonize
 from skimage.morphology import *
 from skimage import data
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from skimage.util import invert
 import mahotas as mah
@@ -57,7 +57,7 @@ def sort_max_fibers(masked, list_M_cells):
     for T in range(len(list_M_cells)):
         fibers = list_M_cells[T].fibers
         if fibers:
-            idx_cells.append(T)
+            idx_cells.append(T)    ### gets only index of cells that have fibers
     
     import operator    
     binary_masked = masked > 0
@@ -71,7 +71,7 @@ def sort_max_fibers(masked, list_M_cells):
         
         cells_overlap = []
         all_numFibers = []
-        for T in range(len(idx_cells)):   
+        for T in range(len(idx_cells)):   ### loops through to check all cells w/ fibers to see which fibers overlap in this region
            idx = idx_cells[T]
                   
            fiber_coords = list_M_cells[idx].coords 
@@ -80,20 +80,24 @@ def sort_max_fibers(masked, list_M_cells):
            combined = np.append(overlap_coords, fiber_coords, axis=0)
            orig_len = len(combined)
            
-           """ find if fiber overlaps by seeing if there is anything unique 
-               RATHER than actually seeing if every pixel matches
-           """
+           #""" find if fiber overlaps by seeing if there is anything unique 
+           #    RATHER than actually seeing if every pixel matches
+           #"""
            uniq = np.unique(combined, axis=0)
            if len(uniq) < orig_len:
                cells_overlap.append(idx)
-               all_numFibers.append(len(fibers))                      
-                          
-        if len(cells_overlap) > 1:
+               all_numFibers.append(len(fibers))      
+               
+        if len(cells_overlap) >= 1:
+            ### get index of cell with most fibers
             cell_index, value = max(enumerate(all_numFibers), key=operator.itemgetter(1))
             
             """ (4) set the entire region to be of value cell_index """    
-            for T in range(len(overlap_coords)):
-               sort_mask[overlap_coords[T,0], overlap_coords[T,1]] = cells_overlap[cell_index]        
+            for id_ov in range(len(overlap_coords)):
+               sort_mask[overlap_coords[id_ov,0], overlap_coords[id_ov,1]] = cells_overlap[cell_index]   
+               
+        # else:
+        #      sort_mask[overlap_coords[:,0], overlap_coords[:,1]] = cc_overlap[M]['max_intensity']
         
         print('Tested: %d overlapped of total: %d' %(M, len(cc_overlap)))     
 
@@ -321,11 +325,25 @@ def skel_one(all_fibers, minLength):
     hor_lines = np.zeros(sub_im.shape)
     for i in range(len(cc_overlap)):
         length = cc_overlap[i]['MajorAxisLength']
-        angle = cc_overlap[i]['Orientation']
+        angle = cc_overlap[i]['Orientation']             ### ORIENTATION is NOT the same as angle!!! It is == 
+        
+        #angle_in_degrees = orientation * (180/np.pi) + 90 
+        #orientation = (angle_in_degrees - 90) * (np.pi/180) 
+                  ### which means that orientation == pi/2 ==> angle of 180
+                  ### and orientation == -pi/2 ==> angle of 0
+                      ### so vertical --> angle between 70 deg and 120 degrees --> which is orientation between ==> -0.349 and 0.52
+                      ### horizontal -->                is orientation < -0.349 or > 0.52
+        
+        
         overlap_coords = cc_overlap[i]['coords']
-        #print(angle)
-        if length < smallLength or (angle <= +0.785398 and angle >= -0.785398):
-    
+        
+        #if length < smallLength or (angle <= +0.785398 and angle >= -0.785398):   ### OLD angles
+             
+        ### ANGLES were flipped in a scikit-image update: https://github.com/scikit-image/scikit-image/issues/2646
+             ### now is this: https://datascience.stackexchange.com/questions/79764/how-to-interpret-skimage-orientation-to-straighten-images
+        #print(angle); print(len(overlap_coords)) 
+        if length > smallLength and (angle > +0.52 or angle < -0.349):
+            
             for T in range(len(overlap_coords)):
                 hor_lines[overlap_coords[T,0], overlap_coords[T,1]] = 1
                     

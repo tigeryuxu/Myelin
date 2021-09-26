@@ -92,35 +92,35 @@ cd(saveDirName);
 save('___Parameters used___', 'save_params');
 cd(cur_dir);
 
-%% TO ADD as GUI prompts:
-%square_cut_h = 6700; % 2052 for 8028 images, and %1600 for newer QL images  and 1500 for HA751
-%square_cut_w = 7200;
 
 %% FOR DARYAN: human_OL == N, enhance_DAPI == N, size == 1000, switch_sheaths on line 564 == 1
 
 % scale of LIF internodes == 0.3611
-
 find_internode = 0;  % change to 1 if want to use internode analysis!!!
 if find_internode == 1
-   minLength = 0; 
+    minLength = 0;
 end
 vol_bool = 1;
 back_sub_size = 150;
 % FOR HUMAN TRIALS, need to eliminate more smaller cells???
 enhance_RED = 'N';
-human_OL = 'Y';
+human_OL = 'N';
 set_thresh = 0/255;
 if switch_sheaths == 1
-   human_OL = 'N';
-   enhance_RED = 'Y';
-   back_sub_size = 80;
-   set_thresh = 30/255;  % pixel uint8 value for permanent thresh to get rid of background
-   set_thresh = 0/255;  % pixel uint8 value for permanent thresh to get rid of background
-
-   %set_thresh = 10/255;  %% TIGER ADDED BAD
-
-   % used 30???
-        % set to zero if manually set thresholds!!!
+    human_OL = 'N';
+    %enhance_RED = 'Y';
+    enhance_RED = 'N';   % Tiger added on Annick redo - 10/1/2019
+    %back_sub_size = 80;
+    back_sub_size = 30;   % Tiger added 10/24/2019
+    %set_thresh = 30/255;  % pixel uint8 value for permanent thresh to get rid of background
+    %set_thresh = 10/255;  % pixel uint8 value for permanent thresh to get rid of background
+    
+    %set_thresh = 0/255;  % pixel uint8 value for permanent thresh to get rid of background
+    
+    set_thresh = 10/255;  %% TIGER ADDED BAD
+    
+    % used 30???
+    % set to zero if manually set thresholds!!!
 end
 
 if human_OL == 'Y'
@@ -149,7 +149,7 @@ percentDilate = 2;   % for cores
 %hor_factor = 2;
 near_join = round(3 / (scale));  % in um
 fillHoles = round(8 / (scale * scale));  % in um^2
-squareDist = round(squareDist / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
+%squareDist = round(squareDist / (scale));  % in um (is the height of the cell that must be obtained to be considered possible candidate)
 coreMin = 0;
 %elim_O4 = round(40 / (scale * scale));    % SMALL O4 body size (200 ==> 1000 pixels)
 
@@ -214,7 +214,7 @@ while (moreTrials == 'Y')
     
     fileID = fopen(nameTmp,'w');
     fid_internodes = fopen(strcat('internodes', saveDirName, '.csv'), 'w') ;
-
+    
     cd(cur_dir);
     
     cd(foldername);   % switch directories
@@ -259,8 +259,8 @@ while (moreTrials == 'Y')
             if ~isempty(binImage)
                 if length(size(binImage)) > 2 binImage = rgb2gray(binImage); else    binImage = binImage;                end
             else  binImage = zeros(im_size);  num_empty = num_empty + 1;    end
-         
-            if ~isempty(wholeImage)  wholeImage = wholeImage;         
+            
+            if ~isempty(wholeImage)  wholeImage = wholeImage;
             else  wholeImage = zeros(im_size);  num_empty = num_empty + 1;    end
             
             empty_file_idx_sub = empty_file_idx_sub + num_empty;
@@ -296,9 +296,10 @@ while (moreTrials == 'Y')
             
             red = redImage(:, :, 1);
             if enhance_RED == 'Y'
-                red = imadjust(red);
-            else
+                %red = imadjust(red);
                 red = adapthisteq(red);
+            else
+                %red = adapthisteq(red);
             end
             wholeImage = cat(3, red, adapthisteq(greenImage), adapthisteq(DAPIimage));
             
@@ -355,13 +356,13 @@ while (moreTrials == 'Y')
         if find_internode == 1
             
             min_MBP_intensity = 20;
-             I = imgaussfilt(redImage(:, :, 1), 0.5);                          
+            I = imgaussfilt(redImage(:, :, 1), 0.5);
             background = imopen(I,strel('disk',30));
             I2 = imsubtract(I, background);
             I = I2;
             I(I < min_MBP_intensity) =  0;
             redImage(:, :, 1) = I;
-              
+            
             % for green channel
             I = imgaussfilt(redImage(:, :, 2), 0.5);
             background = imopen(I,strel('disk',20));
@@ -372,7 +373,7 @@ while (moreTrials == 'Y')
             min_internodes_intensity = 60;
             I(I < min_internodes_intensity) = 0;
             redImage(:, :, 2) = I;
-                        
+            
         end
         
         greenImage = redImage(:, :, 2);
@@ -383,7 +384,9 @@ while (moreTrials == 'Y')
         redImage = redImage(:, :, 1);
         redImage = im2double(redImage);
         im_size = size(redImage);
-                    
+        
+        
+        red_original = redImage;
         if enhance_RED == 'Y'
             %[all_O4_im_split] = split_imV2(redImage, square_cut_h, square_cut_w);
             
@@ -393,6 +396,7 @@ while (moreTrials == 'Y')
                 redImage = adapthisteq(redImage);
             else
                 redImage = imadjust(redImage);
+                redImage = adapthisteq(redImage);
                 red_original = redImage;
             end
             %% TIGER - 08/03/2019 - ONLY ENHANCE GREEN IMAGE IF IT ISN'T CLOSE TO BEING EMPTY
@@ -443,11 +447,18 @@ while (moreTrials == 'Y')
                 %O4_original = redImage;
                 
                 %% 2018-11-13: MADE THE BACKGROUND SUBTRACTION LARGER so won't lose pieces of cell in analysis
-                O4_im_ridges = O4_original;
-                
+                if switch_sheaths
+                    O4_im_ridges = O4_original;
+                end
                 %% 2018-12-14: ADDED??? b/c should be looking at ridges from the actual original image??? not binarized???
                 O4_im_ridges_adapted = O4_original;
                 
+                
+                %% 2019-10-24: Tiger added
+                if switch_sheaths
+                    %O4_original = adapthisteq(O4_original);
+                    O4_im_ridges_adapted = O4_original;
+                end
                 %if switch_sheaths == 1
                 %   O4_original = adapthisteq(O4_original);
                 %end
@@ -457,11 +468,13 @@ while (moreTrials == 'Y')
                 if enhance_RED == 'Y' && switch_sheaths == 0
                     O4_im = imclose(O4_im, strel('disk', 10));
                 elseif enhance_RED == 'Y' && switch_sheaths == 1
-                   O4_im = imclose(O4_im, strel('disk', 3)); 
-                   
-                   % 3 for worst
-                   % 10 for non dense  %% TIGER ADDED BAD
+                    O4_im = imclose(O4_im, strel('disk', 3));
+                    
+                    % 3 for worst
+                    % 10 for non dense  %% TIGER ADDED BAD
                 end
+                
+                
                 
                 
                 
@@ -481,6 +494,48 @@ while (moreTrials == 'Y')
                 elseif combineRG == 1
                     combined_im = imbinarize(O4_im + MBP_im);
                 end
+                
+                
+                %% TIGER ADDED - 10/27/2019 - Combine red + green ONLY if green colocalized with red
+                if switch_sheaths
+                    STEM_bw = O4_im;
+                    MBP_bw = imbinarize(MBP_im);
+                    
+                    obj_MBP = bwconncomp(MBP_bw);
+                    cb_MBP_idx  = obj_MBP.PixelIdxList;
+                    
+                    %% SWITCH TO REGIONPROPS b/c can handle diff numerically coded areas
+                    obj_CB_E = regionprops(STEM_bw, 'PixelIdxList');
+                    cb_CB_E_idx = obj_CB_E;
+                    
+                    cores_MBP = zeros(size(MBP_bw));
+                    idx_new = cell(0);
+                    for Y = 1:length(cb_MBP_idx)
+                        cur_MBP = cb_MBP_idx{Y};
+                        if isempty(cur_MBP)   %% SPEED UP CODE BY REDUCING REDUNDANCY
+                            %% ^DELETES ANYTHING TOO SMALL
+                            continue;
+                        end
+                        for T = 1:length(cb_CB_E_idx)
+                            MBP_obj = cb_CB_E_idx(T).PixelIdxList;
+                            same = ismember(MBP_obj, cur_MBP);
+                            if ~isempty(find(same, 1))
+                                overlap_idx = find(same);
+                                overlap = MBP_obj(overlap_idx);
+                                cores_MBP(cur_MBP) = 1;
+                                break;
+                            end
+                        end
+                    end
+                    
+                    combined_im = imadd(STEM_bw,imbinarize(cores_MBP));
+                    combined_im = imbinarize(combined_im);
+                end
+                
+                %% 2019-10-24: TIGER ADDED
+                combined_im = imclose(combined_im, strel('disk', 3));
+                
+                
                 isGreen = 0;
                 figure(1); imshow(combined_im);
                 
@@ -502,8 +557,7 @@ while (moreTrials == 'Y')
                 strucMat = num2cell(mat, 2);
                 s = struct('objDAPI', objDAPI', 'centerDAPI', strucMat, 'Core', cell(length(objDAPI), 1)...
                     ,'CB', cell(length(objDAPI), 1), 'Fibers', cell(length(objDAPI), 1), 'Mean_Fiber_L_per_C', cell(length(objDAPI), 1), 'Bool_W', c...
-                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c, 'im_size', c, 'OtherStats', c);
-                
+                    , 'im_num', c, 'O4_bool', c, 'AreaOverall', c, 'numO4', c, 'im_size', c, 'O4_area', c, 'MBP_area', c, 'im_name', c, 'OtherStats', c);
                 
                 %% Added "size" metric to keep track of size of image - Tiger 16/02/2019
                 size_red = size(intensityValueDAPI);
@@ -520,8 +574,6 @@ while (moreTrials == 'Y')
                 
                 
                 %% ***^^^ADD "OtherStats"
-                
-                
                 %% (2) Extract cores
                 [s] = reg_core_filt(combined_im, diameterFiber, siz, percentDilate, s);  % small cores
                 %^^^TAKES A LONG TIME - Tiger Xu - 06/03/2019, tried to
@@ -537,13 +589,18 @@ while (moreTrials == 'Y')
                     end
                 end
                 
-                [cores, cb, s] = match_cores(cores, cb, siz, s);  % match_cores
-                if verbose
-                    figure(71); imshow(cores); title('Associated Cores');
+                if ~switch_sheaths   % skip match cores to lower sensitivity for Annick
+                    [cores, cb, s] = match_cores(cores, cb, siz, s);  % match_cores
                 end
                 
                 %% (3) Count O4+ cells:
-                [cores, cb, unass_cb, s] = O4_count(combined_im, cores, cb, siz,diameterFiber, elim_O4, s);
+                if ~switch_sheaths   % skip match cores to lower sensitivity for Annick
+                    [cores, cb, unass_cb, s] = O4_count(combined_im, cores, cb, siz,diameterFiber, elim_O4, s);
+                end
+                
+                if verbose
+                    figure(71); imshow(cores); title('Associated Cores');
+                end
                 
                 if verbose
                     figure(70); imshow(unass_cb); title('Unassociated Objects');
@@ -581,14 +638,14 @@ while (moreTrials == 'Y')
                 end
                 
                 if combineRG == 1
-                   MBP_im = imadjust(greenOrig); 
+                    MBP_im = imadjust(greenOrig);
                 end
                 
                 if find_internode == 0   % only do this if NOT find_internodes
                     wholeImage = cat(3, red_original, MBP_im, tmpDAPI);
                 else
                     wholeImage = cat(3, O4_tmp, adapthisteq(greenImage), DAPIimage);
-                end                
+                end
                 
                 %% Switch the sheaths for Annick's analysis
                 if switch_sheaths == 1
@@ -604,6 +661,27 @@ while (moreTrials == 'Y')
                     MBP_im = O4_im_ridges_adapted;
                 end
                 
+                %% Extract overall MBP and O4:
+                if switch_sheaths == 1
+                    %O4_im_ridges_adapted = MBP_im;
+                    background = imopen(O4_original,strel('disk',back_sub_size));
+                    I2 = O4_original - background;
+                    O4 = I2;
+                    O4(O4 < set_thresh) = 0;
+                else
+                    O4 = O4_original;
+                end
+                [bw_red, originalGreen] = imageAdjust(O4, fillHoles, enhance, back_sub_size);   % image adjust
+                bw_red = bwareaopen(bw_red, 100);
+                figure(33); imshow(bw_red);
+                s(1).O4_area = nnz(bw_red);
+                [bw_green, originalGreen] = imageAdjust(MBP_im, fillHoles, enhance, back_sub_size);   % image adjust
+                bw_green = bwareaopen(bw_green, 100);
+                s(1).MBP_area = nnz(bw_green);
+                
+                s(1).im_name = filename_raw;
+                
+                
                 figure(5); imshow(wholeImage); title('Output Image'); hold on;
                 for Y = 1:length({s.objDAPI})
                     if ~isempty(s(Y).centerDAPI) % Print DAPI
@@ -618,8 +696,11 @@ while (moreTrials == 'Y')
                 end
                 
                 %% (4) Sort through and find cell objects that are much too small, and set them permanently to NOT wrapped
-                new_combined_im = imbinarize(unass_cb + combined_im);     % new combined_im also must include the dilated image in O4_count
-                
+                if switch_sheaths
+                    new_combined_im = combined_im;
+                else
+                    new_combined_im = imbinarize(unass_cb + combined_im);     % new combined_im also must include the dilated image in O4_count
+                end
                 %% 2018-11-13: REMOVED A SETTING FOR HUMAN OLs, now will allow OLs that look like thin lines
                 if switch_sheaths
                     s = s;
@@ -672,68 +753,68 @@ while (moreTrials == 'Y')
                     DAPIsize = 5;
                     dil_lines = 'N';
                     enhance_DAPI = 'Y';
-                   [all_internodes, all_caspr_coloc, one_node, one_node_caspr, two_nodes, two_nodes_caspr, bw_internd] = find_internodes(greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
-
-                   %% Calculate nodal distances
-                   largest_distance = 5 % pixels
-                   [all_nodal_dist] = get_nodal_distances(all_caspr_coloc, largest_distance);
-                   [one_caspr_nodal_dist] = get_nodal_distances(one_node_caspr, largest_distance);
-                   [two_caspr_nodal_dist] = get_nodal_distances(two_nodes_caspr, largest_distance);
-                   %% Get actual undilated size of nodes from original MBP image                   
-                   bw_green = imbinarize(greenImage);
-                   figure(300); imshow(bw_green);
-                   tmp = bw_green;
-                   bw_green(all_caspr_coloc < 0) = 0; all_caspr_coloc = bw_green; bw_green = tmp;
-                   bw_green(one_node_caspr < 0) = 0; one_node_caspr = bw_green; bw_green = tmp;
-                   bw_green(two_nodes_caspr < 0) = 0; two_nodes_caspr = bw_green; bw_green = tmp;
-                   
-                   % turn these into bwdist ==> to get nodal length!
-                   cd(saveDirName);
+                    [all_internodes, all_caspr_coloc, one_node, one_node_caspr, two_nodes, two_nodes_caspr, bw_internd] = find_internodes(greenImage, mask, DAPIsize, DAPImetric, enhance_DAPI, internode_size, im_size, hor_factor, minLength, dil_lines, cur_dir, saveDirName, filename_raw, fileNum_sav);
+                    
+                    %% Calculate nodal distances
+                    largest_distance = 5 % pixels
+                    [all_nodal_dist] = get_nodal_distances(all_caspr_coloc, largest_distance);
+                    [one_caspr_nodal_dist] = get_nodal_distances(one_node_caspr, largest_distance);
+                    [two_caspr_nodal_dist] = get_nodal_distances(two_nodes_caspr, largest_distance);
+                    %% Get actual undilated size of nodes from original MBP image
+                    bw_green = imbinarize(greenImage);
+                    figure(300); imshow(bw_green);
+                    tmp = bw_green;
+                    bw_green(all_caspr_coloc < 0) = 0; all_caspr_coloc = bw_green; bw_green = tmp;
+                    bw_green(one_node_caspr < 0) = 0; one_node_caspr = bw_green; bw_green = tmp;
+                    bw_green(two_nodes_caspr < 0) = 0; two_nodes_caspr = bw_green; bw_green = tmp;
+                    
+                    % turn these into bwdist ==> to get nodal length!
+                    cd(saveDirName);
                     [B,L] = bwboundaries(all_internodes, 'noholes');
                     vv = regionprops(L, 'MajorAxisLength');
                     L = ({vv(:).MajorAxisLength})
                     if isempty(L)   L = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;
                     
                     [B,L] = bwboundaries(all_caspr_coloc, 'noholes');
                     vv = regionprops(L, 'MajorAxisLength');
                     L = ({vv(:).MajorAxisLength})
                     if isempty(L)   L = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;   
-                   
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;
+                    
                     if isempty(all_nodal_dist)  all_nodal_dist = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), all_nodal_dist, '-append') ;          
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), all_nodal_dist, '-append') ;
                     
                     [B,L] = bwboundaries(one_node, 'noholes');
                     vv = regionprops(L, 'MajorAxisLength');
                     L = ({vv(:).MajorAxisLength})
                     if isempty(L)   L = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;
                     
                     [B,L] = bwboundaries(one_node_caspr, 'noholes');
                     vv = regionprops(L, 'MajorAxisLength');
                     L = ({vv(:).MajorAxisLength})
                     if isempty(L)   L = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;
                     
                     if isempty(one_caspr_nodal_dist)  one_caspr_nodal_dist = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), one_caspr_nodal_dist, '-append') ;          
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), one_caspr_nodal_dist, '-append') ;
                     
                     
                     [B,L] = bwboundaries(two_nodes, 'noholes');
                     vv = regionprops(L, 'MajorAxisLength');
                     L = ({vv(:).MajorAxisLength})
                     if isempty(L)   L = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;
                     
                     [B,L] = bwboundaries(two_nodes_caspr, 'noholes');
                     vv = regionprops(L, 'MajorAxisLength');
                     L = ({vv(:).MajorAxisLength})
                     if isempty(L)   L = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;                    
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), L, '-append') ;
                     
                     if isempty(two_caspr_nodal_dist)  two_caspr_nodal_dist = 0;  end
-                    dlmwrite(strcat('internodes', saveDirName, '.csv'), two_caspr_nodal_dist, '-append') ;          
+                    dlmwrite(strcat('internodes', saveDirName, '.csv'), two_caspr_nodal_dist, '-append') ;
                     
                     
                     figure(5);
@@ -759,7 +840,11 @@ while (moreTrials == 'Y')
                 if switch_sheaths == 1
                     
                     %% TIGER - not sure whether or not to adjust threshold for annick's analysis...
-                    O4_adapt = adapthisteq(O4_original);             
+                    if enhance_RED == 'Y'
+                        O4_adapt = adapthisteq(O4_original);
+                    else
+                        O4_adapt = O4_original;
+                    end
                     [combined_im, originalRed] = imageAdjust(O4_adapt, fillHoles, enhance, back_sub_size);
                     
                     
@@ -890,19 +975,24 @@ while (moreTrials == 'Y')
                         end
                     end
                 end
-            
-            %% For Annick's analysis and to find area of MBP when combine_RG == 1
-            if switch_sheaths == 1 || combineRG == 1
-                get_ensheathed_only = 1
-                O4_original(O4_original < set_thresh) = 0;
-                O4_adapt = adapthisteq(O4_original); 
-                greenOrig = MBP_im;
-                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, zeros(size(O4_adapt)), back_sub_size);
-                get_ensheathed_only = 0
-                subtract_old_MBP = cores_MBP;
-                [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, cores_MBP, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP, back_sub_size);
                 
-            end
+                %% For Annick's analysis and to find area of MBP when combine_RG == 1
+                if switch_sheaths == 1 || combineRG == 1
+                    get_ensheathed_only = 1
+                    O4_original(O4_original < set_thresh) = 0;
+                    if enhance_RED == 'Y'
+                        O4_adapt = adapthisteq(O4_original);
+                    else
+                        O4_adapt = O4_original;
+                    end
+                    greenOrig = MBP_im;
+                    min_size_MBP = 100;   %% Tiger added - 10/27/2019 - don't count as tuft if too small
+                    [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, MBP_im, fillHoles, enhance, greenOrig, get_ensheathed_only, zeros(size(O4_adapt)), back_sub_size, min_size_MBP);
+                    get_ensheathed_only = 0
+                    subtract_old_MBP = cores_MBP;
+                    [cores_MBP, s] = find_MBP(s, O4_adapt, switch_sheaths, O4_original, cores_MBP, fillHoles, enhance, greenOrig, get_ensheathed_only, subtract_old_MBP, back_sub_size, min_size_MBP);
+                    
+                end
                 
                 %% Print images of results
                 filename_raw = erase(filename_raw, '.tif');
@@ -953,6 +1043,12 @@ while (moreTrials == 'Y')
                 filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '9) MBP bw') ;
                 print(filename,'-dpng')
                 hold off;
+                
+                figure(33);
+                filename = strcat('Result', erase(name, '*'), num2str(fileNum_sav),  '_', filename_raw, '_', num2str(counter), '9) O4 bw') ;
+                print(filename,'-dpng')
+                hold off;
+                
                 
                 if switch_sheaths || combineRG
                     figure(121);
@@ -1116,6 +1212,7 @@ end
 % saveDirName = uigetdir();   % get directory
 % batch_numFiles = []; minLength = 12;
 % scale = 0.454;
+% scale = 0.323;
 
 %% Combine individual *mat files to single .csvs
 cd(cur_dir)
@@ -1160,6 +1257,7 @@ all_individual_trials_log = cell(0);
 all_individual_trials_LPC = cell(0);
 all_individual_trials_area_per_cell = cell(0);
 all_individual_trials_area_per_cell_non_ensheathed = cell(0);
+all_individual_trials_names = cell(0);
 
 batch_sort = 0;
 batch_counter = 0;
@@ -1181,16 +1279,21 @@ for fileNum = 1 : numfids
     allLog = [];
     all_area_per_cell = [];
     all_area_per_cell_non_ensheathed = [];
+    all_area_O4 = [];
+    all_area_MBP = [];
+    all_names = [];
+    
     num_O4_individual = 0;
     num_sheaths_individual = 0;
     
     filename = trialNames{fileNum};
     s = load(filename);
-    s = s.allS;
+
     
-    if isempty(s)
-        all_individual_trials = [all_individual_trials; [0,  num_O4_individual,num_sheaths_individual]];
+    if isempty(s) || ~isfield(s,'allS')
+        all_individual_trials = [all_individual_trials; [0,  num_O4_individual,num_sheaths_individual, 0, 0]];
     else
+        s = s.allS;
         
         size_im = s(1).im_size;
         height = size_im(1);
@@ -1205,6 +1308,12 @@ for fileNum = 1 : numfids
             %size_counter = size_counter + 1;
             %figure; imshow(tmp);
         end
+        
+        %% Added new global areas and name
+        all_area_O4 = s(1).O4_area;
+        all_area_MBP = s(1).MBP_area;
+        all_names = s(1).im_name;
+        
         
         % Count allNumSheaths and allLengths  ***using LENGTH OF SKELETON
         
@@ -1280,7 +1389,9 @@ for fileNum = 1 : numfids
                 
             end
         end
-        all_individual_trials = [all_individual_trials; [length({s.objDAPI}), num_O4_individual,num_sheaths_individual]];
+        
+        %% Appended multiple things to the main output file
+        all_individual_trials = [all_individual_trials; [length({s.objDAPI}), num_O4_individual, num_sheaths_individual, all_area_O4, all_area_MBP]];
     end
     num_sheaths_individual
     all_individual_trials_sheaths{end + 1} = allNumSheathsR;
@@ -1289,6 +1400,8 @@ for fileNum = 1 : numfids
     all_individual_trials_LPC{end + 1} = allMeanLPC;
     all_individual_trials_area_per_cell{end + 1} = all_area_per_cell;
     all_individual_trials_area_per_cell_non_ensheathed{end + 1} = all_area_per_cell_non_ensheathed;
+    all_individual_trials_names{end + 1} = all_names;
+
 end
 
 cd(cur_dir);
@@ -1306,6 +1419,9 @@ fid4 = fopen(strcat('output_LPC_', saveDirName, '.csv'), 'w') ;
 fid5 = fopen(strcat('output_area_per_cell_', saveDirName, '.csv'), 'w');
 fid6 = fopen(strcat('output_props_', saveDirName, '.csv'), 'w');
 fid7 = fopen(strcat('output_area_per_cell_non-ensheathed', saveDirName, '.csv'), 'w');
+fid8 = fopen(strcat('output_names_', saveDirName, '.csv'), 'wt');
+
+
 
 
 if length(batch_numFiles) < 2
@@ -1339,7 +1455,7 @@ if length(batch_numFiles) < 2
             all_individual_trials_area_per_cell{1, idx} = 0;
         end
         
-        if isempty(all_individual_trials_area_per_cell{1, idx})
+        if isempty(all_individual_trials_area_per_cell_non_ensheathed{1, idx})
             all_individual_trials_area_per_cell_non_ensheathed{1, idx} = 0;
         end
         
@@ -1350,8 +1466,11 @@ if length(batch_numFiles) < 2
         dlmwrite(strcat('output_area_per_cell_', saveDirName, '.csv'), all_individual_trials_area_per_cell(1, idx), '-append')
         dlmwrite(strcat('output_area_per_cell_non_ensheathed', saveDirName, '.csv'), all_individual_trials_area_per_cell_non_ensheathed(1, idx), '-append')
         dlmwrite(strcat('output_props_', saveDirName, '.csv'), all_individual_trials(idx, :), '-append')
+
+        fprintf(fid8, strcat(all_individual_trials_names{idx}, '\n'));
+    
     end
- 
+    
 else  % if BATCHED with user input
     total_counter = 0;
     for idx = 1:length(batch_numFiles)
@@ -1382,11 +1501,11 @@ else  % if BATCHED with user input
         if isempty(all_individual_trials)
             all_individual_trials = 0;
         end
- 
+        
         if isempty(all_individual_trials_area_per_cell_non_ensheathed{1, total_counter})
             all_individual_trials_area_per_cell_non_ensheathed{1, total_counter} = 0;
         end
-       
+        
         dlmwrite(strcat('output_sheaths_', saveDirName, '.csv'), all_individual_trials_sheaths(1, total_counter), '-append') ;
         dlmwrite(strcat('output_lengths_', saveDirName, '.csv'), all_individual_trials_lengths(1, total_counter), '-append') ;
         dlmwrite(strcat('output_log_', saveDirName, '.csv'), all_individual_trials_log(1, total_counter), '-append') ;
@@ -1394,8 +1513,10 @@ else  % if BATCHED with user input
         dlmwrite(strcat('output_area_per_cell_', saveDirName, '.csv'), all_individual_trials_area_per_cell(1, total_counter), '-append')
         dlmwrite(strcat('output_area_per_cell_non_ensheathed', saveDirName, '.csv'), all_individual_trials_area_per_cell_non_ensheathed(1, total_counter), '-append')
         dlmwrite(strcat('output_props_', saveDirName, '.csv'), all_individual_trials, '-append')
+        
+        fprintf(fid8, strcat(all_individual_trials_names{idx}, '\n'))
         %end
-        %cycle_files = cycle_files + 1;    
+        %cycle_files = cycle_files + 1;
     end
 end
 
@@ -1406,6 +1527,7 @@ fclose(fid4);
 fclose(fid5);
 fclose(fid6);
 fclose(fid7);
+fclose(fid8);
 fclose(find_internodes);
 
 %% Make csv files for data analysis
