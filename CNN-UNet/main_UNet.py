@@ -148,6 +148,8 @@ for i in range(len(list_folder)):
                      len_x, width_x, channels, CLAHE, rotate, jacc_test, rand_rot, rolling_ball, resize,
                      debug)
 
+        
+
         print("Analysis of image " + str(i + 1) + " successfully completed.")
         post_process.read_and_comb_csv_as_SINGLES(sav_dir_folder)  
 

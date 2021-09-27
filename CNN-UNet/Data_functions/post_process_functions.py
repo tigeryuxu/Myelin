@@ -273,7 +273,10 @@ def width_separate(masked, all_fibers, width_thresh, minLength):
         overlap_coords = cc_overlap[M]['coords']
         width = cc_overlap[M]['MinorAxisLength']
         
-        if width > width_thresh and length > minLength and (angle > +0.785398 or angle < -0.785398):
+        #if width > width_thresh and length > minLength and (angle > +0.785398 or angle < -0.785398):
+      
+        if width > width_thresh and length > minLength and (angle <= +0.52 and angle >= -0.349):
+
             cell_num = cc_overlap[M]['MaxIntensity']
             cell_num = int(cell_num) 
     
@@ -396,7 +399,10 @@ def fiber_to_list(masked, all_fibers, list_cells, minLength):
         angle = cc_overlap[M]['Orientation']
         overlap_coords = cc_overlap[M]['coords']
    
-        if length > minLength and (angle > +0.785398 or angle < -0.785398):
+        #if length > minLength and (angle > +0.785398 or angle < -0.785398):
+             
+        if length > minLength and (angle <= +0.52 and angle >= -0.349):
+             
             cell_num = cc_overlap[M]['MaxIntensity']
             cell_num = int(cell_num) 
 
@@ -467,7 +473,10 @@ def skeletonize_all_fibers(all_fibers, i, DAPI_tmp, minLength, minLengthSingle, 
         angle = cc_overlap[i]['Orientation']
         overlap_coords = cc_overlap[i]['coords']
         #print(angle)
-        if length < smallLength or (angle <= +0.785398 and angle >= -0.785398):
+        #if length < smallLength or (angle <= +0.785398 and angle >= -0.785398):
+             
+             
+        if length > smallLength and (angle > +0.52 or angle < -0.349):
     
             for T in range(len(overlap_coords)):
                 hor_lines[overlap_coords[T,0], overlap_coords[T,1]] = 1

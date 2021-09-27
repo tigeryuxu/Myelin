@@ -93,10 +93,11 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
 
             """ Pad if array becomes too small after resizing! to be at LEAST 1024 px on each side """
             min_input_size = 1024
-            delta_w = min_input_size - input_arr.size[0]
-            delta_h = min_input_size - input_arr.size[1]
-            padding = (delta_w//2, delta_h//2, delta_w-(delta_w//2), delta_h-(delta_h//2))
-            input_arr = ImageOps.expand(input_arr, padding)
+            if input_arr.size[0] < min_input_size or input_arr.size[1] < min_input_size:
+                 delta_w = min_input_size - input_arr.size[0]
+                 delta_h = min_input_size - input_arr.size[1]
+                 padding = (delta_w//2, delta_h//2, delta_w-(delta_w//2), delta_h-(delta_h//2))
+                 input_arr = ImageOps.expand(input_arr, padding)
                
             
             """ DO CLAHE """
@@ -385,7 +386,7 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
                 #if length > minLength and (angle > +0.785398 or angle < -0.785398):   ### OLD ANGLE
                      
                 if length > minLength and (angle <= +0.52 and angle >= -0.349):
-                    print(angle)
+                    #print(angle)
                     cell_num = cc_overlap[Q]['MinIntensity']
                     cell_num = int(cell_num) 
                     
@@ -422,8 +423,10 @@ def run_analysis(s_path, sav_dir, input_path, checkpoint,
             
             new_fibers[new_fibers > 0] = 255
             input_save[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1]),1] = new_fibers[0:np.minimum(input_arr.size[1], new_fibers.shape[0]), 0:np.minimum(input_arr.size[0], new_fibers.shape[1])]
-            plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tiff', (input_save))
+            plt.imsave(sav_dir + 'final_image' + '_' + filename_split + '_' + str(i) + '.tiff', (new_fibers))
             # garbage collection
+            
+            
             
             """ Print text onto image """
             filename_split = filename.split('.')[0]
